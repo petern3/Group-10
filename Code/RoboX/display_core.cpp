@@ -1,6 +1,11 @@
 
 
+#include "Arduino.h"
 #include "display_core.h"
+
+#include "map_core.h"
+
+
 
 void init_display_core(void) {
   Serial.begin(BAUD_RATE);

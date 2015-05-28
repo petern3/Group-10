@@ -1,5 +1,6 @@
 
 
+#include "Arduino.h"
 #include <inttypes.h>
 
 #include "config.h"

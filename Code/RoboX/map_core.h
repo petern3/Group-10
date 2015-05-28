@@ -8,6 +8,10 @@
 #include <inttypes.h>
 
 
+#define NUM_NODES_X (MAP_SIZE_X / MAP_SPACING)
+#define NUM_NODES_Y (MAP_SIZE_Y / MAP_SPACING)
+
+
 /// STRUCTS ///
 typedef struct {
   uint8_t x;
@@ -16,8 +20,7 @@ typedef struct {
 
 
 /// GLOBALS ///
-uint8_t NUM_NODES_X = MAP_SIZE_X / MAP_SPACING;
-uint8_t NUM_NODES_Y = MAP_SIZE_Y / MAP_SPACING;
+
 
 /// FUNCTIONS ///
 void init_map_core(void);

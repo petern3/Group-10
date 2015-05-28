@@ -10,18 +10,19 @@
 #define MAP_SPACING 500  //20  // mm
 
 
-#define NODE_EDGE "##"
-#define NODE_OPEN "  "
-#define NODE_WALL "[]"
-#define NODE_BASE "~~"
-#define NODE_PACK "::"
-
-
 /// DISPLAY CONFIG ///
 
 #define BAUD_RATE 9600
 
 //#define DEBUG_MAP_NUMBERS  // define if you want to diplay numbers instead of symbols
 
+#ifndef DEBUG_MAP_NUMBERS
+  #define NODE_EDGE "##"
+  #define NODE_OPEN "  "
+  #define NODE_WALL "[]"
+  #define NODE_BASE "~~"
+  #define NODE_PACK "::"
+#endif
 
-#endif CONFIG_H
+
+#endif

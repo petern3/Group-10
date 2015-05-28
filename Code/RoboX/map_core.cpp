@@ -1,16 +1,16 @@
 
 
+#include "Arduino.h"
 #include "map_core.h"
 
-uint8_t** mymap;
-
+static uint8_t mymap[NUM_NODES_Y][NUM_NODES_X];
 
 
 void init_map_core(void) {
-  mymap = (uint8_t**)calloc(NUM_NODES_X, sizeof(uint8_t*));
-  for(uint8_t i=0; i<NUM_NODES_X; i++) {
-    (mymap)[i]=(uint8_t*)calloc(NUM_NODES_X, sizeof(uint8_t));
-  }
+  //mymap = (uint8_t**)calloc(NUM_NODES_X, sizeof(uint8_t*));
+  //for(uint8_t i=0; i<NUM_NODES_X; i++) {
+  //  (mymap)[i]=(uint8_t*)calloc(NUM_NODES_X, sizeof(uint8_t));
+  //}
 }
 
 
