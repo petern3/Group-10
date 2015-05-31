@@ -1,19 +1,19 @@
  ///////////////////////////////////////////////////////////////////////
 /*----------------------------------------------------------------------
- * map_core.h
+ * voice_core.h
  *----------------------------------------------------------------------
  * 
  * Author:  Peter Nicholls
- * Created: 2015-05-26
+ * Created: 2015-05-30
  * Edited:  2015-05-31
  * 
- * The header file of the Map Core.
+ * The header file of the Voice Core.
  * 
  *//////////////////////////////////////////////////////////////////////
+ 
 
-
-#ifndef MAP_CORE_H
-#define MAP_CORE_H
+#ifndef VOICE_CORE_H
+#define VOICE_CORE_H
 
 
 /// INCLUDES ///
@@ -22,26 +22,17 @@
 #include <inttypes.h>
 
 
-/// DEFINES ///
-#define NUM_NODES_X (MAP_SIZE_X / MAP_SPACING)
-#define NUM_NODES_Y (MAP_SIZE_Y / MAP_SPACING)
-
-
 /// STRUCTS ///
-typedef struct {
-  uint8_t x;
-  uint8_t y;
-} Position_t;
 
 
 /// GLOBALS ///
+extern bool SOUNDS_ON;
 
 
 /// FUNCTIONS ///
-void init_map_core(void);
-int8_t get_terrain(Position_t coord);
-int8_t set_terrain(Position_t coord, uint8_t terrain_to_set);
-void display_map(void);
+void init_voice_core(void);
+void play_sound(String file_name);
 
 
 #endif
+
