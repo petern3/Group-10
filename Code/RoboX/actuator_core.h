@@ -30,5 +30,7 @@
 
 /// FUNCTIONS ///
 void init_actuator_core(void);
+void dc_drive(uint8_t motor_speed);
+void dc_rotate(uint8_t motor_direction);
 
 #endif
