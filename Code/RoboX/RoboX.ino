@@ -16,8 +16,9 @@
 /// DEFINES ///
 #include "Arduino.h"
 #include <inttypes.h>
+#include <Servo.h>
 
-//#include "config.h"
+#include "config.h"
 #include "actuator_core.h"
 #include "exception_core.h"
 #include "map_core.h"
@@ -36,7 +37,7 @@ void setup() {
   init_sensor_core();
   init_voice_core();
   
-  display_map();
+  //display_map();
   
 }
 
@@ -46,3 +47,4 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 }
+

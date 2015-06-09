@@ -17,7 +17,7 @@
 
 
 /// GLOBALS ///
-static uint8_t mymap[NUM_NODES_Y][NUM_NODES_X];
+static uint16_t mymap[NUM_NODES_Y][NUM_NODES_X];
 
 
 /// FUNCTIONS ///
@@ -56,8 +56,8 @@ int8_t set_terrain(Position_t coord, uint8_t terrain_to_set) {
 
 
 void display_map(void) {
-  int8_t index_x = 0;
-  int8_t index_y = 0;
+  int16_t index_x = 0;
+  int16_t index_y = 0;
   Position_t curr = {0, 0};
   int8_t terrain_to_print = 0;
   char num[3] = {"\0"};

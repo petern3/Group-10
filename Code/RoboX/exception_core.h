@@ -20,6 +20,7 @@
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
+#include <stdlib.h>
 
 
 /// STRUCTS ///

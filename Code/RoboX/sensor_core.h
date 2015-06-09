@@ -20,15 +20,22 @@
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
+#include <stdlib.h>
 
 
 /// STRUCTS ///
-
+typedef struct {
+  uint8_t sensor_port;
+  uint8_t sensor_type;
+} Sensor_t;
 
 /// GLOBALS ///
-
+extern Sensor_t IR_MED_1;
 
 /// FUNCTIONS ///
 void init_sensor_core(void);
+//Sensor_t init_sensor(uint8_t sensor_port, uint8_t sensor_type);
+int16_t sensor_read(Sensor_t to_read);
+
 
 #endif

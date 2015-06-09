@@ -15,6 +15,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "Arduino.h"
 
 /// PINOUT ///
 #define DC_LEFT_PIN 12
@@ -28,6 +29,11 @@
 #define STEPPER3_DIR_PIN 35
 #define STEPPER4_STEP_PIN 36
 #define STEPPER4_DIR_PIN 37
+
+#define IR_MED1 A10
+
+/// SCHEDULER CONFIG ///
+
 
 
 /// DC MOTOR CONFIG ///
@@ -66,6 +72,26 @@
 
 /// ERROR CONFIG ///
 #define NULL_ERROR_SOUND "\0"
+
+/// SENSOR CONFIG ///
+#define IR_VAR_RANGE 0
+#define IR_SHT_RANGE 1
+#define IR_MED_RANGE 2
+#define IR_LNG_RANGE 3
+#define ULTRASONIC 4
+#define SONAR 5
+
+#define IR_VAR_MIN 0
+#define IR_VAR_MAX 100
+
+#define IR_SHT_MIN 40
+#define IR_SHT_MAX 300
+
+#define IR_MED_MIN 100
+#define IR_MED_MAX 800
+
+#define IR_LNG_MIN 50
+#define IR_LNG_MAX 2000
 
 
 #endif
