@@ -30,7 +30,10 @@
 #define STEPPER4_STEP_PIN 36
 #define STEPPER4_DIR_PIN 37
 
-#define IR_MED1 A10
+#define SERVO1_PIN 3
+#define SERVO2_PIN 2
+
+#define IR_MED1_PIN A10
 
 /// SCHEDULER CONFIG ///
 
@@ -82,7 +85,7 @@
 #define SONAR 5
 
 #define IR_VAR_MIN 0
-#define IR_VAR_MAX 100
+#define IR_VAR_MAX 1000
 
 #define IR_SHT_MIN 40
 #define IR_SHT_MAX 300

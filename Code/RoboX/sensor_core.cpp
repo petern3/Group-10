@@ -17,7 +17,7 @@
 
 
 /// GLOBALS ///
-Sensor_t IR_MED_1 = {IR_MED1, IR_MED_RANGE};
+Sensor_t IR_MED1 = {IR_MED1_PIN, IR_MED_RANGE};
 
 
 /// FUNCTIONS ///

@@ -30,7 +30,7 @@ typedef struct {
 } Sensor_t;
 
 /// GLOBALS ///
-extern Sensor_t IR_MED_1;
+extern Sensor_t IR_MED1;
 
 /// FUNCTIONS ///
 void init_sensor_core(void);

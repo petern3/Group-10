@@ -3,28 +3,36 @@
 
 
 #include "actuator_core.h"
-#include <Servo.h>
 
 
 /// GLOBALS ///
 static Servo LEFT_DRIVE;
 static Servo RIGHT_DRIVE;
 
+Servo SERVO_1;
+Servo SERVO_2;
+
 
 /// FUNCTIONS ///
 void init_actuator_core(void) {
+  // DC Motors
   LEFT_DRIVE.attach(DC_LEFT_PIN);
   RIGHT_DRIVE.attach(DC_RIGHT_PIN);
   
+  // Servos
+  SERVO_1.attach(SERVO1_PIN);
+  SERVO_2.attach(SERVO2_PIN);
+  
+  // Stepper Motors
   pinMode(STEPPER1_STEP_PIN,OUTPUT);
   pinMode(STEPPER1_DIR_PIN,OUTPUT);
   pinMode(STEPPER2_STEP_PIN,OUTPUT);
   pinMode(STEPPER2_DIR_PIN,OUTPUT);
-  
   pinMode(STEPPER3_STEP_PIN,OUTPUT);
   pinMode(STEPPER3_DIR_PIN,OUTPUT);
   pinMode(STEPPER4_STEP_PIN,OUTPUT);
   pinMode(STEPPER4_DIR_PIN,OUTPUT);
+  
 }
 
 
@@ -55,6 +63,12 @@ void dc_rotate(uint8_t motor_direction) {
   }
 }
 
-
+void servo_move(Servo to_rotate, uint8_t servo_position) {
+  if (servo_position < 180) {
+    to_rotate.write(servo_position);
+  } else {
+    to_rotate.write(180);
+  }
+}
 
 

@@ -26,11 +26,11 @@
 #include "voice_core.h"
 
 
-/// SETUP ///
+/// INITIALIZATION ///
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(BAUD_RATE);
   
+  Serial.begin(BAUD_RATE);
   init_actuator_core();
   init_exception_core();
   init_map_core();
@@ -45,6 +45,13 @@ void setup() {
 /// KERNEL ///
 void loop() {
   // put your main code here, to run repeatedly:
-
+  Serial.print("1");
+  //servo_move(SERVO_1, 135);
+  //servo_move(SERVO_2, 45);
+  delay(1000);
+  //servo_move(SERVO_1, 45);
+  //servo_move(SERVO_2, 135);
+  delay(1000);
+  
 }
 

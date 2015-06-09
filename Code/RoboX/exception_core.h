@@ -26,9 +26,13 @@
 /// STRUCTS ///
 typedef struct {
   bool active;
-  String descript;
-  String sound;
+  String* descript;
+  String* sound;
 } Exception_t ;
+
+
+/// GLOBALS ///
+extern Exception_t SD_ERROR;
 
 
 /// FUNCTIONS ///
@@ -37,10 +41,6 @@ Exception_t init_exception(String descript, String sound);
 void activate_exception(Exception_t* to_activate);
 void deactivate_exception(Exception_t* to_deactivate);
 void report_exception(Exception_t to_report);
-
-
-/// GLOBAL EXCEPTIONS ///
-extern Exception_t SD_ERROR;
 
 
 #endif
