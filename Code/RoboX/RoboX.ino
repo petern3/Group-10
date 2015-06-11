@@ -48,11 +48,15 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   
-  Serial.println();
+  Serial.println(sensor_distance(IR_MED1));
+  //Serial.println(analogRead(IR_MED1_PIN));
+  delay(10);
+  //Serial.println(sensor_distance(IR_LNG1));
+  //Serial.println(analogRead(IR_LNG1_PIN));
+  //Serial.println();
   
-  delay(1000);
+  delay(10);
   
-  delay(1000);
   
 }
 

@@ -21,14 +21,17 @@
 #include "config.h"
 #include <inttypes.h>
 #include <stdlib.h>
+//#include <Ultrasonic.h>
 
 /// DEFINES ///
-#define IR_VAR_RANGE 0
-#define IR_SHT_RANGE 1
-#define IR_MED_RANGE 2
-#define IR_LNG_RANGE 3
-#define ULTRASONIC 4
-#define SONAR 5
+#define IR_SHT_RANGE 0
+#define IR_MED_RANGE 1
+#define IR_LNG_RANGE 2
+#define ULTRASONIC 3
+#define SONAR 4
+
+#define IR_VAR 0
+#define LIMIT_SW 1
 
 /// STRUCTS ///
 typedef struct {
@@ -38,10 +41,13 @@ typedef struct {
 
 /// GLOBALS ///
 extern Sensor_t IR_MED1;
+extern Sensor_t IR_LNG1;
+extern Sensor_t IR_VAR1;
 
 /// FUNCTIONS ///
 void init_sensor_core(void);
-int16_t sensor_read(Sensor_t to_read);
+int16_t sensor_distance(Sensor_t to_read);
+bool sensor_detect(Sensor_t to_read);
 
 
 #endif

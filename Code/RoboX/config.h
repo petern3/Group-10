@@ -37,6 +37,8 @@
 
 
 #define IR_MED1_PIN A10
+#define IR_LNG1_PIN A11
+#define IR_VAR1_PIN 29
 
 /// SCHEDULER CONFIG ///
 
@@ -89,17 +91,20 @@
 #define NULL_ERROR_SOUND "\0"
 
 /// SENSOR CONFIG ///
-#define IR_VAR_MIN 0
-#define IR_VAR_MAX 1000
+#define IR_SHT_MIN_MM 40
+#define IR_SHT_MAX_MM 300
+#define IR_SHT_MIN_ADC 0     // To measure
+#define IR_SHT_MAX_ADC 1023  // To measure
 
-#define IR_SHT_MIN 40
-#define IR_SHT_MAX 300
+#define IR_MED_MIN_MM 100
+#define IR_MED_MAX_MM 800
+#define IR_MED_MIN_ADC 0     // To measure
+#define IR_MED_MAX_ADC 1023  // To measure
 
-#define IR_MED_MIN 100
-#define IR_MED_MAX 800
-
-#define IR_LNG_MIN 50
-#define IR_LNG_MAX 2000
+#define IR_LNG_MIN_MM 50     // To find
+#define IR_LNG_MAX_MM 2000   // To find
+#define IR_LNG_MIN_ADC 0     // To measure
+#define IR_LNG_MAX_ADC 1023  // To measure
 
 
 #endif
