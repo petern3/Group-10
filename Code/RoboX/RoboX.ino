@@ -17,6 +17,8 @@
 #include "Arduino.h"
 #include <inttypes.h>
 #include <Servo.h>
+#include <Herkulex.h>
+#include <Stepper.h>
 
 #include "config.h"
 #include "actuator_core.h"
@@ -45,12 +47,11 @@ void setup() {
 /// KERNEL ///
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.print("1");
-  //servo_move(SERVO_1, 135);
-  //servo_move(SERVO_2, 45);
+  
+  Serial.println();
+  
   delay(1000);
-  //servo_move(SERVO_1, 45);
-  //servo_move(SERVO_2, 135);
+  
   delay(1000);
   
 }

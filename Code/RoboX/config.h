@@ -21,6 +21,11 @@
 #define DC_LEFT_PIN 12
 #define DC_RIGHT_PIN 13
 
+#define SERVO1_PIN 3
+#define SERVO2_PIN 2
+
+#define SMART_SERVO1_ADDRESS 0xFE
+
 #define STEPPER1_STEP_PIN 30
 #define STEPPER1_DIR_PIN 31
 #define STEPPER2_STEP_PIN 32
@@ -30,8 +35,6 @@
 #define STEPPER4_STEP_PIN 36
 #define STEPPER4_DIR_PIN 37
 
-#define SERVO1_PIN 3
-#define SERVO2_PIN 2
 
 #define IR_MED1_PIN A10
 
@@ -51,6 +54,15 @@
 #define DC_RIGHT_SLOW 2
 #define DC_RIGHT_FAST 3
 
+/// STEPPER MOTOR CONFIG ///
+#define STEPPER1_SPR 200
+//#define STEPPER1_INV
+#define STEPPER2_SPR 200
+//#define STEPPER2_INV
+#define STEPPER3_SPR 1040  // Geared
+//#define STEPPER3_INV
+#define STEPPER4_SPR 1000  // Geared
+//#define STEPPER4_INV
 
 /// MAP CONFIG ///
 #define MAP_SIZE_X 5000  //4900  // mm  Wider than is long
@@ -77,13 +89,6 @@
 #define NULL_ERROR_SOUND "\0"
 
 /// SENSOR CONFIG ///
-#define IR_VAR_RANGE 0
-#define IR_SHT_RANGE 1
-#define IR_MED_RANGE 2
-#define IR_LNG_RANGE 3
-#define ULTRASONIC 4
-#define SONAR 5
-
 #define IR_VAR_MIN 0
 #define IR_VAR_MAX 1000
 

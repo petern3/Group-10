@@ -21,6 +21,13 @@
 #include "config.h"
 #include <inttypes.h>
 #include <Servo.h>
+#include <Herkulex.h>
+
+/// DEFINES ///
+#define STEPPER1 1
+#define STEPPER2 2
+#define STEPPER3 3
+#define STEPPER4 4
 
 /// STRUCTS ///
 
@@ -33,6 +40,7 @@ extern Servo SERVO_2;
 void init_actuator_core(void);
 void dc_drive(uint8_t motor_speed);
 void dc_rotate(uint8_t motor_direction);
-void servo_move(Servo to_rotate, uint8_t servo_position);
+void servo_rotate(Servo to_rotate, uint8_t servo_position);
+void stepper_rotate(uint8_t to_rotate, int16_t num_degrees);
 
 #endif

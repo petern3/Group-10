@@ -22,6 +22,13 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
+/// DEFINES ///
+#define IR_VAR_RANGE 0
+#define IR_SHT_RANGE 1
+#define IR_MED_RANGE 2
+#define IR_LNG_RANGE 3
+#define ULTRASONIC 4
+#define SONAR 5
 
 /// STRUCTS ///
 typedef struct {
@@ -34,7 +41,6 @@ extern Sensor_t IR_MED1;
 
 /// FUNCTIONS ///
 void init_sensor_core(void);
-//Sensor_t init_sensor(uint8_t sensor_port, uint8_t sensor_type);
 int16_t sensor_read(Sensor_t to_read);
 
 
