@@ -1,0 +1,62 @@
+procedure CalcKey(s) {
+return [min(g(s), rhs(s)) + h(s_start, s) + km, min(g(s), rhs(s))];
+}
+
+procedure Initialize() {
+U = []
+k_m = 0;
+for all s in S rhs(s) = g(s) = inf;
+rhs(s_goal) = 0;
+U.Insert(s_goal, [h(s_start, s_goal); 0]);
+}
+
+procedure UpdateVertex(u) {
+if (g(u) != rhs(u) AND u in U) U.Update(u, CalcKey(u));
+else if (g(u) != rhs(u) AND u not in U) U.Insert(u, CalcKey(u));
+else if (g(u) = rhs(u) AND u not in U) U.Remove(u);
+}
+
+procedure ComputeShortestPath() {
+while (U.TopKey() < CalcKey(s_start) OR rhs(s_start) > g(s_start))
+u = U.Top();
+k_old = U.TopKey();
+k_new = CalcKey(u));
+if(k_old < k_new)
+  U.Update(u, k_new);
+else if (g(u) > rhs(u))
+  g(u) = rhs(u);
+  U.Remove(u);
+  for all s in Pred(u)
+  rhs(s) = min(rhs(s), c(s, u) + g(u));
+  UpdateVertex(s);
+else
+  g_old = g(u);
+  g(u) = 1;
+  for all s in Pred(u) union {u}
+    if (rhs(s) = c(s; u) + g_old)
+      if (s != s_goal) rhs(s) = min_s'_Succ(s) (c(s, s') + g(s'));
+    UpdateVertex(s);
+}
+
+procedure Main() {
+s_last = s_start ;
+Initialize();
+ComputeShortestPath();
+while (s_start != s_goal)
+  /* if (rhs(s_start) = inf) then there is no known path */
+  s_start = arg min_s'_Succ(s_start) (c(s_start, s') + g(s'));
+  Move to s_start;
+  Scan graph for changed edge costs;
+  if any edge costs changed
+    k_m = k_m + h(s_last, s_start);
+    s_last = s_start;
+    for all directed edges (u, v) with changed edge costs
+      c_old = c(u, v);
+      Update the edge cost c(u, v);
+      if (c_old > c(u, v))
+        rhs(u) = min(rhs(u), c(u, v) + g(v));
+      else if (rhs(u) = c_old + g(v))
+        if (u != s_goal) rhs(u) = min_s'_Succ(u)(c(u, s') + g(s'));
+      UpdateVertex(u);
+    ComputeShortestPath();
+}
