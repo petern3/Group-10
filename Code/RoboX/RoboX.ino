@@ -19,6 +19,8 @@
 #include <Servo.h>
 #include <Herkulex.h>
 #include <Stepper.h>
+#include <SPI.h>
+#include <SD.h>
 
 #include "config.h"
 #include "actuator_core.h"
@@ -39,6 +41,8 @@ void setup() {
   init_sensor_core();
   init_voice_core();
   
+  //sd_test1();
+  //sd_test2();
   //display_map();
   
 }
@@ -47,8 +51,8 @@ void setup() {
 /// KERNEL ///
 void loop() {
   // put your main code here, to run repeatedly:
-  
-  Serial.println(sensor_distance(IR_MED1));
+  //report_exception(&SD_ERROR);
+  //Serial.println(sensor_distance(IR_MED1));
   //Serial.println(analogRead(IR_MED1_PIN));
   delay(10);
   //Serial.println(sensor_distance(IR_LNG1));

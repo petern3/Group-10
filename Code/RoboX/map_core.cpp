@@ -14,14 +14,27 @@
 
 /// INCLUDES ///
 #include "map_core.h"
+#include "exception_core.h"
 
 
 /// GLOBALS ///
-static uint16_t mymap[NUM_NODES_Y][NUM_NODES_X];
+static uint16_t mymap[0][0]; //[NUM_NODES_Y][NUM_NODES_X];
+File myFile;
 
 
 /// FUNCTIONS ///
 void init_map_core(void) {
+  Serial.print("Initializing SD card...");
+
+  if (!SD.begin(CHIP_SELECT_PIN)) {
+    activate_exception(&SD_ERROR);
+    Serial.println("initialization failed!");
+    //report_exception(&SD_ERROR);
+    return;
+  }
+  Serial.println("initialization done.");
+    
+  
   //mymap = (uint8_t**)calloc(NUM_NODES_X, sizeof(uint8_t*));
   //for(uint8_t i=0; i<NUM_NODES_X; i++) {
   //  (mymap)[i]=(uint8_t*)calloc(NUM_NODES_X, sizeof(uint8_t));
@@ -90,3 +103,101 @@ void display_map(void) {
     Serial.print("\n");
   }	
 }
+
+
+void sd_test1(void) {
+  
+  double time1 = millis();
+  
+  // Write
+  myFile = SD.open("map.tsv", FILE_WRITE);
+  if (myFile) {
+    Serial.print("Writing to map.tsv...");
+    for (int i=0; i < 1000; i++) {
+      for (int j=0; j < 1000; j++) {
+        
+        myFile.print(4);
+        myFile.print('\t');
+      }
+      myFile.print('\n');
+    }
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening map.tsv");
+  }
+  
+  double time2 = millis();
+  Serial.print("Method 1 took ");
+  Serial.print(time2 - time1);
+  Serial.println(" ms to write");
+  
+  //Read
+  myFile = SD.open("map.txt", FILE_WRITE);
+  if (myFile) {
+    Serial.print("reading map.tsv...");
+    while (myFile.available()) {
+      Serial.write(myFile.read());
+    }
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening map.tsv");
+  }
+  
+  double time3 = millis();
+  Serial.print("Method 1 took ");
+  Serial.print(time3 - time2);
+  Serial.println(" ms to read");
+}
+
+
+void sd_test2(void) {
+  
+  double time1 = millis();
+  String folder = "map/";
+  String address = "000000000000";
+  
+  // Write
+  Serial.print("Writing to card...");
+  for (int i=0; i < 1000; i++) {
+    for (int j=0; j < 1000; j++) {
+      address = folder + String(i) + String(j);
+      myFile = SD.open(address, FILE_WRITE);
+      if (myFile) {
+        myFile.print(4);
+        myFile.close();
+      }
+    }
+  }
+  Serial.println("done.");
+  
+  double time2 = millis();
+  Serial.print("Method 1 took ");
+  Serial.print(time2 - time1);
+  Serial.println(" ms to write");
+  
+  //Read
+  Serial.print("reading...");
+  for (int i=0; i < 1000; i++) {
+    for (int j=0; j < 1000; j++) {
+      address = folder + String(i) + String(j);
+      myFile = SD.open(address);
+      if (myFile) {
+        while (myFile.available()) {
+          Serial.write(myFile.read());
+        }
+        myFile.close();
+      }
+    }
+  }
+  
+  double time3 = millis();
+  Serial.print("Method 1 took ");
+  Serial.print(time3 - time2);
+  Serial.println(" ms to read");
+}
+
+

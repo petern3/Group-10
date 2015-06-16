@@ -21,7 +21,6 @@
 #include "config.h"
 #include <inttypes.h>
 #include <stdlib.h>
-//#include <Ultrasonic.h>
 
 /// DEFINES ///
 #define IR_SHT_RANGE 0

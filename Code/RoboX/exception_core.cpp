@@ -18,7 +18,7 @@
 
 
 /// GLOBALS ///
-Exception_t SD_ERROR = init_exception("Could not find SD card", NULL_ERROR_SOUND);
+Exception_t SD_ERROR = init_exception("Could not find SD card" , NULL_ERROR_SOUND);
 
 
 /// FUNCTIONS ///
@@ -28,15 +28,15 @@ void init_exception_core(void) {
 
 
 Exception_t init_exception(String descript, String sound) {
-  Exception_t* to_init;
+  Exception_t* to_init; // = {false, &descript, &sound};
   
   to_init = (Exception_t*)calloc(1, sizeof(Exception_t));
   to_init->active = false;
   
-  to_init->descript = (String*)calloc(descript.length(), sizeof(char));
+  to_init->descript = (String*)calloc(descript.length()+1, sizeof(char));
   to_init->descript = &descript;
   
-  to_init->sound = (String*)calloc(sound.length(), sizeof(char));
+  to_init->sound = (String*)calloc(sound.length()+1, sizeof(char));
   to_init->sound = &sound;
   
   return *to_init;
@@ -53,12 +53,12 @@ void deactivate_exception(Exception_t* to_deactivate) {
 }
 
 
-void report_exception(Exception_t to_report) {
+void report_exception(Exception_t* to_report) {
   
-  if (SOUNDS_ON && *to_report.sound != NULL_ERROR_SOUND) {
-    play_sound(*to_report.sound);
+  if (SOUNDS_ON && *to_report->sound != NULL_ERROR_SOUND) {
+    play_sound(*to_report->sound);
   }
-  Serial.println(*to_report.descript);
+  Serial.println(*to_report->descript);
 }
 
 

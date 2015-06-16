@@ -40,7 +40,7 @@ void init_exception_core(void);
 Exception_t init_exception(String descript, String sound);
 void activate_exception(Exception_t* to_activate);
 void deactivate_exception(Exception_t* to_deactivate);
-void report_exception(Exception_t to_report);
+void report_exception(Exception_t* to_report);
 
 
 #endif

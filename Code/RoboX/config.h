@@ -40,12 +40,17 @@
 #define IR_LNG1_PIN A11
 #define IR_VAR1_PIN 29
 
+
+#define CHIP_SELECT_PIN 53
+
 /// SCHEDULER CONFIG ///
 
 
 
 /// DC MOTOR CONFIG ///
-#define DC_FWD_FAST 110
+
+
+/*#define DC_FWD_FAST 110
 #define DC_FWD_SLOW 100
 #define DC_ZERO 90
 #define DC_BWD_SLOW 80
@@ -54,7 +59,7 @@
 #define DC_LEFT_FAST 0
 #define DC_LEFT_SLOW 1
 #define DC_RIGHT_SLOW 2
-#define DC_RIGHT_FAST 3
+#define DC_RIGHT_FAST 3*/
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 200

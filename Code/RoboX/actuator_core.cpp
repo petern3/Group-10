@@ -51,7 +51,50 @@ void init_actuator_core(void) {
 }
 
 
-void dc_drive(uint8_t motor_speed) {
+void dc_drive(int8_t motor_speed, int8_t motor_rotation) {
+  // 
+  if (motor_speed > 90) {
+    motor_speed = 90;
+  }
+  else if (motor_speed < -90) {
+    motor_speed = -90;
+  }
+  if (motor_rotation > 90) {
+    motor_rotation = 90;
+  }
+  else if (motor_rotation < -90) {
+    motor_rotation = -90;
+  }
+  
+  int16_t left_drive = 90 + motor_speed + motor_rotation;
+  int16_t right_drive = 90 + motor_speed - motor_rotation;
+  
+  if (left_drive < 0) {
+    left_drive = 0;
+    right_drive = (2*motor_rotation);
+  }
+  else if (left_drive > 180) {
+    left_drive = 180;
+    right_drive = 180 - (2*motor_rotation);
+  }
+
+  else if (right_drive < 0) {
+    right_drive = 0;
+    left_drive = (2*motor_rotation);
+  }
+  else if (right_drive > 180) {
+    right_drive = 180;
+    left_drive = 180 - (2*motor_rotation);
+  }
+  
+  LEFT_DRIVE.write(left_drive);
+  RIGHT_DRIVE.write(right_drive);
+  
+}
+
+//The following dc motor functions are now obselete.
+
+/*void dc_drive(uint8_t motor_speed) {
   
   LEFT_DRIVE.write(motor_speed);
   RIGHT_DRIVE.write(motor_speed);
@@ -76,7 +119,7 @@ void dc_rotate(uint8_t motor_direction) {
     LEFT_DRIVE.write(DC_FWD_FAST);
     RIGHT_DRIVE.write(DC_BWD_FAST);
   }
-}
+}*/
 
 void servo_rotate(Servo to_rotate, uint8_t servo_position) {
   if (servo_position < 180) {
