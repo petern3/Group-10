@@ -104,7 +104,7 @@ void display_map(void) {
   }	
 }
 
-
+/*
 void sd_test1(void) {
   
   double time1 = millis();
@@ -151,10 +151,10 @@ void sd_test1(void) {
   Serial.print("Method 1 took ");
   Serial.print(time3 - time2);
   Serial.println(" ms to read");
-}
+}*/
 
 
-void sd_test2(void) {
+/*void sd_test2(void) {
   
   double time1 = millis();
   String folder = "map/";
@@ -198,6 +198,6 @@ void sd_test2(void) {
   Serial.print("Method 1 took ");
   Serial.print(time3 - time2);
   Serial.println(" ms to read");
-}
+}*/
 
 

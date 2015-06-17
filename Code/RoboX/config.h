@@ -36,15 +36,26 @@
 #define STEPPER4_DIR_PIN 37
 
 
-#define IR_MED1_PIN A10
-#define IR_LNG1_PIN A11
+#define IR_SHT1_PIN A10
+#define IR_SHT2_PIN A11
+#define IR_MED1_PIN A9
+#define IR_MED2_PIN A8
+#define IR_LNG1_PIN A7
+#define IR_LNG2_PIN A6
+#define USONIC1_PIN A5
+#define USONIC2_PIN A4
+#define SONAR_PIN A3
+
 #define IR_VAR1_PIN 29
+#define IR_VAR2_PIN 28
+#define IR_VAR3_PIN 27
 
 
 #define CHIP_SELECT_PIN 53
 
 /// SCHEDULER CONFIG ///
-
+#define SENSOR_PERIOD 10  // milliseconds
+#define THINKING_PERIOD 100  // milliseconds
 
 
 /// DC MOTOR CONFIG ///

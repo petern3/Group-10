@@ -45,8 +45,8 @@ void init_map_core(void);
 int8_t get_terrain(Position_t coord);
 int8_t set_terrain(Position_t coord, uint8_t terrain_to_set);
 void display_map(void);
-void sd_test1(void);
-void sd_test2(void);
+//void sd_test1(void);
+//void sd_test2(void);
 
 
 #endif

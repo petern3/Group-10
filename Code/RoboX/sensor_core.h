@@ -29,24 +29,35 @@
 #define ULTRASONIC 3
 #define SONAR 4
 
-#define IR_VAR 0
-#define LIMIT_SW 1
+#define IR_VAR 5
+#define LIMIT_SW 6
 
 /// STRUCTS ///
 typedef struct {
   uint8_t sensor_port;
   uint8_t sensor_type;
+  int16_t sensor_value;
 } Sensor_t;
 
 /// GLOBALS ///
+extern Sensor_t IR_SHT1;
+extern Sensor_t IR_SHT2;
 extern Sensor_t IR_MED1;
+extern Sensor_t IR_MED2;
 extern Sensor_t IR_LNG1;
+extern Sensor_t IR_LNG2;
+extern Sensor_t USONIC1;
+extern Sensor_t USONIC2;
+
 extern Sensor_t IR_VAR1;
+extern Sensor_t IR_VAR2;
+extern Sensor_t IR_VAR3;
 
 /// FUNCTIONS ///
 void init_sensor_core(void);
-int16_t sensor_distance(Sensor_t to_read);
-bool sensor_detect(Sensor_t to_read);
+//void sensor_distance(Sensor_t* to_read);
+//void sensor_detect(Sensor_t* to_read);
+void read_sensors(void);
 
 
 #endif

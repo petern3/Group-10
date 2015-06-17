@@ -27,6 +27,7 @@
 #include "exception_core.h"
 #include "map_core.h"
 #include "sensor_core.h"
+#include "tactics_core.h"
 #include "voice_core.h"
 
 
@@ -39,6 +40,7 @@ void setup() {
   init_exception_core();
   init_map_core();
   init_sensor_core();
+  init_tactics_core();
   init_voice_core();
   
   //sd_test1();
@@ -51,15 +53,18 @@ void setup() {
 /// KERNEL ///
 void loop() {
   // put your main code here, to run repeatedly:
+  while (!SD_ERROR.active) {
+    primary_tactic();
+  }
   //report_exception(&SD_ERROR);
   //Serial.println(sensor_distance(IR_MED1));
   //Serial.println(analogRead(IR_MED1_PIN));
-  delay(10);
+  //delay(10);
   //Serial.println(sensor_distance(IR_LNG1));
   //Serial.println(analogRead(IR_LNG1_PIN));
   //Serial.println();
   
-  delay(10);
+  //delay(10);
   
   
 }
