@@ -58,7 +58,9 @@ void report_exception(Exception_t* to_report) {
   if (SOUNDS_ON && *to_report->sound != NULL_ERROR_SOUND) {
     play_sound(*to_report->sound);
   }
-  Serial.println(*to_report->descript);
+  #ifdef ENABLE_SERIAL
+    Serial.println(*to_report->descript);
+  #endif
 }
 
 

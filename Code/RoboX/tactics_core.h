@@ -5,7 +5,7 @@
  * 
  * Author:  Peter Nicholls
  * Created: 2015-06-17
- * Edited:  2015-06-17
+ * Edited:  2015-06-18
  * 
  * The header file of the Tactics Core.
  * 
@@ -26,11 +26,13 @@
 
 
 /// GLOBALS ///
+extern bool FORCE_SECONDARY;
 
 
 /// FUNCTIONS ///
 void init_tactics_core(void);
 void primary_tactic(void);
+void secondary_tactic(void);
 
 
 #endif

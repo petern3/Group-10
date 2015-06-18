@@ -5,7 +5,7 @@
  * 
  * Author:  Peter Nicholls
  * Created: 2015-05-31
- * Edited:  2015-05-31
+ * Edited:  2015-06-18
  * 
  * The header file of the Actuator Core.
  * 
@@ -29,10 +29,13 @@
 #define STEPPER3 3
 #define STEPPER4 4
 
+
 /// STRUCTS ///
 
 
 /// GLOBALS ///
+extern float TAU;
+
 extern Servo SERVO_1;
 extern Servo SERVO_2;
 

@@ -5,7 +5,7 @@
  * 
  * Author:  Peter Nicholls
  * Created: 2015-05-31
- * Edited:  2015-05-31
+ * Edited:  2015-06-18
  * 
  * Blurb
  * 
@@ -16,25 +16,67 @@
 
 
 /// GLOBALS ///
+extern float TAU = (2*PI);
+static float ENCODER_INCREMENT = (TAU / ENCODER_PPR);
+static float ENCODER_MAX = (ENCODER_WRAP * TAU);
+
 static Servo LEFT_DRIVE;
 static Servo RIGHT_DRIVE;
+static bool LEFT_DIR = DC_FORWARD;
+static bool RIGHT_DIR = DC_FORWARD;
+volatile float LEFT_ROTATION = 0;
+volatile float RIGHT_ROTATION = 0;
 
 Servo SERVO_1;
 Servo SERVO_2;
 
 
+/// INTERRUPTS ///
+static void left_encoder_ISR(void) {
+  if (LEFT_DIR == DC_FORWARD) {
+    LEFT_ROTATION += ENCODER_INCREMENT;
+  } else {
+    LEFT_ROTATION -= ENCODER_INCREMENT;
+  }
+  if (LEFT_ROTATION < -ENCODER_MAX) {
+    LEFT_ROTATION = ENCODER_MAX;
+  }
+  else if (LEFT_ROTATION > ENCODER_MAX) {
+    LEFT_ROTATION = -ENCODER_MAX;
+  }
+}
+
+static void right_encoder_ISR(void) {
+  if (RIGHT_DIR == DC_FORWARD) {
+    RIGHT_ROTATION += ENCODER_INCREMENT;
+  } else {
+    RIGHT_ROTATION -= ENCODER_INCREMENT;
+  }
+  if (RIGHT_ROTATION < -ENCODER_MAX) {
+    RIGHT_ROTATION = ENCODER_MAX;
+  }
+  else if (RIGHT_ROTATION > ENCODER_MAX) {
+    RIGHT_ROTATION = -ENCODER_MAX;
+  }
+}
+
+
 /// FUNCTIONS ///
 void init_actuator_core(void) {
+  Serial.print("Initializing actuators...");
+  
   // DC Motors
   LEFT_DRIVE.attach(DC_LEFT_PIN);
   RIGHT_DRIVE.attach(DC_RIGHT_PIN);
+  attachInterrupt(DC_LEFT_INTERRUPT, left_encoder_ISR, RISING);
+  attachInterrupt(DC_RIGHT_INTERRUPT, right_encoder_ISR, RISING);
   
   // Servos
   SERVO_1.attach(SERVO1_PIN);
   SERVO_2.attach(SERVO2_PIN);
   
   // Smart Servos
-  Herkulex.beginSerial2(115200);  // When in port C2
+  Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
   Herkulex.reboot(SMART_SERVO1_ADDRESS);
   Herkulex.initialize();
   
@@ -48,6 +90,7 @@ void init_actuator_core(void) {
   pinMode(STEPPER4_STEP_PIN,OUTPUT);
   pinMode(STEPPER4_DIR_PIN,OUTPUT);
   
+  Serial.println("done");
 }
 
 
@@ -91,6 +134,7 @@ void dc_drive(int8_t motor_speed, int8_t motor_rotation) {
   RIGHT_DRIVE.write(right_drive);
   
 }
+
 
 //The following dc motor functions are now obselete.
 

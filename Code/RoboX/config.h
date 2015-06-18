@@ -5,7 +5,7 @@
  * 
  * Author:  Peter Nicholls
  * Created: 2015-05-26
- * Edited:  2015-05-31
+ * Edited:  2015-06-18
  * 
  * Blurb
  * 
@@ -20,6 +20,8 @@
 /// PINOUT ///
 #define DC_LEFT_PIN 12
 #define DC_RIGHT_PIN 13
+#define DC_LEFT_INTERRUPT 4
+#define DC_RIGHT_INTERRUPT 5
 
 #define SERVO1_PIN 3
 #define SERVO2_PIN 2
@@ -53,24 +55,17 @@
 
 #define CHIP_SELECT_PIN 53
 
+
 /// SCHEDULER CONFIG ///
 #define SENSOR_PERIOD 10  // milliseconds
 #define THINKING_PERIOD 100  // milliseconds
 
 
 /// DC MOTOR CONFIG ///
+#define ENCODER_PPR 663
+#define ENCODER_WRAP 10  // Number of revolutions before wrapping
+#define DC_FORWARD true
 
-
-/*#define DC_FWD_FAST 110
-#define DC_FWD_SLOW 100
-#define DC_ZERO 90
-#define DC_BWD_SLOW 80
-#define DC_BWD_FAST 70
-
-#define DC_LEFT_FAST 0
-#define DC_LEFT_SLOW 1
-#define DC_RIGHT_SLOW 2
-#define DC_RIGHT_FAST 3*/
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 200
@@ -90,6 +85,7 @@
 
 /// DEBUG CONFIG ///
 #define BAUD_RATE 9600
+#define ENABLE_SERIAL  // define if you want to send serial
 //#define ENABLE_SOUNDS  // define if you want to play sounds
 //#define DEBUG_ERROR_SOUNDS  // define if you only want error sounds
 
@@ -105,6 +101,7 @@
 
 /// ERROR CONFIG ///
 #define NULL_ERROR_SOUND "\0"
+
 
 /// SENSOR CONFIG ///
 #define IR_SHT_MIN_MM 40

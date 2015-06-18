@@ -28,17 +28,12 @@ void init_map_core(void) {
 
   if (!SD.begin(CHIP_SELECT_PIN)) {
     activate_exception(&SD_ERROR);
-    Serial.println("initialization failed!");
+    Serial.println("failed");
     //report_exception(&SD_ERROR);
     return;
   }
-  Serial.println("initialization done.");
+  Serial.println("done");
     
-  
-  //mymap = (uint8_t**)calloc(NUM_NODES_X, sizeof(uint8_t*));
-  //for(uint8_t i=0; i<NUM_NODES_X; i++) {
-  //  (mymap)[i]=(uint8_t*)calloc(NUM_NODES_X, sizeof(uint8_t));
-  //}
 }
 
 

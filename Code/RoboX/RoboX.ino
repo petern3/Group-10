@@ -5,7 +5,7 @@
  * 
  * Author:  Peter Nicholls
  * Created: 2015-05-26
- * Edited:  2015-05-31
+ * Edited:  2015-06-18
  * 
  * This file is the main file, contatining the overall initialization
  * sequence and program kernel.
@@ -35,7 +35,9 @@
 void setup() {
   // put your setup code here, to run once:
   
+  noInterrupts();
   Serial.begin(BAUD_RATE);
+  
   init_actuator_core();
   init_exception_core();
   init_map_core();
@@ -43,29 +45,19 @@ void setup() {
   init_tactics_core();
   init_voice_core();
   
-  //sd_test1();
-  //sd_test2();
-  //display_map();
-  
+  interrupts();
 }
 
 
 /// KERNEL ///
 void loop() {
   // put your main code here, to run repeatedly:
-  while (!SD_ERROR.active) {
+  
+  if (!SD_ERROR.active && !FORCE_SECONDARY) {
     primary_tactic();
+  } else {
+    secondary_tactic();
   }
-  //report_exception(&SD_ERROR);
-  //Serial.println(sensor_distance(IR_MED1));
-  //Serial.println(analogRead(IR_MED1_PIN));
-  //delay(10);
-  //Serial.println(sensor_distance(IR_LNG1));
-  //Serial.println(analogRead(IR_LNG1_PIN));
-  //Serial.println();
-  
-  //delay(10);
-  
   
 }
 
