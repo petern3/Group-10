@@ -42,7 +42,7 @@ void init_map_core(void) {
 int8_t get_terrain(Position_t coord) {
   // Gets the terrain at a specific point
   int8_t terrain_to_get = EMPTY;
-  char[DIR_BUFFER] dir = {\0};
+  char dir[DIR_BUFFER] = {'\0'};
   sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
   
   if (SD.exists(dir)) {
@@ -60,7 +60,7 @@ int8_t get_terrain(Position_t coord) {
 int8_t set_terrain(Position_t coord, uint8_t terrain_to_set) {
   // Sets a single coordinate to a given terrain type
   int8_t set_terrain_success = 0;
-  char[DIR_BUFFER] dir = {\0};
+  char dir[DIR_BUFFER] = {'\0'};
   sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
   
   if (SD.exists(dir)) {
@@ -99,7 +99,7 @@ int8_t increment_terrain(Position_t coord, int8_t increment) {
   // Increments a single coordinate up or down
   int8_t increment_terrain_success = 0;
   uint8_t prev_value = 0;
-  char[DIR_BUFFER] dir = {\0};
+  char dir[DIR_BUFFER] = {'\0'};
   sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
   
   if (SD.exists(dir)) {
@@ -112,7 +112,7 @@ int8_t increment_terrain(Position_t coord, int8_t increment) {
     prev_value = 0;
   }
   
-  increment_terrain_success = set_terrain(coord, (max(prev_value + increment, 0));
+  increment_terrain_success = set_terrain(coord, (max(prev_value + increment, 0)));
   
   return increment_terrain_success;
 }
@@ -124,7 +124,7 @@ void display_map(void) {
   Position_t curr = {0, 0};
   int8_t terrain_to_print = 0;
   char num[3] = {"\0"};
-
+  /*
   for (index_y = -1; index_y <= NUM_NODES_Y; index_y++) {
     for (index_x = -1; index_x <= NUM_NODES_X; index_x++) {
       curr.x = index_x;
@@ -151,6 +151,6 @@ void display_map(void) {
       #endif
       }
     println_();
-  }
+  }*/
 }
 

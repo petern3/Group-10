@@ -15,7 +15,7 @@
 /// INCLUDES ///
 #include "tactics_core.h"
 #include "actuator_core.h"
-//#include "exception_core.h"
+#include "exception_core.h"
 #include "sensor_core.h"
 
 
