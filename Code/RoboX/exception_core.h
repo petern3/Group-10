@@ -25,7 +25,7 @@
 
 /// STRUCTS ///
 typedef struct {
-  bool active;
+  uint8_t active;
   String* descript;
   String* sound;
 } Exception_t ;

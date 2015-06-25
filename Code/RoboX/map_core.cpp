@@ -15,51 +15,106 @@
 /// INCLUDES ///
 #include "map_core.h"
 #include "exception_core.h"
+#include "miscellaneous_core.h"
 
 
 /// GLOBALS ///
-static uint16_t mymap[0][0]; //[NUM_NODES_Y][NUM_NODES_X];
-File myFile;
+static File BOTMAP;
 
 
 /// FUNCTIONS ///
 void init_map_core(void) {
-  Serial.print("Initializing SD card...");
+  print_("Initializing SD card...");
 
   if (!SD.begin(CHIP_SELECT_PIN)) {
     activate_exception(&SD_ERROR);
-    Serial.println("failed");
+    println_("failed");
     //report_exception(&SD_ERROR);
     return;
   }
-  Serial.println("done");
-    
+  println_("done");
+  print_("Initializing map...");
+  
+  println_("done");
 }
 
 
 int8_t get_terrain(Position_t coord) {
+  // Gets the terrain at a specific point
+  int8_t terrain_to_get = EMPTY;
+  char[DIR_BUFFER] dir = {\0};
+  sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
   
-  int8_t terrain_to_get = -1;
-
-  if (coord.x < NUM_NODES_X && coord.x >= 0 &&
-      coord.y < NUM_NODES_Y && coord.y >= 0) {
-    terrain_to_get = mymap[coord.y][coord.x];
+  if (SD.exists(dir)) {
+    BOTMAP = SD.open(dir, FILE_READ);
+    if (BOTMAP) {
+      terrain_to_get = BOTMAP.read();
+      BOTMAP.close();
+    }
   }
+  
   return terrain_to_get;
 }
 
 
 int8_t set_terrain(Position_t coord, uint8_t terrain_to_set) {
+  // Sets a single coordinate to a given terrain type
+  int8_t set_terrain_success = 0;
+  char[DIR_BUFFER] dir = {\0};
+  sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
   
-  int8_t set_terrain_success = -1;
-  
-  if (coord.x < NUM_NODES_X && coord.x >= 0 &&
-      coord.y < NUM_NODES_Y && coord.y >= 0) {
-
-    mymap[coord.y][coord.x] = terrain_to_set;
-    set_terrain_success = 0;
+  if (SD.exists(dir)) {
+    SD.remove(dir);
   }
+  
+  if (terrain_to_set == EMPTY) {
+    BOTMAP = SD.open(dir, FILE_WRITE);
+    if (BOTMAP) {
+      print_("Writing to ");
+      print_(dir);
+      BOTMAP.print(terrain_to_set);
+      BOTMAP.close();
+      println_("...done.");
+    } else {
+      // if the file didn't open, print an error:
+      //activate_exception(&SD_ERROR);
+      println_("...error opening");
+      set_terrain_success = -1;
+    }
+  }
+  
   return set_terrain_success;
+}
+
+
+int8_t set_wall(Position_t coord) {
+  
+  int8_t set_wall_success = 0;
+  
+  return set_wall_success;
+}
+
+
+int8_t increment_terrain(Position_t coord, int8_t increment) {
+  // Increments a single coordinate up or down
+  int8_t increment_terrain_success = 0;
+  uint8_t prev_value = 0;
+  char[DIR_BUFFER] dir = {\0};
+  sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
+  
+  if (SD.exists(dir)) {
+    BOTMAP = SD.open(dir, FILE_READ);
+    if (BOTMAP) {
+      prev_value = BOTMAP.read();
+      BOTMAP.close();
+    }
+  } else {
+    prev_value = 0;
+  }
+  
+  increment_terrain_success = set_terrain(coord, (max(prev_value + increment, 0));
+  
+  return increment_terrain_success;
 }
 
 
@@ -78,121 +133,24 @@ void display_map(void) {
       sprintf(num, "%2d", terrain_to_print);
       
       #ifdef DEBUG_MAP_NUMBERS
-        Serial.print(num);
+        print_(num);
       #else
         if (terrain_to_print == -1) {
-          Serial.print(NODE_EDGE);
+          print_(NODE_EDGE);
         } else if (terrain_to_print == 0) {
-          Serial.print(NODE_OPEN);
+          print_(NODE_OPEN);
         } else if (terrain_to_print == 1) {
-          Serial.print(NODE_WALL);
+          print_(NODE_WALL);
         } else if (terrain_to_print == 2) {
-          Serial.print(NODE_BASE);
+          print_(NODE_BASE);
         } else if (terrain_to_print == 3) {
-          Serial.print(NODE_PACK);
+          print_(NODE_PACK);
         } else {
-          Serial.print(num);
+          print_(num);
         }
       #endif
       }
-    Serial.print("\n");
-  }	
+    println_();
+  }
 }
-
-/*
-void sd_test1(void) {
-  
-  double time1 = millis();
-  
-  // Write
-  myFile = SD.open("map.tsv", FILE_WRITE);
-  if (myFile) {
-    Serial.print("Writing to map.tsv...");
-    for (int i=0; i < 1000; i++) {
-      for (int j=0; j < 1000; j++) {
-        
-        myFile.print(4);
-        myFile.print('\t');
-      }
-      myFile.print('\n');
-    }
-    myFile.close();
-    Serial.println("done.");
-  } else {
-    // if the file didn't open, print an error:
-    Serial.println("error opening map.tsv");
-  }
-  
-  double time2 = millis();
-  Serial.print("Method 1 took ");
-  Serial.print(time2 - time1);
-  Serial.println(" ms to write");
-  
-  //Read
-  myFile = SD.open("map.txt", FILE_WRITE);
-  if (myFile) {
-    Serial.print("reading map.tsv...");
-    while (myFile.available()) {
-      Serial.write(myFile.read());
-    }
-    myFile.close();
-    Serial.println("done.");
-  } else {
-    // if the file didn't open, print an error:
-    Serial.println("error opening map.tsv");
-  }
-  
-  double time3 = millis();
-  Serial.print("Method 1 took ");
-  Serial.print(time3 - time2);
-  Serial.println(" ms to read");
-}*/
-
-
-/*void sd_test2(void) {
-  
-  double time1 = millis();
-  String folder = "map/";
-  String address = "000000000000";
-  
-  // Write
-  Serial.print("Writing to card...");
-  for (int i=0; i < 1000; i++) {
-    for (int j=0; j < 1000; j++) {
-      address = folder + String(i) + String(j);
-      myFile = SD.open(address, FILE_WRITE);
-      if (myFile) {
-        myFile.print(4);
-        myFile.close();
-      }
-    }
-  }
-  Serial.println("done.");
-  
-  double time2 = millis();
-  Serial.print("Method 1 took ");
-  Serial.print(time2 - time1);
-  Serial.println(" ms to write");
-  
-  //Read
-  Serial.print("reading...");
-  for (int i=0; i < 1000; i++) {
-    for (int j=0; j < 1000; j++) {
-      address = folder + String(i) + String(j);
-      myFile = SD.open(address);
-      if (myFile) {
-        while (myFile.available()) {
-          Serial.write(myFile.read());
-        }
-        myFile.close();
-      }
-    }
-  }
-  
-  double time3 = millis();
-  Serial.print("Method 1 took ");
-  Serial.print(time3 - time2);
-  Serial.println(" ms to read");
-}*/
-
 

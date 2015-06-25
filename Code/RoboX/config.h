@@ -82,14 +82,20 @@
 #define MAP_SIZE_Y 2500  //2400  // mm
 #define MAP_SPACING 500  //20  // mm
 
+#define DIR_BUFFER 20
+#define MAP_DIR "BOTMAP/"
+#define EMPTY 0
+#define WALL_MIN 4
+#define WALL_INCR 2
+
 
 /// DEBUG CONFIG ///
-#define BAUD_RATE 9600
+#define BAUD_RATE 115200
 #define ENABLE_SERIAL  // define if you want to send serial
 //#define ENABLE_SOUNDS  // define if you want to play sounds
 //#define DEBUG_ERROR_SOUNDS  // define if you only want error sounds
 
-//#define DEBUG_MAP_NUMBERS  // define if you want to diplay numbers instead of symbols
+//#define DEBUG_MAP_NUMBERS  // define if you want to display numbers instead of symbols
 #ifndef DEBUG_MAP_NUMBERS
   #define NODE_EDGE "##"
   #define NODE_OPEN "  "

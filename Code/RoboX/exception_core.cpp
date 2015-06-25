@@ -14,6 +14,7 @@
 
 /// INCLUDES ///
 #include "exception_core.h"
+#include "miscellaneous_core.h"
 #include "voice_core.h"
 
 
@@ -58,9 +59,7 @@ void report_exception(Exception_t* to_report) {
   if (SOUNDS_ON && *to_report->sound != NULL_ERROR_SOUND) {
     play_sound(*to_report->sound);
   }
-  #ifdef ENABLE_SERIAL
-    Serial.println(*to_report->descript);
-  #endif
+  println_(*to_report->descript);
 }
 
 

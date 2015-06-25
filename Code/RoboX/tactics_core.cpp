@@ -30,11 +30,13 @@ void init_tactics_core(void) {
 
 
 void primary_tactic(void) {
-  if (millis() > SENSOR_PERIOD) {
-    read_sensors();
-  }
-  if (millis() > THINKING_PERIOD) {
-    
+  while (!SD_ERROR.active && !FORCE_SECONDARY) {
+    if (millis() > SENSOR_PERIOD) {
+      read_sensors();
+    }
+    if (millis() > THINKING_PERIOD) {
+      
+    }
   }
 }
 

@@ -34,7 +34,7 @@
 
 
 /// GLOBALS ///
-extern float TAU;
+//extern float TAU;
 
 extern Servo SERVO_1;
 extern Servo SERVO_2;

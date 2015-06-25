@@ -53,11 +53,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   
-  if (!SD_ERROR.active && !FORCE_SECONDARY) {
-    primary_tactic();
-  } else {
-    secondary_tactic();
-  }
-  
+  primary_tactic();
+  secondary_tactic();
 }
 

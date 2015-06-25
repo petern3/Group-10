@@ -13,10 +13,11 @@
 
 
 #include "actuator_core.h"
+#include "miscellaneous_core.h"
 
 
 /// GLOBALS ///
-extern float TAU = (2*PI);
+//extern float TAU = (2*PI);
 static float ENCODER_INCREMENT = (TAU / ENCODER_PPR);
 static float ENCODER_MAX = (ENCODER_WRAP * TAU);
 
@@ -68,8 +69,8 @@ void init_actuator_core(void) {
   // DC Motors
   LEFT_DRIVE.attach(DC_LEFT_PIN);
   RIGHT_DRIVE.attach(DC_RIGHT_PIN);
-  attachInterrupt(DC_LEFT_INTERRUPT, left_encoder_ISR, RISING);
-  attachInterrupt(DC_RIGHT_INTERRUPT, right_encoder_ISR, RISING);
+  attachInterrupt(DC_LEFT_INTERRUPT, left_encoder_ISR, CHANGE);
+  attachInterrupt(DC_RIGHT_INTERRUPT, right_encoder_ISR, CHANGE);
   
   // Servos
   SERVO_1.attach(SERVO1_PIN);
