@@ -83,10 +83,14 @@
 #define MAP_SPACING 500  //20  // mm
 
 #define DIR_BUFFER 20
-#define MAP_DIR "BOTMAP/"
-#define EMPTY 0
-#define WALL_MIN 4
-#define WALL_INCR 2
+#define MAP_DIR "BOTMAP/"  // Format is "BOTMAP/xxx,yyy" with no file extention
+#define EMPTY 0x00          // Soft or hard
+#define WEIGHT 0x01         // |
+#define SOFT_WALL_MIN 0x04  // 00000100
+#define SOFT_WALL_MAX 0x7F  // 01111111
+#define HARD_WALL_MIN 0x84  // 10000100
+#define HARD_WALL_MAX 0xFF  // 11111111
+#define WALL_INCR 1
 
 
 /// DEBUG CONFIG ///

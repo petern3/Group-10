@@ -20,6 +20,8 @@
 
 /// GLOBALS ///
 Exception_t SD_ERROR = init_exception("Could not find SD card" , NULL_ERROR_SOUND);
+Exception_t MAP_READ_ERROR = init_exception("Could not read map file" , NULL_ERROR_SOUND);
+Exception_t MAP_WRITE_ERROR = init_exception("Could not write to map" , NULL_ERROR_SOUND);
 
 
 /// FUNCTIONS ///

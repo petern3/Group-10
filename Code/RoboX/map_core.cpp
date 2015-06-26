@@ -20,6 +20,8 @@
 
 /// GLOBALS ///
 static File BOTMAP;
+static Position_t ROBOT_POSITION;
+static float ROBOT_ROTATION;
 
 
 /// FUNCTIONS ///
@@ -34,7 +36,9 @@ void init_map_core(void) {
   }
   println_("done");
   print_("Initializing map...");
-  
+  if (SD.exists(MAP_DIR)) {
+    SD.rmdir(MAP_DIR);
+  }
   println_("done");
 }
 
@@ -57,9 +61,8 @@ int8_t get_terrain(Position_t coord) {
 }
 
 
-int8_t set_terrain(Position_t coord, uint8_t terrain_to_set) {
+static void set_terrain(Position_t coord, uint8_t terrain_to_set) {
   // Sets a single coordinate to a given terrain type
-  int8_t set_terrain_success = 0;
   char dir[DIR_BUFFER] = {'\0'};
   sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
   
@@ -77,28 +80,16 @@ int8_t set_terrain(Position_t coord, uint8_t terrain_to_set) {
       println_("...done.");
     } else {
       // if the file didn't open, print an error:
-      //activate_exception(&SD_ERROR);
+      activate_exception(&MAP_WRITE_ERROR);
       println_("...error opening");
-      set_terrain_success = -1;
     }
   }
-  
-  return set_terrain_success;
 }
 
 
-int8_t set_wall(Position_t coord) {
-  
-  int8_t set_wall_success = 0;
-  
-  return set_wall_success;
-}
-
-
-int8_t increment_terrain(Position_t coord, int8_t increment) {
+static void increment_terrain(Position_t coord, int8_t increment) {
   // Increments a single coordinate up or down
-  int8_t increment_terrain_success = 0;
-  uint8_t prev_value = 0;
+  uint8_t prev_value = EMPTY;
   char dir[DIR_BUFFER] = {'\0'};
   sprintf(dir, "%s/%*d,%*d", MAP_DIR, 3, coord.x, 3, coord.y);
   
@@ -108,13 +99,96 @@ int8_t increment_terrain(Position_t coord, int8_t increment) {
       prev_value = BOTMAP.read();
       BOTMAP.close();
     }
+  }
+  set_terrain(coord, (max(prev_value + increment, 0)));
+}
+
+
+void set_wall(Position_t coord, bool set_true) {
+  /*
+                    [][][]12[][][]
+                [][]              [][]
+            [][]                      [][]
+          []                              []
+        []                                  []
+      []                                      []
+      []                                      []
+    []                                          []
+    []                                          []
+  []                                              []
+  []                                              []
+  []                                              []
+  12                      []                      12
+  []                                              []
+  []                                              []
+  []                                              []
+    []                                          []
+    []                                          []
+      []                                      []
+      []                                      []
+        []                                  []
+          []                              []
+            [][]                      [][]
+                [][]              [][]
+                    [][][]12[][][]
+  
+  The middle one is set to a 'hard' wall
+  The rest (outer ones) are set to a 'soft' wall
+  */
+  int8_t edge_fill[17][2] = {
+    { 1,12},{ 2,12},{ 3,12},
+                          { 4,11},{ 5,11},
+                                        { 6,10},{ 7,10},
+                                                      { 8, 9},
+                                                            { 9, 8},
+                                                                  {10, 7},
+                                                                  {10, 6},
+                                                                        {11, 5},
+                                                                        {11, 4},
+                                                                              {12, 3},
+                                                                              {12, 2},
+                                                                              {12, 1}};
+  int8_t edge_array_length = 16;
+  Position_t edge_position = {0, 0};
+  int8_t increment = WALL_INCR;
+  if (set_true == true) {
+    increment_terrain(coord, increment);  // set_terrain to add in checking whether hard or soft wall. Have setting of hard/sof wall here
   } else {
-    prev_value = 0;
+    increment = -WALL_INCR;
+    increment_terrain(coord, increment);
   }
   
-  increment_terrain_success = set_terrain(coord, (max(prev_value + increment, 0)));
   
-  return increment_terrain_success;
+  
+  // Change each corner of the circle
+  for (int i=0; i<edge_array_length; i++) {
+    edge_position.x = coord.x - edge_fill[i][0];
+    edge_position.y = coord.y - edge_fill[i][1];
+    increment_terrain(edge_position, increment);
+    edge_position.x = coord.x - edge_fill[i][0];
+    edge_position.y = coord.y + edge_fill[i][1];
+    increment_terrain(edge_position, increment);
+    edge_position.x = coord.x + edge_fill[i][0];
+    edge_position.y = coord.y - edge_fill[i][1];
+    increment_terrain(edge_position, increment);
+    edge_position.x = coord.x + edge_fill[i][0];
+    edge_position.y = coord.y + edge_fill[i][1];
+    increment_terrain(edge_position, increment);
+  }
+  // Change the four edges in line with the centre
+  edge_position.x = coord.x - 12;
+  edge_position.y = coord.y;
+  increment_terrain(edge_position, increment);
+  edge_position.x = coord.x + 12;
+  edge_position.y = coord.y;
+  increment_terrain(edge_position, increment);
+  edge_position.x = coord.x;
+  edge_position.y = coord.y - 12;
+  increment_terrain(edge_position, increment);
+  edge_position.x = coord.x;
+  edge_position.y = coord.y + 12;
+  increment_terrain(edge_position, increment);
+  
 }
 
 
