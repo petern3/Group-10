@@ -37,7 +37,7 @@ void setup() {
   // put your setup code here, to run once:
   
   Serial.begin(BAUD_RATE);
-  PRINTLN("Initializing:");
+  PRINTLN("\nInitializing:");
   
   init_actuator_core();
   init_exception_core();
@@ -47,6 +47,8 @@ void setup() {
   init_voice_core();
   
   PRINTLN("Ready!\n");
+  
+  display_map();
   
 }
 

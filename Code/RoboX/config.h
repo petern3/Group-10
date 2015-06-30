@@ -79,20 +79,20 @@
 //#define STEPPER4_INV
 
 /// MAP CONFIG ///
-#define MAP_SIZE_X 4900  // mm  Wider than is long
-#define MAP_SIZE_Y 2400  // mm
-#define MAP_SPACING 20  // mm
+#define MAP_SIZE_X 5000 //4900  // mm  Wider than is long
+#define MAP_SIZE_Y 2500 //2400  // mm
+#define MAP_SPACING 500 //20  // mm
 
 #define ROBOT_RADIUS 240  // mm
 #define ROBOT_DIAMETER 480  // mm
 
 
 #define MAP_DIR "BOTMAP/"  // Format is "BOTMAP/xxx,yyy" with no file extention
-#define DIR_BUFFER 20
-#define XY_DEC_MAX 3
+#define DIR_BUFFER 22
 
-#define EMPTY 0x00     // Soft or hard
-#define WEIGHT 0x01    //      |
+#define EMPTY 0x00
+#define PACK  0x01     // Soft or hard
+#define BASE  0x02     //      |
 #define WALL_MIN 0x04  //      00000100
 #define WALL_MAX 0x7F  //      01111111
 #define WALL_INCR 1
@@ -120,11 +120,11 @@
 
 //#define DEBUG_MAP_NUMBERS  // define if you want to display numbers instead of symbols
 #ifndef DEBUG_MAP_NUMBERS
-  #define NODE_EDGE "##"
-  #define NODE_OPEN "  "
-  #define NODE_WALL "[]"
-  #define NODE_BASE "~~"
-  #define NODE_PACK "::"
+  //#define NODE_EDGE "###"
+  #define NODE_OPEN "   "
+  //#define NODE_WALL "[ ]"
+  #define NODE_BASE "~~~"
+  #define NODE_PACK ":::"
 #endif
 
 
