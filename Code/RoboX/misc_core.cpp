@@ -1,34 +1,35 @@
  ///////////////////////////////////////////////////////////////////////
 /*----------------------------------------------------------------------
- * miscellaneous_core.h
+ * misc_core.cpp
  *----------------------------------------------------------------------
  * 
  * Author:  Peter Nicholls
- * Created: 2015-05-31
- * Edited:  2015-05-31
+ * Created: 2015-06-25
+ * Edited:  2015-06-25
  * 
- * The header file of the Miscellaneous Core.
+ * Blurb
  * 
  *//////////////////////////////////////////////////////////////////////
- 
-
-#ifndef SENSOR_CORE_H
-#define SENSOR_CORE_H
 
 
 /// INCLUDES ///
-#include "Arduino.h"
-#include "config.h"
-#include <inttypes.h>
-#include <stdlib.h>
-
+#include "misc_core.h"
 
 /// GLOBALS ///
-extern float TAU;
+extern float TAU = (2*PI);
 
+/*
 /// FUNCTIONS ///
-void print_(String to_print);
-void println_(String to_print);
+void print_(String to_print) {
+  #ifdef ENABLE_SERIAL
+    Serial.print(to_print);
+  #endif
+}
 
+void println_(String to_print) {
+  //#ifdef ENABLE_SERIAL
+  Serial.println("Boo");
+  Serial.println(to_print);
+  //#endif
+}*/
 
-#endif

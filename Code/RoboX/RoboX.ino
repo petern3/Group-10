@@ -26,6 +26,7 @@
 #include "actuator_core.h"
 #include "exception_core.h"
 #include "map_core.h"
+#include "misc_core.h"
 #include "sensor_core.h"
 #include "tactics_core.h"
 #include "voice_core.h"
@@ -35,8 +36,8 @@
 void setup() {
   // put your setup code here, to run once:
   
-  noInterrupts();
   Serial.begin(BAUD_RATE);
+  PRINTLN("Initializing:");
   
   init_actuator_core();
   init_exception_core();
@@ -45,7 +46,8 @@ void setup() {
   init_tactics_core();
   init_voice_core();
   
-  interrupts();
+  PRINTLN("Ready!\n");
+  
 }
 
 

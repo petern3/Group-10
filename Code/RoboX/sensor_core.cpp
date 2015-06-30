@@ -33,9 +33,9 @@ Sensor_t IR_VAR3 = {IR_VAR3_PIN, IR_VAR, -1};
 
 /// FUNCTIONS ///
 void init_sensor_core(void) {
-  Serial.print("Initializing sensors...");
+  PRINT("\tSensors...");
   analogReference(INTERNAL2V56);
-  Serial.println("done");
+  PRINTLN("done");
 }
 
 

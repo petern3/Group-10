@@ -16,6 +16,7 @@
 #include "tactics_core.h"
 #include "actuator_core.h"
 #include "exception_core.h"
+#include "misc_core.h"
 #include "sensor_core.h"
 
 
@@ -30,23 +31,27 @@ void init_tactics_core(void) {
 
 
 void primary_tactic(void) {
+  PRINTLN("Starting primary tactic:");
+  
   while (!SD_ERROR.active && !FORCE_SECONDARY) {
-    if (millis() > SENSOR_PERIOD) {
-      read_sensors();
-    }
-    if (millis() > THINKING_PERIOD) {
-      
-    }
+    read_sensors();
   }
+  PRINTLN("Primary tactic failure\n");
 }
 
 void secondary_tactic(void) {
-  if (millis() > SENSOR_PERIOD) {
+  PRINTLN("Starting secondary tactic:");
+  
+  while(true) {
     read_sensors();
-  }
-  if (millis() > THINKING_PERIOD) {
+    //PRINTLN(IR_SHT1.sensor_value);
+    //PRINTLN(IR_SHT2.sensor_value);
+    //PRINTLN();
+    
+    //delay(1000);
     
   }
+  PRINTLN("Secondary tactic failure\n");
 }
 
 

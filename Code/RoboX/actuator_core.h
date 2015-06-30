@@ -39,6 +39,9 @@
 extern Servo SERVO_1;
 extern Servo SERVO_2;
 
+extern volatile float LEFT_ROTATION;
+extern volatile float RIGHT_ROTATION;
+
 /// FUNCTIONS ///
 void init_actuator_core(void);
 void dc_drive(int8_t motor_speed, int8_t motor_rotation);

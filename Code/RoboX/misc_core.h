@@ -1,34 +1,34 @@
  ///////////////////////////////////////////////////////////////////////
 /*----------------------------------------------------------------------
- * miscellaneous_core.cpp
+ * misc_core.h
  *----------------------------------------------------------------------
  * 
  * Author:  Peter Nicholls
- * Created: 2015-06-25
- * Edited:  2015-06-25
+ * Created: 2015-05-31
+ * Edited:  2015-05-31
  * 
- * Blurb
+ * The header file of the Misc Core.
  * 
  *//////////////////////////////////////////////////////////////////////
+ 
+
+#ifndef MISC_CORE_H
+#define MISC_CORE_H
 
 
 /// INCLUDES ///
-#include "miscellaneous_core.h"
+#include "Arduino.h"
+#include "config.h"
+#include <inttypes.h>
+#include <stdlib.h>
+
 
 /// GLOBALS ///
-extern float TAU = (2*PI);
-
+extern float TAU;
 
 /// FUNCTIONS ///
-void print_(String to_print) {
-  #ifdef ENABLE_SERIAL
-    Serial.print(to_print);
-  #endif
-}
+//void print_(String to_print);
+//void println_(String to_print);
 
-void println_(String to_print) {
-  #ifdef ENABLE_SERIAL
-    Serial.println(to_print);
-  #endif
-}
 
+#endif

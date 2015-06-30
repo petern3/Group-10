@@ -22,13 +22,13 @@ extern bool SOUNDS_ON = false;
 
 /// FUNCTIONS ///
 void init_voice_core(void) {
-  Serial.print("Initializing speakers...");
+  PRINT("\tSpeakers...");
   #ifdef ENABLE_SOUNDS
     SOUNDS_ON = true;
   #else
     SOUNDS_ON = false;
   #endif
-  Serial.println("done");
+  PRINTLN("done");
 }
 
 

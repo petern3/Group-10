@@ -13,7 +13,7 @@
 
 
 #include "actuator_core.h"
-#include "miscellaneous_core.h"
+#include "misc_core.h"
 
 
 /// GLOBALS ///
@@ -25,6 +25,7 @@ static Servo LEFT_DRIVE;
 static Servo RIGHT_DRIVE;
 static bool LEFT_DIR = DC_FORWARD;
 static bool RIGHT_DIR = DC_FORWARD;
+
 volatile float LEFT_ROTATION = 0;
 volatile float RIGHT_ROTATION = 0;
 
@@ -64,7 +65,7 @@ static void right_encoder_ISR(void) {
 
 /// FUNCTIONS ///
 void init_actuator_core(void) {
-  Serial.print("Initializing actuators...");
+  PRINT("\tActuators...");
   
   // DC Motors
   LEFT_DRIVE.attach(DC_LEFT_PIN);
@@ -91,7 +92,7 @@ void init_actuator_core(void) {
   pinMode(STEPPER4_STEP_PIN,OUTPUT);
   pinMode(STEPPER4_DIR_PIN,OUTPUT);
   
-  Serial.println("done");
+  PRINTLN("done");
 }
 
 
@@ -131,40 +132,22 @@ void dc_drive(int8_t motor_speed, int8_t motor_rotation) {
     left_drive = 180 - (2*motor_rotation);
   }
   
+  if (left_drive > 90) {
+    LEFT_DIR = DC_FORWARD;
+  } else {
+    LEFT_DIR = DC_BACKWARD;
+  }
+  if (right_drive > 90) {
+    RIGHT_DIR = DC_FORWARD;
+  } else {
+    RIGHT_DIR = DC_BACKWARD;
+  }
+  
   LEFT_DRIVE.write(left_drive);
   RIGHT_DRIVE.write(right_drive);
   
 }
 
-
-//The following dc motor functions are now obselete.
-
-/*void dc_drive(uint8_t motor_speed) {
-  
-  LEFT_DRIVE.write(motor_speed);
-  RIGHT_DRIVE.write(motor_speed);
-}
-
-
-void dc_rotate(uint8_t motor_direction) {
-  
-  if (motor_direction == DC_LEFT_FAST) {
-    LEFT_DRIVE.write(DC_BWD_FAST);
-    RIGHT_DRIVE.write(DC_FWD_FAST);
-  } else if (motor_direction == DC_LEFT_SLOW) {
-    LEFT_DRIVE.write(DC_BWD_SLOW);
-    RIGHT_DRIVE.write(DC_FWD_SLOW);
-  } else if (motor_direction == DC_ZERO) {
-    LEFT_DRIVE.write(DC_ZERO);
-    RIGHT_DRIVE.write(DC_ZERO);
-  } else if (motor_direction == DC_RIGHT_SLOW) {
-    LEFT_DRIVE.write(DC_FWD_SLOW);
-    RIGHT_DRIVE.write(DC_BWD_SLOW);
-  } else if (motor_direction == DC_RIGHT_FAST) {
-    LEFT_DRIVE.write(DC_FWD_FAST);
-    RIGHT_DRIVE.write(DC_BWD_FAST);
-  }
-}*/
 
 void servo_rotate(Servo to_rotate, uint8_t servo_position) {
   if (servo_position < 180) {

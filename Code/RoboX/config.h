@@ -38,8 +38,8 @@
 #define STEPPER4_DIR_PIN 37
 
 
-#define IR_SHT1_PIN A10
-#define IR_SHT2_PIN A11
+#define IR_SHT1_PIN A0 //10
+#define IR_SHT2_PIN A1 //11
 #define IR_MED1_PIN A9
 #define IR_MED2_PIN A8
 #define IR_LNG1_PIN A7
@@ -57,14 +57,15 @@
 
 
 /// SCHEDULER CONFIG ///
-#define SENSOR_PERIOD 10  // milliseconds
-#define THINKING_PERIOD 100  // milliseconds
+//#define SENSOR_PERIOD 10  // milliseconds
+//#define THINKING_PERIOD 100  // milliseconds
 
 
 /// DC MOTOR CONFIG ///
 #define ENCODER_PPR 663
-#define ENCODER_WRAP 10  // Number of revolutions before wrapping
+#define ENCODER_WRAP 1  // Number of revolutions before wrapping
 #define DC_FORWARD true
+#define DC_BACKWARD false
 
 
 /// STEPPER MOTOR CONFIG ///
@@ -78,24 +79,42 @@
 //#define STEPPER4_INV
 
 /// MAP CONFIG ///
-#define MAP_SIZE_X 5000  //4900  // mm  Wider than is long
-#define MAP_SIZE_Y 2500  //2400  // mm
-#define MAP_SPACING 500  //20  // mm
+#define MAP_SIZE_X 4900  // mm  Wider than is long
+#define MAP_SIZE_Y 2400  // mm
+#define MAP_SPACING 20  // mm
 
-#define DIR_BUFFER 20
+#define ROBOT_RADIUS 240  // mm
+#define ROBOT_DIAMETER 480  // mm
+
+
 #define MAP_DIR "BOTMAP/"  // Format is "BOTMAP/xxx,yyy" with no file extention
-#define EMPTY 0x00          // Soft or hard
-#define WEIGHT 0x01         // |
-#define SOFT_WALL_MIN 0x04  // 00000100
-#define SOFT_WALL_MAX 0x7F  // 01111111
-#define HARD_WALL_MIN 0x84  // 10000100
-#define HARD_WALL_MAX 0xFF  // 11111111
+#define DIR_BUFFER 20
+#define XY_DEC_MAX 3
+
+#define EMPTY 0x00     // Soft or hard
+#define WEIGHT 0x01    //      |
+#define WALL_MIN 0x04  //      00000100
+#define WALL_MAX 0x7F  //      01111111
 #define WALL_INCR 1
+
+#define HARDNESS_BIT 0x80
+#define SOFT_WALL 0
+#define HARD_WALL 1
 
 
 /// DEBUG CONFIG ///
 #define BAUD_RATE 115200
 #define ENABLE_SERIAL  // define if you want to send serial
+
+#ifdef ENABLE_SERIAL
+  #define PRINT(s) Serial.print(s)
+  #define PRINTLN(s) Serial.println(s)
+#else
+  #define PRINT(s)
+  #define PRINTLN(s)
+#endif
+
+
 //#define ENABLE_SOUNDS  // define if you want to play sounds
 //#define DEBUG_ERROR_SOUNDS  // define if you only want error sounds
 
@@ -116,7 +135,7 @@
 /// SENSOR CONFIG ///
 #define IR_SHT_MIN_MM 40
 #define IR_SHT_MAX_MM 300
-#define IR_SHT_MIN_ADC 0     // To measure
+#define IR_SHT_MIN_ADC 157     // To measure
 #define IR_SHT_MAX_ADC 1023  // To measure
 
 #define IR_MED_MIN_MM 100

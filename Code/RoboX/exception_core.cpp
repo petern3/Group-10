@@ -14,7 +14,6 @@
 
 /// INCLUDES ///
 #include "exception_core.h"
-#include "miscellaneous_core.h"
 #include "voice_core.h"
 
 
@@ -26,7 +25,9 @@ Exception_t MAP_WRITE_ERROR = init_exception("Could not write to map" , NULL_ERR
 
 /// FUNCTIONS ///
 void init_exception_core(void) {
+  PRINT("\tExceptions...");
   
+  PRINTLN("done");
 }
 
 
@@ -61,7 +62,7 @@ void report_exception(Exception_t* to_report) {
   if (SOUNDS_ON && *to_report->sound != NULL_ERROR_SOUND) {
     play_sound(*to_report->sound);
   }
-  println_(*to_report->descript);
+  //PRINTLN(*to_report->descript);
 }
 
 
