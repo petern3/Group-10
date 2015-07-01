@@ -26,13 +26,14 @@
 
 
 /// GLOBALS ///
-extern bool FORCE_SECONDARY;
+extern uint8_t OPERATION_MODE;
 
 
 /// FUNCTIONS ///
 void init_tactics_core(void);
 void primary_tactic(void);
 void secondary_tactic(void);
+void manual_mode(void);
 
 
 #endif

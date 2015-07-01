@@ -27,8 +27,6 @@
 extern float TAU;
 
 /// FUNCTIONS ///
-//void print_(String to_print);
-//void println_(String to_print);
 
 
 #endif

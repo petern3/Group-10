@@ -26,8 +26,8 @@ static Servo RIGHT_DRIVE;
 static bool LEFT_DIR = DC_FORWARD;
 static bool RIGHT_DIR = DC_FORWARD;
 
-volatile float LEFT_ROTATION = 0;
-volatile float RIGHT_ROTATION = 0;
+extern volatile float LEFT_ROTATION = 0;
+extern volatile float RIGHT_ROTATION = 0;
 
 Servo SERVO_1;
 Servo SERVO_2;
@@ -96,7 +96,7 @@ void init_actuator_core(void) {
 }
 
 
-void dc_drive(int8_t motor_speed, int8_t motor_rotation) {
+void dc_drive(int8_t motor_speed, int8_t motor_rotation=0) {
   // 
   if (motor_speed > 90) {
     motor_speed = 90;
@@ -260,16 +260,16 @@ static void stepper4_rotate(int16_t num_degrees) {
 
 
 void stepper_rotate(uint8_t to_rotate, int16_t num_degrees) {
-  if (to_rotate == STEPPER1) {
+  if (to_rotate == STEPPER_1) {
     stepper1_rotate(num_degrees);
   }
-  else if (to_rotate == STEPPER2) {
+  else if (to_rotate == STEPPER_2) {
     stepper2_rotate(num_degrees);
   }
-  else if (to_rotate == STEPPER3) {
+  else if (to_rotate == STEPPER_3) {
     stepper3_rotate(num_degrees);
   }
-  else if (to_rotate == STEPPER4) {
+  else if (to_rotate == STEPPER_4) {
     stepper4_rotate(num_degrees);
   }
 }

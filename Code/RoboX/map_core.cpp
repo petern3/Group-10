@@ -45,12 +45,17 @@ void init_map_core(void) {
   }
   PRINTLN("done");
   PRINT("\tMap...");
-  if (SD.exists(MAP_DIR)) {
-    remove_old_map();
-    PRINTLN("cleared previous map");
-  }
-  init_edges();
-  PRINTLN("done");
+  #ifndef FORCE_SECONDARY_TACTIC
+    if (SD.exists(MAP_DIR)) {
+      remove_old_map();
+    } else {
+      SD.mkdir(MAP_DIR);
+    }
+    init_edges();
+    PRINTLN("\t...done");
+  #else
+    PRINTLN("aborted");
+  #endif
 }
 
 
@@ -92,7 +97,7 @@ static void set_terrain(Position_t coord, uint8_t terrain_to_set) {
     PRINT("\t\tWriting to ");
     PRINT(dir);
     if (BOTMAP) {
-      BOTMAP.print(terrain_to_set);
+      BOTMAP.print(char(terrain_to_set));
       BOTMAP.close();
       PRINTLN("...done");
     } else {
@@ -291,9 +296,20 @@ void display_map(void) {
 
 
 static void remove_old_map(void) {
+  char local_dir[DIR_BUFFER] = {'\0'};
   BOTMAP_ROOT = SD.open(MAP_DIR);
+  
   if (BOTMAP_ROOT) {
-    
+    BOTMAP = BOTMAP_ROOT.openNextFile();
+    while(!BOTMAP) {
+      sprintf(local_dir, "%s%s", MAP_DIR, BOTMAP.name());
+      BOTMAP.close();
+      PRINT("\t\tDeleting   ");
+      PRINT(local_dir);
+      SD.remove(local_dir);
+      PRINTLN("...done");
+      BOTMAP = BOTMAP_ROOT.openNextFile();
+    }
     BOTMAP_ROOT.close();
   }
 }

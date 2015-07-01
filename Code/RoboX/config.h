@@ -18,6 +18,7 @@
 #include "Arduino.h"
 
 /// PINOUT ///
+//Analog write will not work on pins 9 and 10!
 #define DC_LEFT_PIN 12
 #define DC_RIGHT_PIN 13
 #define DC_LEFT_INTERRUPT 4
@@ -57,8 +58,13 @@
 
 
 /// SCHEDULER CONFIG ///
-//#define SENSOR_PERIOD 10  // milliseconds
-//#define THINKING_PERIOD 100  // milliseconds
+#define PRIMARY_MODE 0
+#define SECONDARY_MODE 1
+#define MANUAL_MODE 2
+#define DEFAULT_MODE MANUAL_MODE  // can change to any of the previous modes
+
+#define TIMERTHREE_PERIOD 1000  // microseconds
+#define SENSOR_READ_PERIOD 500000  // microseconds. Not used in primary tactic.
 
 
 /// DC MOTOR CONFIG ///
@@ -66,6 +72,9 @@
 #define ENCODER_WRAP 1  // Number of revolutions before wrapping
 #define DC_FORWARD true
 #define DC_BACKWARD false
+
+#define FORWARD_INCREMENT 10
+#define TURNING_INCREMENT 10
 
 
 /// STEPPER MOTOR CONFIG ///
@@ -104,7 +113,7 @@
 
 /// DEBUG CONFIG ///
 #define BAUD_RATE 115200
-#define ENABLE_SERIAL  // define if you want to send serial
+#define ENABLE_SERIAL // define if you want to send serial
 
 #ifdef ENABLE_SERIAL
   #define PRINT(s) Serial.print(s)

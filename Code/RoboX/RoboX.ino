@@ -21,6 +21,7 @@
 #include <Stepper.h>
 #include <SPI.h>
 #include <SD.h>
+#include <TimerThree.h>
 
 #include "config.h"
 #include "actuator_core.h"
@@ -34,8 +35,6 @@
 
 /// INITIALIZATION ///
 void setup() {
-  // put your setup code here, to run once:
-  
   Serial.begin(BAUD_RATE);
   PRINTLN("\nInitializing:");
   
@@ -49,15 +48,20 @@ void setup() {
   PRINTLN("Ready!\n");
   
   display_map();
-  
 }
 
 
 /// KERNEL ///
 void loop() {
-  // put your main code here, to run repeatedly:
-  
-  primary_tactic();
-  secondary_tactic();
+  switch (OPERATION_MODE) {
+    case PRIMARY_MODE:
+      primary_tactic();
+      break;
+    case MANUAL_MODE:
+      manual_mode();
+      break;
+    default:
+      secondary_tactic();
+  }
 }
 

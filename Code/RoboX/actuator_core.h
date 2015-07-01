@@ -24,10 +24,10 @@
 #include <Herkulex.h>
 
 /// DEFINES ///
-#define STEPPER1 1
-#define STEPPER2 2
-#define STEPPER3 3
-#define STEPPER4 4
+#define STEPPER_1 1
+#define STEPPER_2 2
+#define STEPPER_3 3
+#define STEPPER_4 4
 
 
 /// STRUCTS ///
@@ -45,8 +45,6 @@ extern volatile float RIGHT_ROTATION;
 /// FUNCTIONS ///
 void init_actuator_core(void);
 void dc_drive(int8_t motor_speed, int8_t motor_rotation);
-//void dc_drive(uint8_t motor_speed);       // Obselete
-//void dc_rotate(uint8_t motor_direction);  // Obselete
 void servo_rotate(Servo to_rotate, uint8_t servo_position);
 void stepper_rotate(uint8_t to_rotate, int16_t num_degrees);
 
