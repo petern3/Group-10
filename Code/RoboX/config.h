@@ -18,7 +18,7 @@
 #include "Arduino.h"
 
 /// PINOUT ///
-//Analog write will not work on pins 9 and 10!
+//Analog write will not work on pins 9 and 10 due to TimerThree!
 #define DC_LEFT_PIN 12
 #define DC_RIGHT_PIN 13
 #define DC_LEFT_INTERRUPT 4
@@ -73,8 +73,18 @@
 #define DC_FORWARD true
 #define DC_BACKWARD false
 
+
+/// USER CONTROL CONFIG ///
 #define FORWARD_INCREMENT 10
 #define TURNING_INCREMENT 10
+
+#define FWD 'w'
+#define BWD 's'
+#define LFT 'a'
+#define RHT 'd'
+#define STP 'x'
+#define STEPFWD 'r'
+#define STEPBWD 'f'
 
 
 /// STEPPER MOTOR CONFIG ///
@@ -88,15 +98,15 @@
 //#define STEPPER4_INV
 
 /// MAP CONFIG ///
-#define MAP_SIZE_X 5000 //4900  // mm  Wider than is long
-#define MAP_SIZE_Y 2500 //2400  // mm
-#define MAP_SPACING 500 //20  // mm
+#define MAP_SIZE_X 4900 //4900  // mm  Wider than is long
+#define MAP_SIZE_Y 2400 //2400  // mm
+#define MAP_SPACING 200 //20  // mm
 
 #define ROBOT_RADIUS 240  // mm
 #define ROBOT_DIAMETER 480  // mm
 
 
-#define MAP_DIR "BOTMAP/"  // Format is "BOTMAP/xxx,yyy" with no file extention
+#define MAP_DIR_BASE "BOTMAP"  // Format is "BOTMAPn/x.y" with no file extention
 #define DIR_BUFFER 22
 
 #define EMPTY 0x00

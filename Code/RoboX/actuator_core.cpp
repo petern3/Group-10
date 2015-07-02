@@ -26,8 +26,8 @@ static Servo RIGHT_DRIVE;
 static bool LEFT_DIR = DC_FORWARD;
 static bool RIGHT_DIR = DC_FORWARD;
 
-extern volatile float LEFT_ROTATION = 0;
-extern volatile float RIGHT_ROTATION = 0;
+volatile float LEFT_ROTATION = 0;
+volatile float RIGHT_ROTATION = 0;
 
 Servo SERVO_1;
 Servo SERVO_2;

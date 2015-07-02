@@ -18,18 +18,4 @@
 /// GLOBALS ///
 extern float TAU = (2*PI);
 
-/*
-/// FUNCTIONS ///
-void print_(String to_print) {
-  #ifdef ENABLE_SERIAL
-    Serial.print(to_print);
-  #endif
-}
-
-void println_(String to_print) {
-  //#ifdef ENABLE_SERIAL
-  Serial.println("Boo");
-  Serial.println(to_print);
-  //#endif
-}*/
 

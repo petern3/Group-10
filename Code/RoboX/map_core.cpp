@@ -29,6 +29,9 @@ static int16_t X_END = (MAP_SIZE_X - ROBOT_RADIUS) / MAP_SPACING;
 static int16_t Y_START = -ROBOT_RADIUS / MAP_SPACING;
 static int16_t Y_END = (MAP_SIZE_Y - ROBOT_RADIUS) / MAP_SPACING;
 
+static uint8_t MAP_NUMBER = 0;
+static char MAP_DIR[DIR_BUFFER] = {'\0'};
+
 
 /// FUNCTIONS ///
 static void init_edges(void);
@@ -44,8 +47,13 @@ void init_map_core(void) {
     return;
   }
   PRINTLN("done");
+  
   PRINT("\tMap...");
-  #ifndef FORCE_SECONDARY_TACTIC
+  #if DEFAULT_MODE != SECONDARY
+    PRINTLN();
+    
+    sprintf(MAP_DIR, "%s%d", MAP_DIR_BASE, MAP_NUMBER);
+    
     if (SD.exists(MAP_DIR)) {
       remove_old_map();
     } else {
@@ -62,13 +70,13 @@ void init_map_core(void) {
 int8_t get_terrain(Position_t coord) {
   // Gets the terrain at a specific point
   int8_t terrain_to_get = EMPTY;
-  char dir[DIR_BUFFER] = {'\0'};
-  sprintf(dir, "%s%d%d", MAP_DIR, coord.x, coord.y);
+  char local_dir[DIR_BUFFER] = {'\0'};
+  sprintf(dir, "%s/%d.%d", MAP_DIR, coord.x, coord.y);
   
-  if (SD.exists(dir)) {
-    BOTMAP = SD.open(dir, FILE_READ);
+  if (SD.exists(local_dir)) {
+    BOTMAP = SD.open(local_dir, FILE_READ);
     //PRINT("\t\tReading    ");
-    //PRINT(dir);
+    //PRINT(local_dir);
     if (BOTMAP) {
       terrain_to_get = BOTMAP.read();
       BOTMAP.close();
@@ -85,17 +93,17 @@ int8_t get_terrain(Position_t coord) {
 
 static void set_terrain(Position_t coord, uint8_t terrain_to_set) {
   // Sets a single coordinate to a given terrain type
-  char dir[DIR_BUFFER] = {'\0'};
-  sprintf(dir, "%s%d%d", MAP_DIR, coord.x, coord.y);
+  char local_dir[DIR_BUFFER] = {'\0'};
+  sprintf(local_dir, "%s/%d.%d", MAP_DIR, coord.x, coord.y);
   
-  if (SD.exists(dir)) {
-    SD.remove(dir);
+  if (SD.exists(local_dir)) {
+    SD.remove(local_dir);
   }
   
   if (terrain_to_set != EMPTY) {
-    BOTMAP = SD.open(dir, FILE_WRITE);
+    BOTMAP = SD.open(local_dir, FILE_WRITE);
     PRINT("\t\tWriting to ");
-    PRINT(dir);
+    PRINT(local_dir);
     if (BOTMAP) {
       BOTMAP.print(char(terrain_to_set));
       BOTMAP.close();
@@ -242,22 +250,41 @@ void set_wall(Position_t coord, bool set_true=true, bool set_edge=false) { //set
 static void init_edges(void) {
   Position_t curr = {0,0};
   
-  // Set 'top' and 'bottom' edges
+  // Set top and bottom hard edges
   for (int16_t x = X_START; x <= X_END; x++) {
     curr.x = x;
     curr.y = Y_START;
-    set_terrain(curr, 0xFF);//set_hard_bit(WALL_MAX, HARD_WALL));
+    set_terrain(curr, 0xFF); //set_hard_bit(WALL_MAX, HARD_WALL));
     curr.y = Y_END;
-    set_terrain(curr, 0xFF);//set_hard_bit(WALL_MAX, HARD_WALL));
+    set_terrain(curr, 0xFF); //set_hard_bit(WALL_MAX, HARD_WALL));
   }
-  // Set 'left' and 'right' edges
+  // Set left and right hard edges
   for (int16_t y = Y_START; y <= Y_END; y++) {
     curr.x = X_START;
     curr.y = y;
-    set_terrain(curr, set_hard_bit(WALL_MAX, HARD_WALL));
+    set_terrain(curr, 0xFF); //set_hard_bit(WALL_MAX, HARD_WALL));
     curr.x = X_END;
-    set_terrain(curr, set_hard_bit(WALL_MAX, HARD_WALL));
+    set_terrain(curr, 0xFF); //set_hard_bit(WALL_MAX, HARD_WALL));
   }
+  // Set top and bottom soft edges
+  for (int16_t x = 0; x <= X_END + X_START; x++) {
+    curr.x = x;
+    curr.y = 0;
+    set_terrain(curr, 0x7F);
+    curr.y = Y_END + Y_START;
+    set_terrain(curr, 0x7F);
+  }
+  // Set left and right soft edges
+  for (int16_t y = 0; y <= Y_END + Y_START; y++) {
+    curr.x = 0;
+    curr.y = y;
+    set_terrain(curr, 0x7F);
+    curr.x = X_END + X_START;
+    set_terrain(curr, 0x7F);
+  }
+  curr.x = 0;
+  curr.y = 0;
+  set_terrain(curr, PACK);
 }
 
 
@@ -265,7 +292,7 @@ void display_map(void) {
   int16_t index_x = 0;
   int16_t index_y = 0;
   Position_t curr = {0, 0};
-  int8_t terrain_to_print = 0;
+  uint8_t terrain_to_print = 0;
   char num[4] = {"\0"};
   
   for (index_y = Y_START; index_y <= Y_END; index_y++) {
@@ -296,13 +323,14 @@ void display_map(void) {
 
 
 static void remove_old_map(void) {
+  
   char local_dir[DIR_BUFFER] = {'\0'};
   BOTMAP_ROOT = SD.open(MAP_DIR);
   
   if (BOTMAP_ROOT) {
     BOTMAP = BOTMAP_ROOT.openNextFile();
-    while(!BOTMAP) {
-      sprintf(local_dir, "%s%s", MAP_DIR, BOTMAP.name());
+    while(BOTMAP) {
+      sprintf(local_dir, "%s/%s", MAP_DIR, BOTMAP.name());
       BOTMAP.close();
       PRINT("\t\tDeleting   ");
       PRINT(local_dir);
