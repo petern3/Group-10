@@ -71,7 +71,7 @@ int8_t get_terrain(Position_t coord) {
   // Gets the terrain at a specific point
   int8_t terrain_to_get = EMPTY;
   char local_dir[DIR_BUFFER] = {'\0'};
-  sprintf(dir, "%s/%d.%d", MAP_DIR, coord.x, coord.y);
+  sprintf(local_dir, "%s/%d.%d", MAP_DIR, coord.x, coord.y);
   
   if (SD.exists(local_dir)) {
     BOTMAP = SD.open(local_dir, FILE_READ);

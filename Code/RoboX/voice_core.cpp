@@ -17,7 +17,7 @@
 
 
 /// GLOBALS ///
-extern bool SOUNDS_ON = false;
+bool SOUNDS_ON = false;
 
 
 /// FUNCTIONS ///

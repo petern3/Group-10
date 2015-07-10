@@ -16,6 +16,6 @@
 #include "misc_core.h"
 
 /// GLOBALS ///
-extern float TAU = (2*PI);
+float TAU = (2*PI);
 
 

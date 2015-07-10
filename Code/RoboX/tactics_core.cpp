@@ -21,7 +21,7 @@
 
 
 /// GLOBALS ///
-extern uint8_t OPERATION_MODE = DEFAULT_MODE;
+uint8_t OPERATION_MODE = DEFAULT_MODE;
 
 static int8_t FORWARD = 0;
 static int8_t TURNING = 0;
