@@ -44,8 +44,8 @@ extern volatile float RIGHT_ROTATION;
 
 /// FUNCTIONS ///
 void init_actuator_core(void);
-void dc_drive(int8_t motor_speed, int8_t motor_rotation);
-void servo_rotate(Servo to_rotate, uint8_t servo_position);
-void stepper_rotate(uint8_t to_rotate, int16_t num_degrees);
+void dc_drive(int8_t motor_speed, int8_t motor_rotation);     // absolute speed
+void servo_rotate(Servo to_rotate, uint8_t servo_position);   // absolute position
+void stepper_rotate(uint8_t to_rotate, int16_t num_degrees);  // relative position
 
 #endif

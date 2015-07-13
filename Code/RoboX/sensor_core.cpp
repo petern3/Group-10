@@ -32,9 +32,49 @@ Sensor_t IR_VAR3 = {IR_VAR3_PIN, IR_VAR, -1};
 
 
 /// FUNCTIONS ///
+
+void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t* Data) {
+  // This function read Nbytes bytes from I2C device at address Address. 
+  // Put read bytes starting at register Register in the Data array. 
+
+  // Set register address
+  Wire.beginTransmission(Address);
+  Wire.write(Register);
+  Wire.endTransmission();
+ 
+  // Read Nbytes
+  Wire.requestFrom(Address, Nbytes); 
+  uint8_t index=0;
+  while (Wire.available())
+    Data[index++]=Wire.read();
+}
+ 
+void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data) {
+  // Write a byte (Data) in device (Address) at register (Register)
+  
+  // Set register address
+  Wire.beginTransmission(Address);
+  Wire.write(Register);
+  Wire.write(Data);
+  Wire.endTransmission();
+}
+
+
 void init_sensor_core(void) {
   PRINT("\tSensors...");
   analogReference(INTERNAL2V56);
+  
+  // Configure gyroscope range
+  I2CwriteByte(MPU9250_ADDRESS,27,GYRO_FULL_SCALE_2000_DPS);
+  // Configure accelerometers range
+  I2CwriteByte(MPU9250_ADDRESS,28,ACC_FULL_SCALE_16_G);
+  
+  // Ignore magnetometer //
+  // Set by pass mode for the magnetometers
+  //I2CwriteByte(MPU9250_ADDRESS,0x37,0x02);
+  // Request first magnetometer single measurement
+  //I2CwriteByte(MAG_ADDRESS,0x0A,0x01);
+  
   PRINTLN("done");
 }
 
@@ -125,6 +165,11 @@ void sensor_detect(Sensor_t* to_read) {
   if (to_read->sensor_type == IR_VAR) {
     read_ir_var(to_read);
   }
+  
+}
+
+
+void read_IMU(void) {
   
 }
 

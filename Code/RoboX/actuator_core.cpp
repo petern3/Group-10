@@ -98,6 +98,7 @@ void init_actuator_core(void) {
 
 void dc_drive(int8_t motor_speed, int8_t motor_rotation=0) {
   // 
+  
   if (motor_speed > 90) {
     motor_speed = 90;
   }
@@ -111,8 +112,8 @@ void dc_drive(int8_t motor_speed, int8_t motor_rotation=0) {
     motor_rotation = -90;
   }
   
-  int16_t left_drive = 90 + motor_speed + motor_rotation;
-  int16_t right_drive = 90 + motor_speed - motor_rotation;
+  int16_t left_drive = DC_STOP - motor_speed + motor_rotation;  // subtract motor speed due to upside-down chassis
+  int16_t right_drive = DC_STOP - motor_speed - motor_rotation;
   
   if (left_drive < 0) {
     left_drive = 0;

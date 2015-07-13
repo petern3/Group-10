@@ -22,6 +22,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include <TimerThree.h>
+#include <Wire.h>
 
 #include "config.h"
 #include "actuator_core.h"
@@ -47,7 +48,7 @@ void setup() {
   
   PRINTLN("Ready!\n");
   
-  display_map();
+  //display_map();
 }
 
 

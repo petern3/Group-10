@@ -21,6 +21,7 @@
 #include "config.h"
 #include <inttypes.h>
 #include <stdlib.h>
+#include <Wire.h>
 
 /// DEFINES ///
 #define IR_SHT_RANGE 0

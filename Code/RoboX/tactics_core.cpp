@@ -66,6 +66,7 @@ void manual_mode(void) {
   char serial_byte = '\0';
   
   while(OPERATION_MODE == MANUAL_MODE) {
+    #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
       serial_byte = Serial.read();
       
@@ -115,6 +116,8 @@ void manual_mode(void) {
         PRINTLN("\tMoving Stepper 1 backward by 180 degrees");
       }
     }
+    
+    #endif
     
     dc_drive(FORWARD, TURNING);
     
