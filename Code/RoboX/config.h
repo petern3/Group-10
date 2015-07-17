@@ -18,25 +18,26 @@
 #include "Arduino.h"
 
 /// PINOUT ///
-//Analog write will not work on pins 9 and 10 due to TimerThree!
+// analogWrite() will not work on pins 9 and 10 due to TimerThree!
+// analogWrite() may not work on pins 11 and 3 due to Speaker
 #define DC_LEFT_PIN 12
 #define DC_RIGHT_PIN 13
-#define DC_LEFT_INTERRUPT 4
-#define DC_RIGHT_INTERRUPT 5
+#define DC_LEFT_INTERRUPT_PIN 4
+#define DC_RIGHT_INTERRUPT_PIN 5
 
 #define SERVO1_PIN 3
 #define SERVO2_PIN 2
 
-#define SMART_SERVO1_ADDRESS 0xFE
+//#define SMART_SERVO1_ADDRESS 0xFE
 
-#define STEPPER1_STEP_PIN 30
-#define STEPPER1_DIR_PIN 31
-#define STEPPER2_STEP_PIN 32
-#define STEPPER2_DIR_PIN 33
-#define STEPPER3_STEP_PIN 34
-#define STEPPER3_DIR_PIN 35
-#define STEPPER4_STEP_PIN 36
-#define STEPPER4_DIR_PIN 37
+#define STEPPER1_STEP_PIN 42
+#define STEPPER1_DIR_PIN 43
+#define STEPPER2_STEP_PIN 44
+#define STEPPER2_DIR_PIN 45
+#define STEPPER3_STEP_PIN 42
+#define STEPPER3_DIR_PIN 43
+#define STEPPER4_STEP_PIN 44
+#define STEPPER4_DIR_PIN 45
 
 
 #define IR_SHT1_PIN A0 //10
@@ -53,10 +54,9 @@
 #define IR_VAR2_PIN 28
 #define IR_VAR3_PIN 27
 
-#define MPU9250_ADDRESS 0x68
-#define MAG_ADDRESS 0x0C
-
 #define CHIP_SELECT_PIN 53
+
+#define SPEAKER_PIN 8
 
 
 /// SCHEDULER CONFIG ///
@@ -65,16 +65,18 @@
 #define MANUAL_MODE 2
 #define DEFAULT_MODE MANUAL_MODE  // can change to any of the previous modes
 
-#define TIMERTHREE_PERIOD 1000  // microseconds
-#define SENSOR_READ_PERIOD 500000  // microseconds. Not used in primary tactic.
+//#define TIMERTHREE_PERIOD 1000  // microseconds
+#define PRIMARY_TACTIC_PERIOD 1000000  // microseconds
+#define SECONDARY_TACTIC_PERIOD 100000  // microseconds
+#define MANUAL_CONTROL_PERIOD 1000000  // microseconds
 
 
 /// DC MOTOR CONFIG ///
-#define ENCODER_PPR 663
-#define ENCODER_WRAP 1  // Number of revolutions before wrapping
-#define DC_STOP 88  // This is slightly faster forwardm 87 is slightly faster backwards.
+#define ENCODER_PPR 330  // 663
+#define ENCODER_RESET_TIMEOUT 10000 // microseconds
 #define DC_FORWARD true
 #define DC_BACKWARD false
+#define DC_CALIBRATION_LIMIT 20 // 90 +/- 20
 
 
 /// USER CONTROL CONFIG ///
@@ -91,13 +93,13 @@
 
 
 /// STEPPER MOTOR CONFIG ///
-#define STEPPER1_SPR 200
-//#define STEPPER1_INV
-#define STEPPER2_SPR 200
+#define STEPPER1_SPR 1040 // Geared
+#define STEPPER1_INV
+#define STEPPER2_SPR 1040 // Geared
 //#define STEPPER2_INV
-#define STEPPER3_SPR 1040  // Geared
+#define STEPPER3_SPR 200  // to calibrate
 //#define STEPPER3_INV
-#define STEPPER4_SPR 1000  // Geared
+#define STEPPER4_SPR 200  // to calibrate
 //#define STEPPER4_INV
 
 /// MAP CONFIG ///
@@ -107,21 +109,6 @@
 
 #define ROBOT_RADIUS 240  // mm
 #define ROBOT_DIAMETER 480  // mm
-
-
-#define MAP_DIR_BASE "BOTMAP"  // Format is "BOTMAPn/x.y" with no file extention
-#define DIR_BUFFER 22
-
-#define EMPTY 0x00
-#define PACK  0x01     // Soft or hard
-#define BASE  0x02     //      |
-#define WALL_MIN 0x04  //      00000100
-#define WALL_MAX 0x7F  //      01111111
-#define WALL_INCR 1
-
-#define HARDNESS_BIT 0x80
-#define SOFT_WALL 0
-#define HARD_WALL 1
 
 
 /// DEBUG CONFIG ///
@@ -157,7 +144,7 @@
 /// SENSOR CONFIG ///
 #define IR_SHT_MIN_MM 40
 #define IR_SHT_MAX_MM 300
-#define IR_SHT_MIN_ADC 157     // To measure
+#define IR_SHT_MIN_ADC 157    // To measure
 #define IR_SHT_MAX_ADC 1023  // To measure
 
 #define IR_MED_MIN_MM 100
@@ -165,20 +152,15 @@
 #define IR_MED_MIN_ADC 0     // To measure
 #define IR_MED_MAX_ADC 1023  // To measure
 
-#define IR_LNG_MIN_MM 50     // To find
-#define IR_LNG_MAX_MM 2000   // To find
+#define IR_LNG_MIN_MM 200
+#define IR_LNG_MAX_MM 1500
 #define IR_LNG_MIN_ADC 0     // To measure
 #define IR_LNG_MAX_ADC 1023  // To measure
 
-#define    GYRO_FULL_SCALE_250_DPS    0x00  
-#define    GYRO_FULL_SCALE_500_DPS    0x08
-#define    GYRO_FULL_SCALE_1000_DPS   0x10
-#define    GYRO_FULL_SCALE_2000_DPS   0x18
- 
-#define    ACC_FULL_SCALE_2_G        0x00  
-#define    ACC_FULL_SCALE_4_G        0x08
-#define    ACC_FULL_SCALE_8_G        0x10
-#define    ACC_FULL_SCALE_16_G       0x18
+#define USONIC_MIN_MM 20
+#define USONIC_MAX_MM 4000
+#define USONIC_MIN_ADC 0     // To measure
+#define USONIC_MAX_ADC 1023  // To measure
 
 
 #endif

@@ -27,6 +27,6 @@
 extern float TAU;
 
 /// FUNCTIONS ///
-
+void print_buffer(int16_t* to_print, uint16_t len);
 
 #endif

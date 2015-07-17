@@ -17,7 +17,7 @@
 #include "Arduino.h"
 #include <inttypes.h>
 #include <Servo.h>
-#include <Herkulex.h>
+//#include <Herkulex.h>
 #include <Stepper.h>
 #include <SPI.h>
 #include <SD.h>
@@ -27,6 +27,7 @@
 #include "config.h"
 #include "actuator_core.h"
 #include "exception_core.h"
+#include "interrupt_core.h"
 #include "map_core.h"
 #include "misc_core.h"
 #include "sensor_core.h"

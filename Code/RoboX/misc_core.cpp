@@ -19,5 +19,11 @@
 float TAU = (2*PI);
 
 /// FUNCTIONS ///
-
+void print_buffer(int16_t* to_print, uint16_t len) {
+  for (uint16_t i=0; i < len; i++) {
+    PRINT(to_print[i]);
+    PRINT("  ");
+  }
+  PRINTLN();
+}
 

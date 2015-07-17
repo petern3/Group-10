@@ -16,7 +16,8 @@
 #include "tactics_core.h"
 #include "actuator_core.h"
 #include "exception_core.h"
-//#include "misc_core.h"
+#include "interrupt_core.h"
+#include "misc_core.h"
 #include "sensor_core.h"
 
 
@@ -30,39 +31,46 @@ static int8_t TURNING = 0;
 /// FUNCTIONS ///
 void init_tactics_core(void) {
   PRINT("\tTactics...");
-  Timer3.initialize(TIMERTHREE_PERIOD);  // in microseconds, 1 second by default
+  Timer3.initialize();  // in microseconds, 1 second by default
   PRINTLN("done");
 }
 
 
 void primary_tactic(void) {
   PRINTLN("Starting primary tactic:");
-  Timer3.detachInterrupt();
+  Timer3.setPeriod(PRIMARY_TACTIC_PERIOD);
+  Timer3.attachInterrupt(primary_tactic_ISR);
   
   while (!SD_ERROR.active && OPERATION_MODE == PRIMARY_MODE) {
-    
-    read_sensors();
     
     
   }
   PRINTLN("Primary tactic failure\n");
-  Timer3.attachInterrupt(read_sensors, SENSOR_READ_PERIOD);
+  Timer3.detachInterrupt();
 }
 
 
 void secondary_tactic(void) {
   PRINTLN("Starting secondary tactic:");
+  Timer3.setPeriod(SECONDARY_TACTIC_PERIOD);
+  Timer3.attachInterrupt(secondary_tactic_ISR);
   
   while(OPERATION_MODE == SECONDARY_MODE) {
     
+    
+    
+    
   }
   PRINTLN("Secondary tactic failure\n");
-  
+  Timer3.detachInterrupt();
 }
 
 
 void manual_mode(void) {
   PRINTLN("Handing over control:");
+  Timer3.setPeriod(MANUAL_CONTROL_PERIOD);
+  Timer3.attachInterrupt(manual_control_ISR);
+  
   char serial_byte = '\0';
   
   while(OPERATION_MODE == MANUAL_MODE) {
@@ -109,18 +117,23 @@ void manual_mode(void) {
       }
       else if (serial_byte == STEPFWD) {
         stepper_rotate(STEPPER_1, 180);
-        PRINTLN("\tMoving Stepper 1 forward by 180 degrees");
+        PRINTLN("\tMoving Steppers forward by 180 degrees");
       }
       else if (serial_byte == STEPBWD) {
         stepper_rotate(STEPPER_1, -180);
-        PRINTLN("\tMoving Stepper 1 backward by 180 degrees");
+        PRINTLN("\tMoving Steppers backward by 180 degrees");
       }
+      
     }
     
     #endif
     
     dc_drive(FORWARD, TURNING);
+    //PRINTLN(LEFT_ROTATION*0.104719755);
+    //PRINTLN(RIGHT_ROTATION*0.104719755);
+    //delay(200);
     
   }
   PRINTLN("Receiving control\n");
+  Timer3.detachInterrupt();
 }

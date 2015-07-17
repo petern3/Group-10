@@ -13,74 +13,82 @@
 
 
 #include "actuator_core.h"
+#include "interrupt_core.h"
 #include "misc_core.h"
 
 
 /// GLOBALS ///
-//extern float TAU = (2*PI);
-static float ENCODER_INCREMENT = (TAU / ENCODER_PPR);
-static float ENCODER_MAX = (ENCODER_WRAP * TAU);
-
 static Servo LEFT_DRIVE;
 static Servo RIGHT_DRIVE;
-static bool LEFT_DIR = DC_FORWARD;
-static bool RIGHT_DIR = DC_FORWARD;
-
-volatile float LEFT_ROTATION = 0;
-volatile float RIGHT_ROTATION = 0;
+static uint8_t DC_STOP = 90;
 
 Servo SERVO_1;
 Servo SERVO_2;
 
 
-/// INTERRUPTS ///
-static void left_encoder_ISR(void) {
-  if (LEFT_DIR == DC_FORWARD) {
-    LEFT_ROTATION += ENCODER_INCREMENT;
-  } else {
-    LEFT_ROTATION -= ENCODER_INCREMENT;
-  }
-  if (LEFT_ROTATION < -ENCODER_MAX) {
-    LEFT_ROTATION = ENCODER_MAX;
-  }
-  else if (LEFT_ROTATION > ENCODER_MAX) {
-    LEFT_ROTATION = -ENCODER_MAX;
-  }
-}
-
-static void right_encoder_ISR(void) {
-  if (RIGHT_DIR == DC_FORWARD) {
-    RIGHT_ROTATION += ENCODER_INCREMENT;
-  } else {
-    RIGHT_ROTATION -= ENCODER_INCREMENT;
-  }
-  if (RIGHT_ROTATION < -ENCODER_MAX) {
-    RIGHT_ROTATION = ENCODER_MAX;
-  }
-  else if (RIGHT_ROTATION > ENCODER_MAX) {
-    RIGHT_ROTATION = -ENCODER_MAX;
-  }
-}
-
-
 /// FUNCTIONS ///
+void dc_calibrate(void) {
+  LEFT_DRIVE.write(DC_STOP);
+  RIGHT_DRIVE.write(DC_STOP);
+  uint8_t dc_high_limit = DC_STOP;
+  uint8_t dc_low_limit = DC_STOP;
+  
+  // get the point at which the motor moves forward
+  while (LEFT_ROTATION == 0.0 && RIGHT_ROTATION == 0.0) {
+    LEFT_DRIVE.write(dc_high_limit);
+    RIGHT_DRIVE.write(dc_high_limit);
+    if (dc_high_limit > (DC_STOP + DC_CALIBRATION_LIMIT)) {
+      break;
+    }
+    dc_high_limit++;
+    delay(100);
+  }
+  
+  // reset the conditions
+  LEFT_DRIVE.write(DC_STOP);
+  RIGHT_DRIVE.write(DC_STOP);
+  delay(500);
+  LEFT_ROTATION = 0.0;
+  RIGHT_ROTATION = 0.0;
+  
+  // get the point at which the motors move backward
+  while (LEFT_ROTATION == 0.0 && RIGHT_ROTATION == 0.0) {
+    LEFT_DRIVE.write(dc_low_limit);
+    RIGHT_DRIVE.write(dc_low_limit);
+    if (dc_low_limit < (DC_STOP - DC_CALIBRATION_LIMIT)) {
+      break;
+    }
+    dc_low_limit--;
+    delay(100);
+  }
+  
+  DC_STOP = (dc_high_limit + dc_low_limit) / 2;
+  PRINT(DC_STOP);
+  LEFT_DRIVE.write(DC_STOP);
+  RIGHT_DRIVE.write(DC_STOP);
+}
+
+
 void init_actuator_core(void) {
-  PRINT("\tActuators...");
+  PRINT("\tDC Motors...");
   
   // DC Motors
   LEFT_DRIVE.attach(DC_LEFT_PIN);
   RIGHT_DRIVE.attach(DC_RIGHT_PIN);
-  attachInterrupt(DC_LEFT_INTERRUPT, left_encoder_ISR, CHANGE);
-  attachInterrupt(DC_RIGHT_INTERRUPT, right_encoder_ISR, CHANGE);
+  attachInterrupt(DC_LEFT_INTERRUPT_PIN, left_encoder_ISR, RISING);  // can do 'CHANGE', but would include twice the interrupts (high CPU load)
+  attachInterrupt(DC_RIGHT_INTERRUPT_PIN, right_encoder_ISR, RISING);
+  dc_calibrate();
   
+  PRINTLN("done");
+  PRINT("\tActuators...");
   // Servos
   SERVO_1.attach(SERVO1_PIN);
   SERVO_2.attach(SERVO2_PIN);
   
   // Smart Servos
-  Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
-  Herkulex.reboot(SMART_SERVO1_ADDRESS);
-  Herkulex.initialize();
+  //Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
+  //Herkulex.reboot(SMART_SERVO1_ADDRESS);
+  //Herkulex.initialize();
   
   // Stepper Motors
   pinMode(STEPPER1_STEP_PIN,OUTPUT);
@@ -274,3 +282,4 @@ void stepper_rotate(uint8_t to_rotate, int16_t num_degrees) {
     stepper4_rotate(num_degrees);
   }
 }
+

@@ -21,7 +21,7 @@
 #include "config.h"
 #include <inttypes.h>
 #include <Servo.h>
-#include <Herkulex.h>
+//#include <Herkulex.h>
 
 /// DEFINES ///
 #define STEPPER_1 1
@@ -34,13 +34,9 @@
 
 
 /// GLOBALS ///
-//extern float TAU;
-
 extern Servo SERVO_1;
 extern Servo SERVO_2;
 
-extern volatile float LEFT_ROTATION;
-extern volatile float RIGHT_ROTATION;
 
 /// FUNCTIONS ///
 void init_actuator_core(void);

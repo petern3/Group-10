@@ -30,7 +30,7 @@ static int16_t Y_START = -ROBOT_RADIUS / MAP_SPACING;
 static int16_t Y_END = (MAP_SIZE_Y - ROBOT_RADIUS) / MAP_SPACING;
 
 static uint8_t MAP_NUMBER = 0;
-static char MAP_DIR[DIR_BUFFER] = {'\0'};
+static char MAP_DIR[DIR_BUFFER_SIZE] = {'\0'};
 
 
 /// FUNCTIONS ///
@@ -49,7 +49,7 @@ void init_map_core(void) {
   PRINTLN("done");
   
   PRINT("\tMap...");
-  #if DEFAULT_MODE != SECONDARY
+  #if DEFAULT_MODE == PRIMARY_MODE
     PRINTLN();
     
     sprintf(MAP_DIR, "%s%d", MAP_DIR_BASE, MAP_NUMBER);
@@ -70,7 +70,7 @@ void init_map_core(void) {
 int8_t get_terrain(Position_t coord) {
   // Gets the terrain at a specific point
   int8_t terrain_to_get = EMPTY;
-  char local_dir[DIR_BUFFER] = {'\0'};
+  char local_dir[DIR_BUFFER_SIZE] = {'\0'};
   sprintf(local_dir, "%s/%d.%d", MAP_DIR, coord.x, coord.y);
   
   if (SD.exists(local_dir)) {
@@ -93,7 +93,7 @@ int8_t get_terrain(Position_t coord) {
 
 static void set_terrain(Position_t coord, uint8_t terrain_to_set) {
   // Sets a single coordinate to a given terrain type
-  char local_dir[DIR_BUFFER] = {'\0'};
+  char local_dir[DIR_BUFFER_SIZE] = {'\0'};
   sprintf(local_dir, "%s/%d.%d", MAP_DIR, coord.x, coord.y);
   
   if (SD.exists(local_dir)) {
@@ -324,7 +324,7 @@ void display_map(void) {
 
 static void remove_old_map(void) {
   
-  char local_dir[DIR_BUFFER] = {'\0'};
+  char local_dir[DIR_BUFFER_SIZE] = {'\0'};
   BOTMAP_ROOT = SD.open(MAP_DIR);
   
   if (BOTMAP_ROOT) {

@@ -30,10 +30,12 @@ Sensor_t IR_VAR1 = {IR_VAR1_PIN, IR_VAR, -1};
 Sensor_t IR_VAR2 = {IR_VAR2_PIN, IR_VAR, -1};
 Sensor_t IR_VAR3 = {IR_VAR3_PIN, IR_VAR, -1};
 
+int16_t IMU_BUFFER[IMU_BUFFER_SIZE] = {0};
+
 
 /// FUNCTIONS ///
 
-void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t* Data) {
+static void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t* Data) {
   // This function read Nbytes bytes from I2C device at address Address. 
   // Put read bytes starting at register Register in the Data array. 
 
@@ -45,11 +47,12 @@ void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t* Data) {
   // Read Nbytes
   Wire.requestFrom(Address, Nbytes); 
   uint8_t index=0;
-  while (Wire.available())
+  while (Wire.available()) {
     Data[index++]=Wire.read();
+  }
 }
  
-void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data) {
+static void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data) {
   // Write a byte (Data) in device (Address) at register (Register)
   
   // Set register address
@@ -64,16 +67,15 @@ void init_sensor_core(void) {
   PRINT("\tSensors...");
   analogReference(INTERNAL2V56);
   
+  Wire.begin();
   // Configure gyroscope range
-  I2CwriteByte(MPU9250_ADDRESS,27,GYRO_FULL_SCALE_2000_DPS);
+  I2CwriteByte(MPU9250_ADDRESS, MPU9250_ACC_CONFIG_REG, GYRO_FULL_SCALE_2000_DPS);
   // Configure accelerometers range
-  I2CwriteByte(MPU9250_ADDRESS,28,ACC_FULL_SCALE_16_G);
-  
-  // Ignore magnetometer //
+  I2CwriteByte(MPU9250_ADDRESS, MPU9250_GYR_CONFIG_REG, ACC_FULL_SCALE_16_G);
   // Set by pass mode for the magnetometers
-  //I2CwriteByte(MPU9250_ADDRESS,0x37,0x02);
+  I2CwriteByte(MPU9250_ADDRESS, MPU9250_INT_CONFIG_REG ,0x02);
   // Request first magnetometer single measurement
-  //I2CwriteByte(MAG_ADDRESS,0x0A,0x01);
+  I2CwriteByte(MAG_ADDRESS,0x0A,0x01);
   
   PRINTLN("done");
 }
@@ -81,58 +83,57 @@ void init_sensor_core(void) {
 
 static void read_ir_sht(Sensor_t* to_read) {
   
-  int16_t sensor_actual = -1;
   int16_t sensor_analog = analogRead(to_read->sensor_port);
   
-  if (sensor_analog >= IR_SHT_MIN_ADC || sensor_analog <= IR_SHT_MAX_ADC) {
-    sensor_actual = map(sensor_analog, 1023, 0, IR_SHT_MIN_MM, IR_SHT_MAX_MM);
+  if (sensor_analog <= IR_SHT_MIN_ADC || sensor_analog >= IR_SHT_MAX_ADC) {
+    sensor_analog = -1;
   }
-  to_read->sensor_value = sensor_actual;
+  to_read->sensor_value = sensor_analog;
 }
 
 static void read_ir_med(Sensor_t* to_read) {
   
-  int16_t sensor_actual = -1;
   int16_t sensor_analog = analogRead(to_read->sensor_port);
   
-  if (sensor_analog >= IR_MED_MIN_ADC || sensor_analog <= IR_MED_MAX_ADC) {
-    sensor_actual = map(sensor_analog, 1023, 0, IR_MED_MIN_MM, IR_MED_MAX_MM);
+  if (sensor_analog <= IR_MED_MIN_ADC || sensor_analog >= IR_MED_MAX_ADC) {
+    sensor_analog = -1;
   }
-  to_read->sensor_value = sensor_actual;
+  to_read->sensor_value = sensor_analog;
 }
 
 
 static void read_ir_lng(Sensor_t* to_read) {
   
-  int16_t sensor_actual = -1;
   int16_t sensor_analog = analogRead(to_read->sensor_port);
   
-  if (sensor_analog >= IR_LNG_MIN_ADC || sensor_analog <= IR_LNG_MAX_ADC) {
-    sensor_actual = map(sensor_analog, 1023, 0, IR_LNG_MIN_MM, IR_LNG_MAX_MM);
+  if (sensor_analog <= IR_LNG_MIN_ADC || sensor_analog >= IR_LNG_MAX_ADC) {
+    sensor_analog = -1;
   }
-  to_read->sensor_value = sensor_actual;
+  to_read->sensor_value = sensor_analog;
 }
 
 
 static void read_ultrasonic(Sensor_t* to_read) {
   
-  int16_t sensor_analog = -1;
-  int16_t sensor_actual = sensor_analog;
-  to_read->sensor_value = sensor_actual;
+  int16_t sensor_analog = analogRead(to_read->sensor_port);
+  
+  if (sensor_analog <= USONIC_MIN_ADC || sensor_analog >= USONIC_MAX_ADC) {
+    sensor_analog = -1;
+  }
+  to_read->sensor_value = sensor_analog;
 }
 
 
 static void read_sonar(Sensor_t* to_read) {
   
-  int16_t sensor_analog = analogRead(to_read->sensor_port);
-  int16_t sensor_actual = map(sensor_analog, 0, 1023, 0, 1000); 
-  //if (sensor_actual < IR_LNG_MIN || sensor_actual > IR_LNG_MAX) {
-  //  sensor_actual = -1;
-  //}
+  //int16_t sensor_analog = analogRead(to_read->sensor_port);
+  
+  int16_t sensor_analog = -1;
+  to_read->sensor_value = sensor_analog;
 }
 
 
-void sensor_distance(Sensor_t* to_read) {
+static void sensor_distance(Sensor_t* to_read) {
   
   if (to_read->sensor_type == IR_SHT_RANGE) {
     read_ir_sht(to_read);
@@ -169,12 +170,47 @@ void sensor_detect(Sensor_t* to_read) {
 }
 
 
-void read_IMU(void) {
+void update_IMU(void) {
+  PRINTLN("1");
+  uint8_t ACC_GYR_BUFFER[ACC_GYR_BUFFER_SIZE];  //The IMU reads in 8 bit data
+  uint8_t MAG_BUFFER[MAG_BUFFER_SIZE];
+  PRINTLN("2");
+  //I2Cread(MPU9250_ADDRESS, 0x3B, ACC_GYR_BUFFER_SIZE, ACC_GYR_BUFFER);
+  PRINTLN("3");
+  // Accelerometer
+  /*IMU_BUFFER[0] = ACC_GYR_BUFFER[0]<<8 | ACC_GYR_BUFFER[1]; // Create 16 bits values from 8 bits data
+  IMU_BUFFER[1] = ACC_GYR_BUFFER[2]<<8 | ACC_GYR_BUFFER[3];
+  IMU_BUFFER[2] = ACC_GYR_BUFFER[4]<<8 | ACC_GYR_BUFFER[5];
+  PRINTLN("4");
+  // Temperature
+  //IMU_BUFFER[3] = ACC_GYR_BUFFER[7]<<8 | ACC_GYR_BUFFER[6];
+  /*
+  // Gyroscope
+  IMU_BUFFER[4] = ACC_GYR_BUFFER[8]<<8 | ACC_GYR_BUFFER[9];
+  IMU_BUFFER[5] = ACC_GYR_BUFFER[10]<<8 | ACC_GYR_BUFFER[11];
+  IMU_BUFFER[6] = ACC_GYR_BUFFER[12]<<8 | ACC_GYR_BUFFER[13];
+  PRINTLN("5");
+  // Magnetometer
+  uint8_t ST1;
+  while (!(ST1&0x01)) {
+    I2Cread(MAG_ADDRESS,0x02,1,&ST1);
+  }
   
+  // Read magnetometer data
+  I2Cread(MAG_ADDRESS, 0x03, MAG_BUFFER_SIZE, MAG_BUFFER);
+  
+  // Request next magnetometer single measurement
+  I2CwriteByte(MAG_ADDRESS,0x0A,0x01);
+  
+  IMU_BUFFER[7] = MAG_BUFFER[1]<<8 | MAG_BUFFER[0];
+  IMU_BUFFER[8] = MAG_BUFFER[3]<<8 | MAG_BUFFER[2];
+  IMU_BUFFER[9] = MAG_BUFFER[5]<<8 | MAG_BUFFER[4];*/
+  
+  //print_buffer(IMU_BUFFER, IMU_BUFFER_SIZE);
 }
 
 
-void read_sensors(void) {
+void update_sensors(void) {
   sensor_distance(&IR_SHT1);
   sensor_distance(&IR_SHT2);
   sensor_distance(&IR_MED1);
