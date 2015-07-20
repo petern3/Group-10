@@ -46,8 +46,10 @@
 #define IR_MED2_PIN A8
 #define IR_LNG1_PIN A7
 #define IR_LNG2_PIN A6
-#define USONIC1_PIN A5
-#define USONIC2_PIN A4
+#define USONIC1_TRIG_PIN 11
+#define USONIC1_ECHO_PIN 10
+#define USONIC2_TRIG_PIN 11
+#define USONIC2_ECHO_PIN 10
 #define SONAR_PIN A3
 
 #define IR_VAR1_PIN 29

@@ -60,41 +60,77 @@
 #define MAG_BUFFER_SIZE 6
 
 
-#define IR_SHT_RANGE 0
-#define IR_MED_RANGE 1
-#define IR_LNG_RANGE 2
-#define ULTRASONIC 3
-#define SONAR 4
+#define SHT_RANGE 0
+#define MED_RANGE 1
+#define LNG_RANGE 2
 
-#define IR_VAR 5
-#define LIMIT_SW 6
+#define NOT_VALID -1
+#define NOT_READ -2
 
 /// STRUCTS ///
-typedef struct {
-  uint8_t sensor_port;
-  uint8_t sensor_type;
-  int16_t sensor_value;
-} Sensor_t;
+class InfraredSensor {
+  private:
+    uint8_t port;
+    int8_t type;
+    int16_t raw_value;
+    int16_t value;
+    void read_sht(void);
+    void read_med(void);
+    void read_lng(void);
+  public:
+    void initialize(uint8_t init_port, uint8_t init_type);
+    void update(void);
+    int16_t read(void);
+};
+
+class UltrasonicSensor {
+  private:
+    uint8_t trig;
+    uint8_t echo;
+    int32_t raw_value;
+    int16_t value;
+  public:
+    void initialize(uint8_t init_trig, uint8_t init_echo);
+    void update(void);
+    int16_t read(void);
+};
+
+class DigitalSensor {
+  private:
+    uint8_t port;
+    bool value;
+  public:
+  	void initialize(uint8_t init_port);
+    void update(void);
+    bool read(void);
+};
+
+class IMUSensor {
+  private:
+    int16_t values[IMU_BUFFER_SIZE];
+  public:
+  	void initialize(void);
+    void update(void);
+    bool read(void);
+};
+
 
 /// GLOBALS ///
-extern Sensor_t IR_SHT1; //to rename to appropriate locations
-extern Sensor_t IR_SHT2;
-extern Sensor_t IR_MED1;
-extern Sensor_t IR_MED2;
-extern Sensor_t IR_LNG1;
-extern Sensor_t IR_LNG2;
-extern Sensor_t USONIC1;
-extern Sensor_t USONIC2;
-
-extern Sensor_t IR_VAR1;
-extern Sensor_t IR_VAR2;
-extern Sensor_t IR_VAR3;
-
-extern int16_t IMU_BUFFER[];
+extern InfraredSensor IR_SHT1; //to rename to appropriate locations
+extern InfraredSensor IR_SHT2;
+extern InfraredSensor IR_MED1;
+extern InfraredSensor IR_MED2;
+extern InfraredSensor IR_LNG1;
+extern InfraredSensor IR_LNG2;
+extern UltrasonicSensor USONIC1;
+extern UltrasonicSensor USONIC2;
+extern DigitalSensor IR_VAR1;
+extern DigitalSensor IR_VAR2;
+extern DigitalSensor IR_VAR3;
+extern IMUSensor IMU;
 
 /// FUNCTIONS ///
 void init_sensor_core(void);
-void update_IMU(void);
 void update_sensors(void);
 
 

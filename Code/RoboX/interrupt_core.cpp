@@ -70,17 +70,19 @@ void reset_encoders(void) {
 
 void primary_tactic_ISR(void) {
   reset_encoders();
+  update_sensors();
+  
 }
 
 void secondary_tactic_ISR(void) {
   reset_encoders();
+  update_sensors();
   
 }
 
 void manual_control_ISR(void) {
   reset_encoders();
   update_sensors();
-  //update_IMU();
   //PRINTLN("Interrupt");
 }
 

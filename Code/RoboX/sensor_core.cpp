@@ -17,20 +17,20 @@
 
 
 /// GLOBALS ///
-Sensor_t IR_SHT1 = {IR_SHT1_PIN, IR_SHT_RANGE, -1};
-Sensor_t IR_SHT2 = {IR_SHT2_PIN, IR_SHT_RANGE, -1};
-Sensor_t IR_MED1 = {IR_MED1_PIN, IR_MED_RANGE, -1};
-Sensor_t IR_MED2 = {IR_MED2_PIN, IR_MED_RANGE, -1};
-Sensor_t IR_LNG1 = {IR_LNG1_PIN, IR_LNG_RANGE, -1};
-Sensor_t IR_LNG2 = {IR_LNG2_PIN, IR_LNG_RANGE, -1};
-Sensor_t USONIC1 = {USONIC1_PIN, ULTRASONIC, -1};
-Sensor_t USONIC2 = {USONIC2_PIN, ULTRASONIC, -1};
+InfraredSensor IR_SHT1;
+InfraredSensor IR_SHT2;
+InfraredSensor IR_MED1;
+InfraredSensor IR_MED2;
+InfraredSensor IR_LNG1;
+InfraredSensor IR_LNG2;
+UltrasonicSensor USONIC1;
+UltrasonicSensor USONIC2;
 
-Sensor_t IR_VAR1 = {IR_VAR1_PIN, IR_VAR, -1};
-Sensor_t IR_VAR2 = {IR_VAR2_PIN, IR_VAR, -1};
-Sensor_t IR_VAR3 = {IR_VAR3_PIN, IR_VAR, -1};
+DigitalSensor IR_VAR1;
+DigitalSensor IR_VAR2;
+DigitalSensor IR_VAR3;
 
-int16_t IMU_BUFFER[IMU_BUFFER_SIZE] = {0};
+IMUSensor IMU;
 
 
 /// FUNCTIONS ///
@@ -62,12 +62,126 @@ static void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data) {
   Wire.endTransmission();
 }
 
-
 void init_sensor_core(void) {
   PRINT("\tSensors...");
   analogReference(INTERNAL2V56);
-  
   Wire.begin();
+  
+  IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE);
+  IR_SHT2.initialize(IR_SHT2_PIN, SHT_RANGE);
+  IR_MED1.initialize(IR_MED1_PIN, MED_RANGE);
+  IR_MED2.initialize(IR_MED2_PIN, MED_RANGE);
+  IR_LNG1.initialize(IR_LNG1_PIN, LNG_RANGE);
+  IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE);
+  USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN);
+  USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN);
+  
+  IR_VAR1.initialize(IR_VAR1_PIN);
+  IR_VAR2.initialize(IR_VAR2_PIN);
+  IR_VAR3.initialize(IR_VAR3_PIN);
+  
+  IMU.initialize();
+  
+  PRINTLN("done");
+}
+
+
+/// INFRARED SENSOR CLASS FUNCTIONS ///
+void InfraredSensor::initialize(uint8_t init_port, uint8_t init_type) {
+  this->port = init_port;
+  this->type = init_type;
+}
+
+void InfraredSensor::update(void) {
+  this->raw_value = analogRead(this->port);
+  this->value = NOT_READ;
+}
+
+int16_t InfraredSensor::read(void) {
+  if (this->value == NOT_READ) {  // Only converts value once
+    if (type == SHT_RANGE) {
+      this->read_sht();
+    }
+    else if (type == MED_RANGE) {
+      this->read_med();
+    }
+    else if (type == LNG_RANGE) {
+      this->read_lng();
+    }
+  }
+ 
+ return this->value;
+}
+
+
+void InfraredSensor::read_sht(void) {
+  
+  if (this->raw_value >= IR_SHT_MIN_ADC || this->raw_value <= IR_SHT_MAX_ADC) {
+    this->value = this->raw_value;
+  } else {
+    this->value = NOT_VALID;
+  }
+}
+
+void InfraredSensor::read_med(void) {
+  
+  if (this->raw_value >= IR_MED_MIN_ADC || this->raw_value <= IR_MED_MAX_ADC) {
+    this->value = this->raw_value;
+  } else {
+    this->value = NOT_VALID;
+  }
+}
+
+void InfraredSensor::read_lng(void) {
+  
+  if (this->raw_value >= IR_LNG_MIN_ADC || this->raw_value <= IR_LNG_MAX_ADC) {
+    this->value = this->raw_value;
+  } else {
+    this->value = NOT_VALID;
+  }
+}
+
+
+/// ULTRASONIC SENSOR CLASS FUNCTIONS ///
+void UltrasonicSensor::initialize(uint8_t init_trig, uint8_t init_echo) {
+  this->trig = init_trig;
+  this->echo = init_echo;
+}
+
+void UltrasonicSensor::update(void) {
+  //this->raw_value = analogRead(this->port);
+  this->value = NOT_READ;
+}
+
+int16_t UltrasonicSensor::read(void) {
+  if (this->value == NOT_READ) {  // Only converts value once
+    this->value = NOT_VALID;
+  }
+ 
+ return this->value;
+  
+}
+
+
+/// DIGIATAL SENSOR CLASS FUNCTIONS ///
+void DigitalSensor::initialize(uint8_t init_port) {
+  this->port = init_port;
+}
+
+void DigitalSensor::update(void) {
+  this->value = digitalRead(this->port);
+}
+
+bool DigitalSensor::read(void) {
+ return this->value;
+  
+}
+
+
+/// IMU CLASS FUNCTIONS ///
+void IMUSensor::initialize(void) {
+  //this->values[IMU_BUFFER_SIZE] = {0};
+  
   // Configure gyroscope range
   I2CwriteByte(MPU9250_ADDRESS, MPU9250_ACC_CONFIG_REG, GYRO_FULL_SCALE_2000_DPS);
   // Configure accelerometers range
@@ -75,102 +189,11 @@ void init_sensor_core(void) {
   // Set by pass mode for the magnetometers
   I2CwriteByte(MPU9250_ADDRESS, MPU9250_INT_CONFIG_REG ,0x02);
   // Request first magnetometer single measurement
-  I2CwriteByte(MAG_ADDRESS,0x0A,0x01);
-  
-  PRINTLN("done");
-}
-
-
-static void read_ir_sht(Sensor_t* to_read) {
-  
-  int16_t sensor_analog = analogRead(to_read->sensor_port);
-  
-  if (sensor_analog <= IR_SHT_MIN_ADC || sensor_analog >= IR_SHT_MAX_ADC) {
-    sensor_analog = -1;
-  }
-  to_read->sensor_value = sensor_analog;
-}
-
-static void read_ir_med(Sensor_t* to_read) {
-  
-  int16_t sensor_analog = analogRead(to_read->sensor_port);
-  
-  if (sensor_analog <= IR_MED_MIN_ADC || sensor_analog >= IR_MED_MAX_ADC) {
-    sensor_analog = -1;
-  }
-  to_read->sensor_value = sensor_analog;
-}
-
-
-static void read_ir_lng(Sensor_t* to_read) {
-  
-  int16_t sensor_analog = analogRead(to_read->sensor_port);
-  
-  if (sensor_analog <= IR_LNG_MIN_ADC || sensor_analog >= IR_LNG_MAX_ADC) {
-    sensor_analog = -1;
-  }
-  to_read->sensor_value = sensor_analog;
-}
-
-
-static void read_ultrasonic(Sensor_t* to_read) {
-  
-  int16_t sensor_analog = analogRead(to_read->sensor_port);
-  
-  if (sensor_analog <= USONIC_MIN_ADC || sensor_analog >= USONIC_MAX_ADC) {
-    sensor_analog = -1;
-  }
-  to_read->sensor_value = sensor_analog;
-}
-
-
-static void read_sonar(Sensor_t* to_read) {
-  
-  //int16_t sensor_analog = analogRead(to_read->sensor_port);
-  
-  int16_t sensor_analog = -1;
-  to_read->sensor_value = sensor_analog;
-}
-
-
-static void sensor_distance(Sensor_t* to_read) {
-  
-  if (to_read->sensor_type == IR_SHT_RANGE) {
-    read_ir_sht(to_read);
-  }
-  else if (to_read->sensor_type == IR_MED_RANGE) {
-    read_ir_med(to_read);
-  }
-  else if (to_read->sensor_type == IR_LNG_RANGE) {
-    read_ir_lng(to_read);
-  }
-  else if (to_read->sensor_type == ULTRASONIC) {
-    read_ultrasonic(to_read);
-  }
-  else if (to_read->sensor_type == SONAR) {
-    read_sonar(to_read);
-  }
+  I2CwriteByte(MAG_ADDRESS,0x0A,0x01); 
   
 }
 
-
-static void read_ir_var(Sensor_t* to_read) {
-  
-  bool sensor_actual = digitalRead(to_read->sensor_port);
-  to_read->sensor_value = sensor_actual;
-}
-
-
-void sensor_detect(Sensor_t* to_read) {
-  
-  if (to_read->sensor_type == IR_VAR) {
-    read_ir_var(to_read);
-  }
-  
-}
-
-
-void update_IMU(void) {
+void IMUSensor::update(void) {
   PRINTLN("1");
   uint8_t ACC_GYR_BUFFER[ACC_GYR_BUFFER_SIZE];  //The IMU reads in 8 bit data
   uint8_t MAG_BUFFER[MAG_BUFFER_SIZE];
@@ -211,18 +234,20 @@ void update_IMU(void) {
 
 
 void update_sensors(void) {
-  sensor_distance(&IR_SHT1);
-  sensor_distance(&IR_SHT2);
-  sensor_distance(&IR_MED1);
-  sensor_distance(&IR_MED2);
-  sensor_distance(&IR_LNG1);
-  sensor_distance(&IR_LNG2);
-  sensor_distance(&USONIC1);
-  sensor_distance(&USONIC2);
+  IR_SHT1.update();
+  IR_SHT2.update();
+  IR_MED1.update();
+  IR_MED2.update();
+  IR_LNG1.update();
+  IR_LNG2.update();
+  USONIC1.update();
+  USONIC2.update();
   
-  sensor_detect(&IR_VAR1);
-  sensor_detect(&IR_VAR2);
-  sensor_detect(&IR_VAR3);
+  IR_VAR1.update();
+  IR_VAR2.update();
+  IR_VAR3.update();
+  
+  IMU.update();
   
 }
 
