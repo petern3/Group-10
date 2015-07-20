@@ -251,8 +251,8 @@ void update_sensors(void) {
   IR_MED2.update();
   IR_LNG1.update();
   IR_LNG2.update();
-  USONIC1.update();
-  USONIC2.update();
+  //USONIC1.update();
+  //USONIC2.update();
   
   IR_VAR1.update();
   IR_VAR2.update();

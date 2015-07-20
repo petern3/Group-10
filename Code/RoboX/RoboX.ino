@@ -17,7 +17,7 @@
 #include "Arduino.h"
 #include <inttypes.h>
 #include <Servo.h>
-//#include <Herkulex.h>
+#include <Herkulex.h>
 #include <Stepper.h>
 #include <SPI.h>
 #include <SD.h>

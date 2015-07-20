@@ -18,7 +18,7 @@
 #include "Arduino.h"
 
 /// PINOUT ///
-// analogWrite() will not work on pins 9 and 10 due to TimerThree!
+// analogWrite() will not work on pins 9 and 10 due to TimerThree
 // analogWrite() may not work on pins 11 and 3 due to Speaker
 #define DC_LEFT_PIN 12
 #define DC_RIGHT_PIN 13
@@ -28,16 +28,16 @@
 #define SERVO1_PIN 3
 #define SERVO2_PIN 2
 
-//#define SMART_SERVO1_ADDRESS 0xFE
+#define SMART_SERVO1_ADDRESS 0xFE
 
 #define STEPPER1_STEP_PIN 42
 #define STEPPER1_DIR_PIN 43
 #define STEPPER2_STEP_PIN 44
 #define STEPPER2_DIR_PIN 45
-#define STEPPER3_STEP_PIN 42
-#define STEPPER3_DIR_PIN 43
-#define STEPPER4_STEP_PIN 44
-#define STEPPER4_DIR_PIN 45
+//#define STEPPER3_STEP_PIN 42
+//#define STEPPER3_DIR_PIN 43
+//#define STEPPER4_STEP_PIN 44
+//#define STEPPER4_DIR_PIN 45
 
 
 #define IR_SHT1_PIN A0 //10

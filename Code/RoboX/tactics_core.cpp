@@ -116,11 +116,11 @@ void manual_mode(void) {
         PRINTLN("\tStopping");
       }
       else if (serial_byte == STEPFWD) {
-        stepper_rotate(STEPPER_1, 180);
+        STEPPER1.rotate(180);
         PRINTLN("\tMoving Steppers forward by 180 degrees");
       }
       else if (serial_byte == STEPBWD) {
-        stepper_rotate(STEPPER_1, -180);
+        STEPPER1.rotate(-180);
         PRINTLN("\tMoving Steppers backward by 180 degrees");
       }
       
@@ -128,7 +128,7 @@ void manual_mode(void) {
     
     #endif
     
-    dc_drive(FORWARD, TURNING);
+    DC.drive(FORWARD, TURNING);
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
     //delay(200);

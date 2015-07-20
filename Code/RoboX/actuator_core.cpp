@@ -18,26 +18,64 @@
 
 
 /// GLOBALS ///
-static Servo LEFT_DRIVE;
-static Servo RIGHT_DRIVE;
-static uint8_t DC_STOP = 90;
+DCMotor DC;
 
-Servo SERVO_1;
-Servo SERVO_2;
+ServoMotor SERVO1;
+ServoMotor SERVO2;
+
+StepperMotor STEPPER1;
+StepperMotor STEPPER2;
 
 
 /// FUNCTIONS ///
-void dc_calibrate(void) {
-  LEFT_DRIVE.write(DC_STOP);
-  RIGHT_DRIVE.write(DC_STOP);
-  uint8_t dc_high_limit = DC_STOP;
-  uint8_t dc_low_limit = DC_STOP;
+void init_actuator_core(void) {
+  PRINT("\tDC Motors...");
+  
+  // DC Motors
+  DC.initialize();
+  
+  attachInterrupt(DC_LEFT_INTERRUPT_PIN, left_encoder_ISR, RISING);  // can do 'CHANGE', but would include twice the interrupts (high CPU load)
+  attachInterrupt(DC_RIGHT_INTERRUPT_PIN, right_encoder_ISR, RISING);
+  
+  DC.calibrate();
+  
+  PRINTLN("done");
+  PRINT("\tActuators...");
+  // Servos
+  SERVO1.initialize(SERVO1_PIN);
+  SERVO2.initialize(SERVO2_PIN);
+  
+  // Stepper Motors
+  STEPPER1.initialize(STEPPER1_STEP_PIN, STEPPER1_DIR_PIN, STEPPER1_SPR);
+  STEPPER2.initialize(STEPPER2_STEP_PIN, STEPPER2_DIR_PIN, STEPPER1_SPR);
+  
+  // Smart Servos
+  Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
+  Herkulex.reboot(SMART_SERVO1_ADDRESS);
+  Herkulex.initialize();
+  
+  PRINTLN("done");
+}
+
+
+/// DC MOTOR CLASS FUNCTIONS ///
+void DCMotor::initialize(void) {
+  this->zero = 90;
+  this->left_motor.attach(DC_LEFT_PIN);
+  this->right_motor.attach(DC_RIGHT_PIN);
+}
+
+void DCMotor::calibrate(void) {
+  this->left_motor.write(this->zero);
+  this->right_motor.write(this->zero);
+  uint8_t dc_high_limit = this->zero;
+  uint8_t dc_low_limit = this->zero;
   
   // get the point at which the motor moves forward
   while (LEFT_ROTATION == 0.0 && RIGHT_ROTATION == 0.0) {
-    LEFT_DRIVE.write(dc_high_limit);
-    RIGHT_DRIVE.write(dc_high_limit);
-    if (dc_high_limit > (DC_STOP + DC_CALIBRATION_LIMIT)) {
+    this->left_motor.write(dc_high_limit);
+    this->right_motor.write(dc_high_limit);
+    if (dc_high_limit > (this->zero + DC_CALIBRATION_LIMIT)) {
       break;
     }
     dc_high_limit++;
@@ -45,66 +83,30 @@ void dc_calibrate(void) {
   }
   
   // reset the conditions
-  LEFT_DRIVE.write(DC_STOP);
-  RIGHT_DRIVE.write(DC_STOP);
+  this->left_motor.write(this->zero);
+  this->right_motor.write(this->zero);
   delay(500);
   LEFT_ROTATION = 0.0;
   RIGHT_ROTATION = 0.0;
   
   // get the point at which the motors move backward
   while (LEFT_ROTATION == 0.0 && RIGHT_ROTATION == 0.0) {
-    LEFT_DRIVE.write(dc_low_limit);
-    RIGHT_DRIVE.write(dc_low_limit);
-    if (dc_low_limit < (DC_STOP - DC_CALIBRATION_LIMIT)) {
+    this->left_motor.write(dc_low_limit);
+    this->right_motor.write(dc_low_limit);
+    if (dc_low_limit < (this->zero - DC_CALIBRATION_LIMIT)) {
       break;
     }
     dc_low_limit--;
     delay(100);
   }
   
-  DC_STOP = (dc_high_limit + dc_low_limit) / 2;
-  PRINT(DC_STOP);
-  LEFT_DRIVE.write(DC_STOP);
-  RIGHT_DRIVE.write(DC_STOP);
+  this->zero = (dc_high_limit + dc_low_limit) / 2;
+  PRINT(this->zero);
+  this->left_motor.write(this->zero);
+  this->right_motor.write(this->zero);
 }
 
-
-void init_actuator_core(void) {
-  PRINT("\tDC Motors...");
-  
-  // DC Motors
-  LEFT_DRIVE.attach(DC_LEFT_PIN);
-  RIGHT_DRIVE.attach(DC_RIGHT_PIN);
-  attachInterrupt(DC_LEFT_INTERRUPT_PIN, left_encoder_ISR, RISING);  // can do 'CHANGE', but would include twice the interrupts (high CPU load)
-  attachInterrupt(DC_RIGHT_INTERRUPT_PIN, right_encoder_ISR, RISING);
-  dc_calibrate();
-  
-  PRINTLN("done");
-  PRINT("\tActuators...");
-  // Servos
-  SERVO_1.attach(SERVO1_PIN);
-  SERVO_2.attach(SERVO2_PIN);
-  
-  // Smart Servos
-  //Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
-  //Herkulex.reboot(SMART_SERVO1_ADDRESS);
-  //Herkulex.initialize();
-  
-  // Stepper Motors
-  pinMode(STEPPER1_STEP_PIN,OUTPUT);
-  pinMode(STEPPER1_DIR_PIN,OUTPUT);
-  pinMode(STEPPER2_STEP_PIN,OUTPUT);
-  pinMode(STEPPER2_DIR_PIN,OUTPUT);
-  pinMode(STEPPER3_STEP_PIN,OUTPUT);
-  pinMode(STEPPER3_DIR_PIN,OUTPUT);
-  pinMode(STEPPER4_STEP_PIN,OUTPUT);
-  pinMode(STEPPER4_DIR_PIN,OUTPUT);
-  
-  PRINTLN("done");
-}
-
-
-void dc_drive(int8_t motor_speed, int8_t motor_rotation=0) {
+void DCMotor::drive(int8_t motor_speed, int8_t motor_rotation=0) {
   // 
   
   if (motor_speed > 90) {
@@ -120,8 +122,8 @@ void dc_drive(int8_t motor_speed, int8_t motor_rotation=0) {
     motor_rotation = -90;
   }
   
-  int16_t left_drive = DC_STOP - motor_speed + motor_rotation;  // subtract motor speed due to upside-down chassis
-  int16_t right_drive = DC_STOP - motor_speed - motor_rotation;
+  int16_t left_drive = this->zero - motor_speed + motor_rotation;  // subtract motor speed due to upside-down chassis
+  int16_t right_drive = this->zero - motor_speed - motor_rotation;
   
   if (left_drive < 0) {
     left_drive = 0;
@@ -152,134 +154,48 @@ void dc_drive(int8_t motor_speed, int8_t motor_rotation=0) {
     RIGHT_DIR = DC_BACKWARD;
   }
   
-  LEFT_DRIVE.write(left_drive);
-  RIGHT_DRIVE.write(right_drive);
+  this->left_motor.write(left_drive);
+  this->right_motor.write(right_drive);
   
 }
 
 
-void servo_rotate(Servo to_rotate, uint8_t servo_position) {
-  if (servo_position < 180) {
-    to_rotate.write(servo_position);
+/// SERVO MOTOR CLASS FUNCTIONS ///
+void ServoMotor::initialize(uint8_t init_port) {
+  this->servo.attach(init_port);
+}
+
+void ServoMotor::rotate(int16_t servo_position) {
+  this->servo.write(servo_position);
+}
+
+
+/// STEPPER MOTOR CLASS FUNCTIONS ///
+void StepperMotor::initialize(uint8_t init_step_pin, uint8_t init_dir_pin, int16_t init_steps_per_rev) {
+  this->step_pin = init_step_pin;
+  this->dir_pin = init_dir_pin;
+  this->steps_per_rev = init_steps_per_rev;
+  pinMode(init_step_pin,OUTPUT);
+  pinMode(init_dir_pin,OUTPUT);
+}
+
+void StepperMotor::rotate(int16_t num_degrees) {
+  uint32_t steps_left = abs(((int32_t)num_degrees * this->steps_per_rev) / 360);
+  
+  if (num_degrees > 0) {
+    digitalWrite(this->dir_pin,LOW);
   } else {
-    to_rotate.write(180);
+    digitalWrite(this->dir_pin,HIGH);
   }
-}
-
-
-static void stepper1_rotate(int16_t num_degrees) {
-  uint32_t steps_left = abs(((int32_t)num_degrees * STEPPER1_SPR) / 360);
-  
-  #ifndef STEPPER1_INV
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER1_DIR_PIN,HIGH);
-    } else {
-      digitalWrite(STEPPER1_DIR_PIN,LOW);
-    }
-  #else
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER1_DIR_PIN,LOW);
-    } else {
-      digitalWrite(STEPPER1_DIR_PIN,HIGH);
-    }
-  #endif
   
   for (steps_left; steps_left > 0; steps_left--) {
-    digitalWrite(STEPPER1_STEP_PIN, LOW);
+    digitalWrite(this->step_pin, LOW);
     delayMicroseconds(2);
-    digitalWrite(STEPPER1_STEP_PIN, HIGH);
+    digitalWrite(this->step_pin, HIGH);
     delay(1);
   }
-}
-
-static void stepper2_rotate(int16_t num_degrees) {
-  uint32_t steps_left = abs(((int32_t)num_degrees * STEPPER2_SPR) / 360);
   
-  #ifndef STEPPER2_INV
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER2_DIR_PIN,HIGH);
-    } else {
-      digitalWrite(STEPPER2_DIR_PIN,LOW);
-    }
-  #else
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER2_DIR_PIN,LOW);
-    } else {
-      digitalWrite(STEPPER2_DIR_PIN,HIGH);
-    }
-  #endif
-  
-  for (steps_left; steps_left > 0; steps_left--) {
-    digitalWrite(STEPPER2_STEP_PIN, LOW);
-    delayMicroseconds(2);
-    digitalWrite(STEPPER2_STEP_PIN, HIGH);
-    delay(1);
-  }
-}
-
-static void stepper3_rotate(int16_t num_degrees) {
-  uint32_t steps_left = abs(((int32_t)num_degrees * STEPPER3_SPR) / 360);
-  
-  #ifndef STEPPER3_INV
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER3_DIR_PIN,HIGH);
-    } else {
-      digitalWrite(STEPPER3_DIR_PIN,LOW);
-    }
-  #else
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER3_DIR_PIN,LOW);
-    } else {
-      digitalWrite(STEPPER3_DIR_PIN,HIGH);
-    }
-  #endif
-  
-  for (steps_left; steps_left > 0; steps_left--) {
-    digitalWrite(STEPPER3_STEP_PIN, LOW);
-    delayMicroseconds(2);
-    digitalWrite(STEPPER3_STEP_PIN, HIGH);
-    delay(1);
-  }
-}
-
-static void stepper4_rotate(int16_t num_degrees) {
-  uint32_t steps_left = abs(((int32_t)num_degrees * STEPPER4_SPR) / 360);
-  
-  #ifndef STEPPER4_INV
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER4_DIR_PIN,HIGH);
-    } else {
-      digitalWrite(STEPPER4_DIR_PIN,LOW);
-    }
-  #else
-    if (num_degrees > 0) {
-      digitalWrite(STEPPER4_DIR_PIN,LOW);
-    } else {
-      digitalWrite(STEPPER4_DIR_PIN,HIGH);
-    }
-  #endif
-  
-  for (steps_left; steps_left > 0; steps_left--) {
-    digitalWrite(STEPPER4_STEP_PIN, LOW);
-    delayMicroseconds(2);
-    digitalWrite(STEPPER4_STEP_PIN, HIGH);
-    delay(1);
-  }
 }
 
 
-void stepper_rotate(uint8_t to_rotate, int16_t num_degrees) {
-  if (to_rotate == STEPPER_1) {
-    stepper1_rotate(num_degrees);
-  }
-  else if (to_rotate == STEPPER_2) {
-    stepper2_rotate(num_degrees);
-  }
-  else if (to_rotate == STEPPER_3) {
-    stepper3_rotate(num_degrees);
-  }
-  else if (to_rotate == STEPPER_4) {
-    stepper4_rotate(num_degrees);
-  }
-}
 
