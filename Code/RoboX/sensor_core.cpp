@@ -146,16 +146,27 @@ void InfraredSensor::read_lng(void) {
 void UltrasonicSensor::initialize(uint8_t init_trig, uint8_t init_echo) {
   this->trig = init_trig;
   this->echo = init_echo;
+  pinMode(init_trig, OUTPUT);
+  pinMode(init_echo, INPUT);
 }
 
 void UltrasonicSensor::update(void) {
-  //this->raw_value = analogRead(this->port);
+  digitalWrite(this->trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(this->trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(this->trig, LOW);
+  
+  this->raw_value = pulseIn(this->echo, HIGH);
   this->value = NOT_READ;
 }
 
 int16_t UltrasonicSensor::read(void) {
   if (this->value == NOT_READ) {  // Only converts value once
-    this->value = NOT_VALID;
+    this->value = this->raw_value / 29 / 2;  // microseconds to centimeters
+    if (this->value >= 1000) {
+      this->value = -1;
+    }
   }
  
  return this->value;
@@ -246,7 +257,7 @@ void update_sensors(void) {
   IR_VAR1.update();
   IR_VAR2.update();
   IR_VAR3.update();
-  
+  PRINTLN(USONIC1.read());
   IMU.update();
   
 }
