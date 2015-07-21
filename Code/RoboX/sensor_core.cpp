@@ -11,12 +11,15 @@
  * 
  *//////////////////////////////////////////////////////////////////////
  
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "sensor_core.h"
+#include "exception_core.h"
 
-
+///////////////
 /// GLOBALS ///
+///////////////
 InfraredSensor IR_SHT1;
 InfraredSensor IR_SHT2;
 InfraredSensor IR_MED1;
@@ -31,10 +34,11 @@ DigitalSensor IR_VAR2;
 DigitalSensor IR_VAR3;
 
 IMUSensor IMU;
+ColourSensor COLOUR;
 
-
+/////////////////
 /// FUNCTIONS ///
-
+/////////////////
 static void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t* Data) {
   // This function read Nbytes bytes from I2C device at address Address. 
   // Put read bytes starting at register Register in the Data array. 
@@ -81,12 +85,33 @@ void init_sensor_core(void) {
   IR_VAR3.initialize(IR_VAR3_PIN);
   
   IMU.initialize();
+  COLOUR.initialize();
   
   PRINTLN("done");
 }
 
+void update_sensors(void) {
+  IR_SHT1.update();
+  IR_SHT2.update();
+  IR_MED1.update();
+  IR_MED2.update();
+  IR_LNG1.update();
+  IR_LNG2.update();
+  //USONIC1.update();
+  //USONIC2.update();
+  
+  IR_VAR1.update();
+  IR_VAR2.update();
+  IR_VAR3.update();
+  //PRINTLN(USONIC1.read());
+  IMU.update();
+  //COLOUR.update();
+  
+}
 
+///////////////////////////////////////
 /// INFRARED SENSOR CLASS FUNCTIONS ///
+///////////////////////////////////////
 void InfraredSensor::initialize(uint8_t init_port, uint8_t init_type) {
   this->port = init_port;
   this->type = init_type;
@@ -112,7 +137,6 @@ int16_t InfraredSensor::read(void) {
  
  return this->value;
 }
-
 
 void InfraredSensor::read_sht(void) {
   
@@ -141,8 +165,9 @@ void InfraredSensor::read_lng(void) {
   }
 }
 
-
+/////////////////////////////////////////
 /// ULTRASONIC SENSOR CLASS FUNCTIONS ///
+/////////////////////////////////////////
 void UltrasonicSensor::initialize(uint8_t init_trig, uint8_t init_echo) {
   this->trig = init_trig;
   this->echo = init_echo;
@@ -173,8 +198,9 @@ int16_t UltrasonicSensor::read(void) {
   
 }
 
-
+///////////////////////////////////////
 /// DIGIATAL SENSOR CLASS FUNCTIONS ///
+///////////////////////////////////////
 void DigitalSensor::initialize(uint8_t init_port) {
   this->port = init_port;
 }
@@ -188,8 +214,9 @@ bool DigitalSensor::read(void) {
   
 }
 
-
+///////////////////////////
 /// IMU CLASS FUNCTIONS ///
+///////////////////////////
 void IMUSensor::initialize(void) {
   //this->values[IMU_BUFFER_SIZE] = {0};
   
@@ -205,12 +232,12 @@ void IMUSensor::initialize(void) {
 }
 
 void IMUSensor::update(void) {
-  PRINTLN("1");
+  //PRINTLN("1");
   uint8_t ACC_GYR_BUFFER[ACC_GYR_BUFFER_SIZE];  //The IMU reads in 8 bit data
   uint8_t MAG_BUFFER[MAG_BUFFER_SIZE];
-  PRINTLN("2");
+  //PRINTLN("2");
   //I2Cread(MPU9250_ADDRESS, 0x3B, ACC_GYR_BUFFER_SIZE, ACC_GYR_BUFFER);
-  PRINTLN("3");
+  //PRINTLN("3");
   // Accelerometer
   /*IMU_BUFFER[0] = ACC_GYR_BUFFER[0]<<8 | ACC_GYR_BUFFER[1]; // Create 16 bits values from 8 bits data
   IMU_BUFFER[1] = ACC_GYR_BUFFER[2]<<8 | ACC_GYR_BUFFER[3];
@@ -243,23 +270,41 @@ void IMUSensor::update(void) {
   //print_buffer(IMU_BUFFER, IMU_BUFFER_SIZE);
 }
 
-
-void update_sensors(void) {
-  IR_SHT1.update();
-  IR_SHT2.update();
-  IR_MED1.update();
-  IR_MED2.update();
-  IR_LNG1.update();
-  IR_LNG2.update();
-  //USONIC1.update();
-  //USONIC2.update();
+/////////////////////////////////////
+/// COLOUR SENSOR CLASS FUNCTIONS ///
+/////////////////////////////////////
+void ColourSensor::initialize(void) {
   
-  IR_VAR1.update();
-  IR_VAR2.update();
-  IR_VAR3.update();
-  PRINTLN(USONIC1.read());
-  IMU.update();
+  this->tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+  
+  if (!tcs.begin()) {
+    PRINTLN("failed");
+    COLOUR_SENSOR_ERROR.activate();
+    return;
+  }
+  
+  tcs.setInterrupt(false);      // turn on LED
+}
+
+void ColourSensor::update(void) {
+  tcs.setInterrupt(false);      // turn on LED
+  delay(60);
+  tcs.getRawData(&this->raw_values[0], &this->raw_values[1], &this->raw_values[2], &this->raw_values[3]);
+  tcs.setInterrupt(true);  // turn off LED
   
 }
+
+uint16_t* ColourSensor::read(void) {
+  
+  Serial.print("C:\t"); Serial.print(this->raw_values[3]);
+  Serial.print("\tR:\t"); Serial.print(this->raw_values[1]);
+  Serial.print("\tG:\t"); Serial.print(this->raw_values[2]);
+  Serial.print("\tB:\t"); Serial.print(this->raw_values[3]);
+  PRINTLN();
+  
+  return this->raw_values;
+}
+
+
 
 

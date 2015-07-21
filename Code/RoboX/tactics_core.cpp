@@ -11,8 +11,9 @@
  * 
  *//////////////////////////////////////////////////////////////////////
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "tactics_core.h"
 #include "actuator_core.h"
 #include "exception_core.h"
@@ -20,15 +21,17 @@
 #include "misc_core.h"
 #include "sensor_core.h"
 
-
+///////////////
 /// GLOBALS ///
+///////////////
 uint8_t OPERATION_MODE = DEFAULT_MODE;
 
 static int8_t FORWARD = 0;
 static int8_t TURNING = 0;
 
-
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void init_tactics_core(void) {
   PRINT("\tTactics...");
   Timer3.initialize();  // in microseconds, 1 second by default
@@ -41,12 +44,15 @@ void primary_tactic(void) {
   Timer3.setPeriod(PRIMARY_TACTIC_PERIOD);
   Timer3.attachInterrupt(primary_tactic_ISR);
   
-  while (!SD_ERROR.active && OPERATION_MODE == PRIMARY_MODE) {
+  while (!SD_ERROR.is_active() && OPERATION_MODE == PRIMARY_MODE) {
     
     
   }
   PRINTLN("Primary tactic failure\n");
   Timer3.detachInterrupt();
+  if (OPERATION_MODE == PRIMARY_MODE) {
+    OPERATION_MODE = SECONDARY_MODE;  // if there was an unexpected failure
+  }
 }
 
 
@@ -115,13 +121,19 @@ void manual_mode(void) {
         TURNING = 0;
         PRINTLN("\tStopping");
       }
-      else if (serial_byte == STEPFWD) {
-        STEPPER1.rotate(180);
-        PRINTLN("\tMoving Steppers forward by 180 degrees");
+      else if (serial_byte == EXTEND) {
+        //STEPPER1.rotate(180);
+        //STEPPER2.rotate(180);
+        extend_magnets();
+        PRINTLN("\tExtending magnets");
       }
-      else if (serial_byte == STEPBWD) {
-        STEPPER1.rotate(-180);
-        PRINTLN("\tMoving Steppers backward by 180 degrees");
+      else if (serial_byte == RETRACT) {
+        retract_magnets();
+        PRINTLN("\tRetracting magnets");
+      }
+      else if (serial_byte == TOGGLE) {
+        toggle_magnets();
+        PRINTLN("\tToggling magnets");
       }
       
     }
@@ -131,6 +143,7 @@ void manual_mode(void) {
     DC.drive(FORWARD, TURNING);
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
+    //COLOUR.read();
     //delay(200);
     
   }

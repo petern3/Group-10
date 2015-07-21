@@ -11,13 +11,15 @@
  * 
  *//////////////////////////////////////////////////////////////////////
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "map_core.h"
 #include "exception_core.h"
 
-
+///////////////
 /// GLOBALS ///
+///////////////
 static File BOTMAP_ROOT;
 static File BOTMAP;
 static Position_t ROBOT_POSITION;
@@ -32,8 +34,9 @@ static int16_t Y_END = (MAP_SIZE_Y - ROBOT_RADIUS) / MAP_SPACING;
 static uint8_t MAP_NUMBER = 0;
 static char MAP_DIR[DIR_BUFFER_SIZE] = {'\0'};
 
-
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 static void init_edges(void);
 static void remove_old_map(void);
 
@@ -41,9 +44,9 @@ void init_map_core(void) {
   PRINT("\tSD card...");
   
   if (!SD.begin(CHIP_SELECT_PIN)) {
-    activate_exception(&SD_ERROR);
     PRINTLN("failed");
-    //report_exception(&SD_ERROR);
+    SD_ERROR.activate();
+    //SD_ERROR.report();
     return;
   }
   PRINTLN("done");
@@ -82,7 +85,7 @@ int8_t get_terrain(Position_t coord) {
       BOTMAP.close();
       //PRINTLN("...done");
     } else {
-      activate_exception(&MAP_READ_ERROR);
+      MAP_READ_ERROR.activate();
       //PRINTLN("...error opening");
     }
   }
@@ -110,7 +113,7 @@ static void set_terrain(Position_t coord, uint8_t terrain_to_set) {
       PRINTLN("...done");
     } else {
       // if the file didn't open, print an error:
-      activate_exception(&MAP_WRITE_ERROR);
+      MAP_WRITE_ERROR.activate();
       PRINTLN("...error opening");
     }
   }

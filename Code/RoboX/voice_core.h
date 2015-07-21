@@ -15,21 +15,21 @@
 #ifndef VOICE_CORE_H
 #define VOICE_CORE_H
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
 
-
-/// STRUCTS ///
-
-
+///////////////
 /// GLOBALS ///
+///////////////
 extern bool SOUNDS_ON;
 
-
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void init_voice_core(void);
 void play_sound(String file_name);
 

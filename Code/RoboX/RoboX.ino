@@ -12,8 +12,9 @@
  * 
  *//////////////////////////////////////////////////////////////////////
 
-
+///////////////
 /// DEFINES ///
+///////////////
 #include "Arduino.h"
 #include <inttypes.h>
 #include <Servo.h>
@@ -23,6 +24,7 @@
 #include <SD.h>
 #include <TimerThree.h>
 #include <Wire.h>
+#include "Adafruit_TCS34725.h"
 
 #include "config.h"
 #include "actuator_core.h"
@@ -34,14 +36,15 @@
 #include "tactics_core.h"
 #include "voice_core.h"
 
-
+//////////////////////
 /// INITIALIZATION ///
+//////////////////////
 void setup() {
   Serial.begin(BAUD_RATE);
   PRINTLN("\nInitializing:");
   
   init_actuator_core();
-  init_exception_core();
+  //init_exception_core();
   init_map_core();
   init_sensor_core();
   init_tactics_core();
@@ -52,8 +55,9 @@ void setup() {
   //display_map();
 }
 
-
-/// KERNEL ///
+//////////////////////////////
+/// MASTER CONTROL PROGRAM ///
+//////////////////////////////
 void loop() {
   switch (OPERATION_MODE) {
     case PRIMARY_MODE:

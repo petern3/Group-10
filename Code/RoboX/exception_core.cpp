@@ -11,64 +11,66 @@
  * 
  *//////////////////////////////////////////////////////////////////////
  
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "exception_core.h"
 #include "voice_core.h"
+#include "misc_core.h"
 
-
+///////////////
 /// GLOBALS ///
-Exception_t SD_ERROR = init_exception("Could not find SD card" , NULL_ERROR_SOUND);
-Exception_t MAP_READ_ERROR = init_exception("Could not read map file" , NULL_ERROR_SOUND);
-Exception_t MAP_WRITE_ERROR = init_exception("Could not write to map" , NULL_ERROR_SOUND);
+///////////////
+Exception SD_ERROR;
+Exception MAP_READ_ERROR;
+Exception MAP_WRITE_ERROR;
+Exception DC_MOTOR_ERROR;
+Exception COLOUR_SENSOR_ERROR;
 
-
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void init_exception_core(void) {
   PRINT("\tExceptions...");
+  
+  SD_ERROR.initialize("Could not find SD card\0" , NULL_ERROR_SOUND);
+  MAP_READ_ERROR.initialize("Could not read map file\0" , NULL_ERROR_SOUND);
+  MAP_WRITE_ERROR.initialize("Could not write to map\0" , NULL_ERROR_SOUND);
+  DC_MOTOR_ERROR.initialize("I can't move!\0" , NULL_ERROR_SOUND);
+  COLOUR_SENSOR_ERROR.initialize("Could not find colour sensor\0", NULL_ERROR_SOUND);
   
   PRINTLN("done");
 }
 
-
-Exception_t init_exception(String descript, String sound) {
-  Exception_t* to_init; // = {false, &descript, &sound};
+/////////////////////////////////
+/// EXCEPTION CLASS FUNCTIONS ///
+/////////////////////////////////
+void Exception::initialize(char* descript, char* sound) {
   
-  to_init = (Exception_t*)calloc(1, sizeof(Exception_t));
-  to_init->active = 0;
+  this->active = 0;
+  this->descript = (char*)malloc((string_length(descript) + 1) * sizeof(char));
+  this->sound = (char*)malloc((string_length(sound) + 1) * sizeof(char));
   
-  to_init->descript = (String*)calloc(descript.length()+1, sizeof(char));
-  to_init->descript = &descript;
-  
-  to_init->sound = (String*)calloc(sound.length()+1, sizeof(char));
-  to_init->sound = &sound;
-  
-  return *to_init;
 }
 
+void Exception::activate(void) {
+  this->active = true;
+}
 
-void activate_exception(Exception_t* to_activate) {
-  to_activate->active += 1;
-  // Check for overflow
-  if (to_activate->active == 0) {
-    to_activate->active = -1;
+void Exception::deactivate(void) {
+  this->active = false;
+}
+
+void Exception::report(void) {
+  
+  if (SOUNDS_ON && this->sound != NULL_ERROR_SOUND) {
+    play_sound(this->sound);
   }
+  PRINTLN(this->descript);
 }
 
-
-void deactivate_exception(Exception_t* to_deactivate) {
-  to_deactivate->active = 0;
+bool Exception::is_active(void) {
+  return this->active;
 }
-
-
-void report_exception(Exception_t* to_report) {
-  
-  if (SOUNDS_ON && *to_report->sound != NULL_ERROR_SOUND) {
-    play_sound(*to_report->sound);
-  }
-  PRINTLN(*to_report->descript);
-}
-
-
 
 

@@ -15,22 +15,22 @@
 #ifndef TACTICS_CORE_H
 #define TACTICS_CORE_H
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
 #include <TimerThree.h>
 
-
-/// STRUCTS ///
-
-
+///////////////
 /// GLOBALS ///
+///////////////
 extern uint8_t OPERATION_MODE;
 
-
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void init_tactics_core(void);
 void primary_tactic(void);
 void secondary_tactic(void);

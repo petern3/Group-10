@@ -15,15 +15,19 @@
 #ifndef SENSOR_CORE_H
 #define SENSOR_CORE_H
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
 #include <stdlib.h>
 #include <Wire.h>
+#include "Adafruit_TCS34725.h"
 
+///////////////
 /// DEFINES ///
+///////////////
 #define MPU9250_ADDRESS 0x68
 #define MAG_ADDRESS 0x0C
 
@@ -58,7 +62,7 @@
 #define IMU_BUFFER_SIZE 10
 #define ACC_GYR_BUFFER_SIZE 14
 #define MAG_BUFFER_SIZE 6
-
+#define COLOUR_BUFFER_SIZE 4
 
 #define SHT_RANGE 0
 #define MED_RANGE 1
@@ -67,7 +71,9 @@
 #define NOT_VALID -1
 #define NOT_READ -2
 
-/// STRUCTS ///
+///////////////
+/// CLASSES ///
+///////////////
 class InfraredSensor {
   private:
     uint8_t port;
@@ -111,11 +117,23 @@ class IMUSensor {
   public:
   	void initialize(void);
     void update(void);
-    bool read(void);
+    int16_t* read(void);
 };
 
+class ColourSensor {
+  private:
+    Adafruit_TCS34725 tcs;
+    uint16_t raw_values[COLOUR_BUFFER_SIZE];
+    
+  public:
+    void initialize(void);
+    void update(void);
+    uint16_t* read(void);
+};
 
+///////////////
 /// GLOBALS ///
+///////////////
 extern InfraredSensor IR_SHT1; //to rename to appropriate locations
 extern InfraredSensor IR_SHT2;
 extern InfraredSensor IR_MED1;
@@ -128,8 +146,11 @@ extern DigitalSensor IR_VAR1;
 extern DigitalSensor IR_VAR2;
 extern DigitalSensor IR_VAR3;
 extern IMUSensor IMU;
+extern ColourSensor COLOUR;
 
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void init_sensor_core(void);
 void update_sensors(void);
 

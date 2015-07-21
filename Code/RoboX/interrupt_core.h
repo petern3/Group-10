@@ -15,22 +15,26 @@
 #ifndef INTERRUPT_CORE_H
 #define INTERRUPT_CORE_H
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
-
+///////////////
 /// GLOBALS ///
+///////////////
 extern bool LEFT_DIR;
 extern bool RIGHT_DIR;
 
 extern volatile float LEFT_ROTATION;
 extern volatile float RIGHT_ROTATION;
 
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void left_encoder_ISR(void);
 void right_encoder_ISR(void);
 

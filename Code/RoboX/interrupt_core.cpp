@@ -11,15 +11,17 @@
  * 
  *//////////////////////////////////////////////////////////////////////
  
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "interrupt_core.h"
 #include "actuator_core.h"
 #include "misc_core.h"
 #include "sensor_core.h"
 
-
+///////////////
 /// GLOBALS ///
+///////////////
 static float ENCODER_INCREMENT = (TAU / ENCODER_PPR);
 //static float ENCODER_MAX = (ENCODER_WRAP * TAU);
 static uint32_t left_prev_time = 0;
@@ -31,8 +33,9 @@ bool RIGHT_DIR = DC_FORWARD;
 volatile float LEFT_ROTATION = 0;
 volatile float RIGHT_ROTATION = 0;
 
-
+//////////////////
 /// INTERRUPTS ///
+//////////////////
 void left_encoder_ISR(void) {
   
   uint32_t left_curr_time = micros();

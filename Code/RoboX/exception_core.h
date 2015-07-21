@@ -15,34 +15,43 @@
 #ifndef EXCEPTION_CORE_H
 #define EXCEPTION_CORE_H
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
+///////////////
+/// CLASSES ///
+///////////////
+class Exception {
+  private:
+    bool active;
+    char* descript;
+    char* sound;
+  public:
+    void initialize(char* descript, char* sound);
+    void activate(void);
+    void deactivate(void);
+    void report(void);
+    bool is_active(void);
+};
 
-/// STRUCTS ///
-typedef struct {
-  uint8_t active;
-  String* descript;
-  String* sound;
-} Exception_t ;
-
-
+///////////////
 /// GLOBALS ///
-extern Exception_t SD_ERROR;
-extern Exception_t MAP_READ_ERROR;
-extern Exception_t MAP_WRITE_ERROR;
+///////////////
+extern Exception SD_ERROR;
+extern Exception MAP_READ_ERROR;
+extern Exception MAP_WRITE_ERROR;
+extern Exception DC_MOTOR_ERROR;
+extern Exception COLOUR_SENSOR_ERROR;
 
-
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void init_exception_core(void);
-Exception_t init_exception(String descript, String sound);
-void activate_exception(Exception_t* to_activate);
-void deactivate_exception(Exception_t* to_deactivate);
-void report_exception(Exception_t* to_report);
 
 
 #endif

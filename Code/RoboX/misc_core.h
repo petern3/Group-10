@@ -15,18 +15,23 @@
 #ifndef MISC_CORE_H
 #define MISC_CORE_H
 
-
+////////////////
 /// INCLUDES ///
+////////////////
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
 #include <stdlib.h>
 
-
+///////////////
 /// GLOBALS ///
+///////////////
 extern float TAU;
 
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void print_buffer(int16_t* to_print, uint16_t len);
+uint8_t string_length(char* to_count);
 
 #endif

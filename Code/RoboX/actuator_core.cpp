@@ -13,11 +13,13 @@
 
 
 #include "actuator_core.h"
+#include "exception_core.h"
 #include "interrupt_core.h"
 #include "misc_core.h"
 
-
+///////////////
 /// GLOBALS ///
+///////////////
 DCMotor DC;
 
 ServoMotor SERVO1;
@@ -26,8 +28,11 @@ ServoMotor SERVO2;
 StepperMotor STEPPER1;
 StepperMotor STEPPER2;
 
+bool is_extended = true;
 
+/////////////////
 /// FUNCTIONS ///
+/////////////////
 void init_actuator_core(void) {
   PRINT("\tDC Motors...");
   
@@ -39,7 +44,13 @@ void init_actuator_core(void) {
   
   DC.calibrate();
   
-  PRINTLN("done");
+  if (DC_MOTOR_ERROR.is_active()) {
+    PRINTLN("failed");
+  } else {
+    PRINT("zero set to ");
+    PRINTLN(DC.zero);
+  }
+  
   PRINT("\tActuators...");
   // Servos
   SERVO1.initialize(SERVO1_PIN);
@@ -47,7 +58,7 @@ void init_actuator_core(void) {
   
   // Stepper Motors
   STEPPER1.initialize(STEPPER1_STEP_PIN, STEPPER1_DIR_PIN, STEPPER1_SPR);
-  STEPPER2.initialize(STEPPER2_STEP_PIN, STEPPER2_DIR_PIN, STEPPER1_SPR);
+  STEPPER2.initialize(STEPPER2_STEP_PIN, STEPPER2_DIR_PIN, STEPPER2_SPR);
   
   // Smart Servos
   Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
@@ -57,8 +68,9 @@ void init_actuator_core(void) {
   PRINTLN("done");
 }
 
-
+////////////////////////////////
 /// DC MOTOR CLASS FUNCTIONS ///
+////////////////////////////////
 void DCMotor::initialize(void) {
   this->zero = 90;
   this->left_motor.attach(DC_LEFT_PIN);
@@ -76,6 +88,8 @@ void DCMotor::calibrate(void) {
     this->left_motor.write(dc_high_limit);
     this->right_motor.write(dc_high_limit);
     if (dc_high_limit > (this->zero + DC_CALIBRATION_LIMIT)) {
+      DC_MOTOR_ERROR.activate();
+      //DC_MOTOR_ERROR.report();
       break;
     }
     dc_high_limit++;
@@ -94,6 +108,8 @@ void DCMotor::calibrate(void) {
     this->left_motor.write(dc_low_limit);
     this->right_motor.write(dc_low_limit);
     if (dc_low_limit < (this->zero - DC_CALIBRATION_LIMIT)) {
+      DC_MOTOR_ERROR.activate();
+      //DC_MOTOR_ERROR.report();
       break;
     }
     dc_low_limit--;
@@ -101,7 +117,6 @@ void DCMotor::calibrate(void) {
   }
   
   this->zero = (dc_high_limit + dc_low_limit) / 2;
-  PRINT(this->zero);
   this->left_motor.write(this->zero);
   this->right_motor.write(this->zero);
 }
@@ -159,8 +174,9 @@ void DCMotor::drive(int8_t motor_speed, int8_t motor_rotation=0) {
   
 }
 
-
+///////////////////////////////////
 /// SERVO MOTOR CLASS FUNCTIONS ///
+///////////////////////////////////
 void ServoMotor::initialize(uint8_t init_port) {
   this->servo.attach(init_port);
 }
@@ -169,14 +185,15 @@ void ServoMotor::rotate(int16_t servo_position) {
   this->servo.write(servo_position);
 }
 
-
+/////////////////////////////////////
 /// STEPPER MOTOR CLASS FUNCTIONS ///
+/////////////////////////////////////
 void StepperMotor::initialize(uint8_t init_step_pin, uint8_t init_dir_pin, int16_t init_steps_per_rev) {
   this->step_pin = init_step_pin;
   this->dir_pin = init_dir_pin;
   this->steps_per_rev = init_steps_per_rev;
-  pinMode(init_step_pin,OUTPUT);
-  pinMode(init_dir_pin,OUTPUT);
+  pinMode(init_step_pin, OUTPUT);
+  pinMode(init_dir_pin, OUTPUT);
 }
 
 void StepperMotor::rotate(int16_t num_degrees) {
@@ -194,8 +211,51 @@ void StepperMotor::rotate(int16_t num_degrees) {
     digitalWrite(this->step_pin, HIGH);
     delay(1);
   }
-  
 }
 
 
+void extend_magnets(void) {
+  if (!is_extended) {
+    uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
+    digitalWrite(STEPPER1.dir_pin, LOW);
+    digitalWrite(STEPPER2.dir_pin, HIGH);
+    
+    for (steps_left; steps_left > 0; steps_left--) {
+      digitalWrite(STEPPER1.step_pin, LOW);
+      digitalWrite(STEPPER2.step_pin, LOW);
+      delayMicroseconds(2);
+      digitalWrite(STEPPER1.step_pin, HIGH);
+      digitalWrite(STEPPER2.step_pin, HIGH);
+      delay(1);
+    }
+    is_extended = true;
+  }
+}
+
+void retract_magnets(void) {
+  if (is_extended) {
+    uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
+    digitalWrite(STEPPER1.dir_pin, LOW);
+    digitalWrite(STEPPER2.dir_pin, HIGH);
+    
+    for (steps_left; steps_left > 0; steps_left--) {
+      digitalWrite(STEPPER1.step_pin, LOW);
+      digitalWrite(STEPPER2.step_pin, LOW);
+      delayMicroseconds(2);
+      digitalWrite(STEPPER1.step_pin, HIGH);
+      digitalWrite(STEPPER2.step_pin, HIGH);
+      delay(1);
+    }
+    is_extended = false;
+  }
+}
+
+
+void toggle_magnets(void) {
+  if (is_extended) {
+    retract_magnets();
+  } else {
+    extend_magnets();
+  }
+}
 
