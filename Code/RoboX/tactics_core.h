@@ -24,9 +24,30 @@
 #include <TimerThree.h>
 
 ///////////////
+/// DEFINES ///
+///////////////
+#define PRIMARY_MODE '0'
+#define SECONDARY_MODE '1'
+#define MANUAL_MODE '2'
+#define DEFAULT_MODE SECONDARY_MODE  // can change to any of the previous modes
+
+///////////////
 /// GLOBALS ///
 ///////////////
 extern uint8_t OPERATION_MODE;
+
+///////////////
+/// STRUCTS ///
+///////////////
+typedef struct {
+  float x;
+  float y;
+} CartVec_t;
+
+typedef struct {
+  float r;
+  float theta;
+} PolarVec_t;
 
 /////////////////
 /// FUNCTIONS ///

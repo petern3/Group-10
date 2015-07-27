@@ -24,9 +24,20 @@
 #include <stdlib.h>
 
 ///////////////
+/// DEFINES ///
+///////////////
+#define degrees_to_radians(a) 0.01745329251*a
+#define radians_to_degrees(a) 57.2957795131*a
+
+#define tau  6.28318530718
+#define pi   3.14159265359
+#define pi_2 1.57079632679
+#define pi_4 0.78539816339
+
+///////////////
 /// GLOBALS ///
 ///////////////
-extern float TAU;
+//extern float TAU;
 
 /////////////////
 /// FUNCTIONS ///

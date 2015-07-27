@@ -22,8 +22,8 @@
 ///////////////
 /// GLOBALS ///
 ///////////////
-static float ENCODER_INCREMENT = (TAU / ENCODER_PPR);
-//static float ENCODER_MAX = (ENCODER_WRAP * TAU);
+static float ENCODER_INCREMENT = (tau / ENCODER_PPR);
+//static float ENCODER_MAX = (ENCODER_WRAP * tau);
 static uint32_t left_prev_time = 0;
 static uint32_t right_prev_time = 0;
 

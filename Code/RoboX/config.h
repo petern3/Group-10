@@ -30,7 +30,7 @@
 #define SERVO1_PIN 3
 #define SERVO2_PIN 2
 
-#define SMART_SERVO1_ADDRESS 0xFE
+#define SMART_SERVO1_ADDRESS 0xFD
 
 #define STEPPER1_STEP_PIN 42
 #define STEPPER1_DIR_PIN 43
@@ -65,11 +65,6 @@
 ////////////////////////
 /// SCHEDULER CONFIG ///
 ////////////////////////
-#define PRIMARY_MODE 0
-#define SECONDARY_MODE 1
-#define MANUAL_MODE 2
-#define DEFAULT_MODE MANUAL_MODE  // can change to any of the previous modes
-
 //#define TIMERTHREE_PERIOD 1000  // microseconds
 #define PRIMARY_TACTIC_PERIOD 1000000  // microseconds
 #define SECONDARY_TACTIC_PERIOD 100000  // microseconds
@@ -99,6 +94,8 @@
 #define DC_FORWARD true
 #define DC_BACKWARD false
 #define DC_CALIBRATION_LIMIT 15 // 90 +/- n
+
+#define MOTOR_P 10
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 1040 // Geared

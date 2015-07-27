@@ -28,7 +28,11 @@ ServoMotor SERVO2;
 StepperMotor STEPPER1;
 StepperMotor STEPPER2;
 
+uint8_t SERVO_COLOUR = LED_WHITE;
+
 bool is_extended = true;
+bool is_lowered = false;
+
 
 /////////////////
 /// FUNCTIONS ///
@@ -44,7 +48,7 @@ void init_actuator_core(void) {
   
   DC.calibrate();
   
-  if (DC_MOTOR_ERROR.is_active()) {
+  if (DC_MOTOR_ERROR.is_active) {
     PRINTLN("failed");
   } else {
     PRINT("zero set to ");
@@ -63,10 +67,14 @@ void init_actuator_core(void) {
   // Smart Servos
   Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
   Herkulex.reboot(SMART_SERVO1_ADDRESS);
+  //delay(500);
   Herkulex.initialize();
+  //delay(200);
+  Herkulex.setLed(SMART_SERVO1_ADDRESS, SERVO_COLOUR);
   
   PRINTLN("done");
 }
+
 
 ////////////////////////////////
 /// DC MOTOR CLASS FUNCTIONS ///

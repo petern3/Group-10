@@ -28,15 +28,14 @@
 ///////////////
 class Exception {
   private:
-    bool active;
     char* descript;
     char* sound;
   public:
+    bool is_active;
     void initialize(char* descript, char* sound);
     void activate(void);
     void deactivate(void);
     void report(void);
-    bool is_active(void);
 };
 
 ///////////////

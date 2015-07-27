@@ -22,8 +22,8 @@
 ///////////////
 static File BOTMAP_ROOT;
 static File BOTMAP;
-static Position_t ROBOT_POSITION;
-static float ROBOT_ROTATION;
+static Position_t ROBOT_POSITION;   // (x, y) from it's start position
+static float ROBOT_ROTATION;  // bearing from North
 
 // Robot should start at a set 240 mm from edge in home base.
 static int16_t X_START = -ROBOT_RADIUS / MAP_SPACING;
@@ -343,4 +343,13 @@ static void remove_old_map(void) {
     }
     BOTMAP_ROOT.close();
   }
+}
+
+
+int16_t bearing_to_origin(void) {
+  
+  // get bearing of robot from origin
+  
+  
+  
 }

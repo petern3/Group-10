@@ -47,18 +47,18 @@ void init_exception_core(void) {
 /////////////////////////////////
 void Exception::initialize(char* descript, char* sound) {
   
-  this->active = 0;
+  this->is_active = 0;
   this->descript = (char*)malloc((string_length(descript) + 1) * sizeof(char));
   this->sound = (char*)malloc((string_length(sound) + 1) * sizeof(char));
   
 }
 
 void Exception::activate(void) {
-  this->active = true;
+  this->is_active = true;
 }
 
 void Exception::deactivate(void) {
-  this->active = false;
+  this->is_active = false;
 }
 
 void Exception::report(void) {
@@ -67,10 +67,6 @@ void Exception::report(void) {
     play_sound(this->sound);
   }
   PRINTLN(this->descript);
-}
-
-bool Exception::is_active(void) {
-  return this->active;
 }
 
 

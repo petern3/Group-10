@@ -278,7 +278,7 @@ void ColourSensor::initialize(void) {
   this->tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
   
   if (!tcs.begin()) {
-    PRINTLN("failed");
+    PRINTLN("colour sensor failed...");
     COLOUR_SENSOR_ERROR.activate();
     return;
   }
@@ -287,21 +287,22 @@ void ColourSensor::initialize(void) {
 }
 
 void ColourSensor::update(void) {
-  tcs.setInterrupt(false);      // turn on LED
-  delay(60);
-  tcs.getRawData(&this->raw_values[0], &this->raw_values[1], &this->raw_values[2], &this->raw_values[3]);
-  tcs.setInterrupt(true);  // turn off LED
-  
+  if (!COLOUR_SENSOR_ERROR.is_active) {
+    tcs.setInterrupt(false);      // turn on LED
+    delay(60);
+    tcs.getRawData(&this->raw_values[0], &this->raw_values[1], &this->raw_values[2], &this->raw_values[3]);
+    tcs.setInterrupt(true);  // turn off LED
+  }
 }
 
 uint16_t* ColourSensor::read(void) {
-  
-  Serial.print("C:\t"); Serial.print(this->raw_values[3]);
-  Serial.print("\tR:\t"); Serial.print(this->raw_values[1]);
-  Serial.print("\tG:\t"); Serial.print(this->raw_values[2]);
-  Serial.print("\tB:\t"); Serial.print(this->raw_values[3]);
-  PRINTLN();
-  
+  if (!COLOUR_SENSOR_ERROR.is_active) {
+    Serial.print("C:\t"); Serial.print(this->raw_values[3]);
+    Serial.print("\tR:\t"); Serial.print(this->raw_values[1]);
+    Serial.print("\tG:\t"); Serial.print(this->raw_values[2]);
+    Serial.print("\tB:\t"); Serial.print(this->raw_values[3]);
+    PRINTLN();
+  }
   return this->raw_values;
 }
 

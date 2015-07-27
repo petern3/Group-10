@@ -56,6 +56,7 @@ typedef struct {
 void init_map_core(void);
 void set_wall(Position_t coord);
 void display_map(void);
+int16_t bearing_to_origin(void);
 
 
 #endif
