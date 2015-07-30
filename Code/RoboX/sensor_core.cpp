@@ -21,7 +21,6 @@
 /// GLOBALS ///
 ///////////////
 InfraredSensor IR_SHT1;
-InfraredSensor IR_SHT2;
 InfraredSensor IR_MED1;
 InfraredSensor IR_MED2;
 InfraredSensor IR_LNG1;
@@ -35,6 +34,9 @@ DigitalSensor IR_VAR3;
 
 IMUSensor IMU;
 ColourSensor COLOUR;
+
+int8_t NO_WEIGHT[2] = {-1, -1};
+CartVec weight_location = {-1, -1};
 
 /////////////////
 /// FUNCTIONS ///
@@ -70,15 +72,22 @@ void init_sensor_core(void) {
   PRINT("\tSensors...");
   analogReference(INTERNAL2V56);
   Wire.begin();
-  
-  IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE);
-  IR_SHT2.initialize(IR_SHT2_PIN, SHT_RANGE);
-  IR_MED1.initialize(IR_MED1_PIN, MED_RANGE);
-  IR_MED2.initialize(IR_MED2_PIN, MED_RANGE);
-  IR_LNG1.initialize(IR_LNG1_PIN, LNG_RANGE);
-  IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE);
-  USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN);
-  USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN);
+
+  int8_t IR_SHT1_OFFSET_TEMP[2] = IR_SHT1_OFFSET;
+  int8_t IR_MED1_OFFSET_TEMP[2] = IR_MED1_OFFSET;
+  int8_t IR_MED2_OFFSET_TEMP[2] = IR_MED2_OFFSET;
+  int8_t IR_LNG1_OFFSET_TEMP[2] = IR_LNG1_OFFSET;
+  int8_t IR_LNG2_OFFSET_TEMP[2] = IR_LNG2_OFFSET;
+  int8_t USONIC1_OFFSET_TEMP[2] = USONIC1_OFFSET;
+  int8_t USONIC2_OFFSET_TEMP[2] = USONIC2_OFFSET;
+
+  IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE, IR_SHT1_OFFSET_TEMP, IR_SHT1_ANGLE);
+  IR_MED1.initialize(IR_MED1_PIN, MED_RANGE, IR_MED1_OFFSET_TEMP, IR_MED1_ANGLE);
+  IR_MED2.initialize(IR_MED2_PIN, MED_RANGE, IR_MED2_OFFSET_TEMP, IR_MED2_ANGLE);
+  IR_LNG1.initialize(IR_LNG1_PIN, LNG_RANGE, IR_LNG1_OFFSET_TEMP, IR_LNG1_ANGLE);
+  IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE, IR_LNG2_OFFSET_TEMP, IR_LNG2_ANGLE);
+  USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN, USONIC1_OFFSET_TEMP, USONIC1_ANGLE);
+  USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC1_OFFSET_TEMP, USONIC1_ANGLE);
   
   IR_VAR1.initialize(IR_VAR1_PIN);
   IR_VAR2.initialize(IR_VAR2_PIN);
@@ -92,7 +101,6 @@ void init_sensor_core(void) {
 
 void update_sensors(void) {
   IR_SHT1.update();
-  IR_SHT2.update();
   IR_MED1.update();
   IR_MED2.update();
   IR_LNG1.update();
@@ -104,26 +112,47 @@ void update_sensors(void) {
   IR_VAR2.update();
   IR_VAR3.update();
   //PRINTLN(USONIC1.read());
-  IMU.update();
+  //IMU.update();
   //COLOUR.update();
-  
 }
+
+bool weight_detect(void) {
+
+  // Check left. No need for abs as the lower one (USONIC) should always be less.
+  if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE) {
+    weight_location = USONIC1.cart_read();
+    return true;
+  }
+  // Check right
+  else if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE) {
+    weight_location = USONIC2.cart_read();
+    return true;
+  }
+  else {
+    weight_location = NO_WEIGHT;
+    return false;
+  }
+}
+
 
 ///////////////////////////////////////
 /// INFRARED SENSOR CLASS FUNCTIONS ///
 ///////////////////////////////////////
-void InfraredSensor::initialize(uint8_t init_port, uint8_t init_type) {
-  this->port = init_port;
+void InfraredSensor::initialize(uint8_t init_pin, uint8_t init_type, int8_t init_offset[2], float init_angle) {
+  this->pin = init_pin;
   this->type = init_type;
+  this->offset = init_offset;
+  this->polar_value.theta = init_angle;
 }
 
 void InfraredSensor::update(void) {
-  this->raw_value = analogRead(this->port);
-  this->value = NOT_READ;
+  this->raw_value = analogRead(this->pin);
+  this->polar_value.r = NOT_READ;
+  this->cart_value.x = NOT_READ;
 }
 
-int16_t InfraredSensor::read(void) {
-  if (this->value == NOT_READ) {  // Only converts value once
+PolarVec InfraredSensor::polar_read(void) {
+  if (this->polar_value.r == NOT_READ) {  // Only converts value once
     if (type == SHT_RANGE) {
       this->read_sht();
     }
@@ -134,79 +163,125 @@ int16_t InfraredSensor::read(void) {
       this->read_lng();
     }
   }
- 
- return this->value;
+  return this->polar_value;
+}
+
+CartVec InfraredSensor::cart_read(void) {
+  if (this->cart_value.x == NOT_READ) {  // Only converts value once
+    if (polar_read().r == NOT_VALID) {
+      this->cart_value.x = NOT_VALID;
+    } else {
+    this->cart_value = this->polar_value + this->offset;
+    }
+  }
+  return this->cart_value;
 }
 
 void InfraredSensor::read_sht(void) {
+  this->polar_value.r = this->raw_value;
   
-  if (this->raw_value >= IR_SHT_MIN_ADC || this->raw_value <= IR_SHT_MAX_ADC) {
-    this->value = this->raw_value;
+  if (this->raw_value >= IR_SHT_MIN_ADC && this->raw_value < IR_SHT_DV1_ADC) {
+    map(this->polar_value.r, IR_SHT_MIN_ADC, IR_SHT_DV1_ADC, IR_SHT_MIN_MM, IR_SHT_DV1_MM);
+  }
+  else if (this->raw_value >= IR_SHT_DV1_ADC && this->raw_value < IR_SHT_DV2_ADC) {
+    map(this->polar_value.r, IR_SHT_DV1_ADC, IR_SHT_DV2_ADC, IR_SHT_DV1_MM, IR_SHT_DV2_MM);
+  }
+  else if (this->raw_value >= IR_SHT_DV2_ADC && this->raw_value < IR_SHT_MAX_ADC) {
+    map(this->polar_value.r, IR_SHT_DV2_ADC, IR_SHT_MAX_ADC, IR_SHT_DV2_MM, IR_SHT_MAX_MM);
   } else {
-    this->value = NOT_VALID;
+    this->polar_value.r = NOT_VALID;
   }
 }
 
 void InfraredSensor::read_med(void) {
+  this->polar_value.r = this->raw_value;
   
-  if (this->raw_value >= IR_MED_MIN_ADC || this->raw_value <= IR_MED_MAX_ADC) {
-    this->value = this->raw_value;
+  if (this->raw_value >= IR_MED_MIN_ADC && this->raw_value < IR_MED_DV1_ADC) {
+    map(this->polar_value.r, IR_MED_MIN_ADC, IR_MED_DV1_ADC, IR_MED_MIN_MM, IR_MED_DV1_MM);
+  }
+  else if (this->raw_value >= IR_MED_DV1_ADC && this->raw_value < IR_MED_DV2_ADC) {
+    map(this->polar_value.r, IR_MED_DV1_ADC, IR_MED_DV2_ADC, IR_MED_DV1_MM, IR_MED_DV2_MM);
+  }
+  else if (this->raw_value >= IR_MED_DV2_ADC && this->raw_value < IR_MED_MAX_ADC) {
+    map(this->polar_value.r, IR_MED_DV2_ADC, IR_MED_MAX_ADC, IR_MED_DV2_MM, IR_MED_MAX_MM);
   } else {
-    this->value = NOT_VALID;
+    this->polar_value.r = NOT_VALID;
   }
 }
 
 void InfraredSensor::read_lng(void) {
+  this->polar_value.r = this->raw_value;
   
-  if (this->raw_value >= IR_LNG_MIN_ADC || this->raw_value <= IR_LNG_MAX_ADC) {
-    this->value = this->raw_value;
+  if (this->raw_value >= IR_LNG_MIN_ADC && this->raw_value < IR_LNG_DV1_ADC) {
+    map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
+  }
+  else if (this->raw_value >= IR_LNG_DV1_ADC && this->raw_value < IR_LNG_DV2_ADC) {
+    map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
+  }
+  else if (this->raw_value >= IR_LNG_DV2_ADC && this->raw_value < IR_LNG_MAX_ADC) {
+    map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
   } else {
-    this->value = NOT_VALID;
+    this->polar_value.r = NOT_VALID;
   }
 }
+
 
 /////////////////////////////////////////
 /// ULTRASONIC SENSOR CLASS FUNCTIONS ///
 /////////////////////////////////////////
-void UltrasonicSensor::initialize(uint8_t init_trig, uint8_t init_echo) {
-  this->trig = init_trig;
-  this->echo = init_echo;
-  pinMode(init_trig, OUTPUT);
-  pinMode(init_echo, INPUT);
+void UltrasonicSensor::initialize(uint8_t init_trig_pin, uint8_t init_echo_pin, int8_t init_offset[2], float init_angle) {
+  this->trig_pin = init_trig_pin;
+  this->echo_pin = init_echo_pin;
+  this->offset = init_offset;
+  this->polar_value.theta = init_angle;
+  
+  pinMode(init_trig_pin, OUTPUT);
+  pinMode(init_echo_pin, INPUT);
 }
 
 void UltrasonicSensor::update(void) {
-  digitalWrite(this->trig, LOW);
+  digitalWrite(this->trig_pin, LOW);
   delayMicroseconds(2);
-  digitalWrite(this->trig, HIGH);
+  digitalWrite(this->trig_pin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(this->trig, LOW);
+  digitalWrite(this->trig_pin, LOW);
   
-  this->raw_value = pulseIn(this->echo, HIGH);
-  this->value = NOT_READ;
+  this->raw_value = pulseIn(this->echo_pin, HIGH);
+  this->polar_value.r = NOT_READ;
+  this->cart_value.x = NOT_READ;
 }
 
-int16_t UltrasonicSensor::read(void) {
-  if (this->value == NOT_READ) {  // Only converts value once
-    this->value = this->raw_value / 29 / 2;  // microseconds to centimeters
-    if (this->value >= 1000) {
-      this->value = -1;
+PolarVec UltrasonicSensor::polar_read(void) {
+  if (this->polar_value.r == NOT_READ) {  // Only converts value once
+    if (this->raw_value < 1000) { // to change
+      this->polar_value.r = this->raw_value / 29 / 2;  // microseconds to centimeters
+    } else {
+      this->polar_value.r = NOT_VALID;
     }
   }
- 
- return this->value;
-  
+  return this->polar_value;
+}
+
+CartVec UltrasonicSensor::cart_read(void) {
+  if (this->cart_value.x == NOT_READ) {  // Only converts value once
+    if (polar_read().r == NOT_VALID) {
+      this->cart_value.x = NOT_VALID;
+    } else {
+    this->cart_value = this->polar_value + this->offset;
+    }
+  }
+  return this->cart_value;
 }
 
 ///////////////////////////////////////
 /// DIGIATAL SENSOR CLASS FUNCTIONS ///
 ///////////////////////////////////////
-void DigitalSensor::initialize(uint8_t init_port) {
-  this->port = init_port;
+void DigitalSensor::initialize(uint8_t init_pin) {
+  this->pin = init_pin;
 }
 
 void DigitalSensor::update(void) {
-  this->value = digitalRead(this->port);
+  this->value = digitalRead(this->pin);
 }
 
 bool DigitalSensor::read(void) {

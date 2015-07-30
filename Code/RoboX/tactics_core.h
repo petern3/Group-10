@@ -26,33 +26,26 @@
 ///////////////
 /// DEFINES ///
 ///////////////
-#define PRIMARY_MODE '0'
-#define SECONDARY_MODE '1'
-#define MANUAL_MODE '2'
-#define DEFAULT_MODE SECONDARY_MODE  // can change to any of the previous modes
+#define IDLE_MODE '0'
+#define PRIMARY_MODE '1'
+#define SECONDARY_MODE '2'
+#define MANUAL_MODE '3'
+//#define DEFAULT_MODE IDLE_MODE  // can change to any of the previous modes
+
+#define SEARCHING 0
+#define COLLECTING 1
+#define RETURNING 2
 
 ///////////////
 /// GLOBALS ///
 ///////////////
 extern uint8_t OPERATION_MODE;
 
-///////////////
-/// STRUCTS ///
-///////////////
-typedef struct {
-  float x;
-  float y;
-} CartVec_t;
-
-typedef struct {
-  float r;
-  float theta;
-} PolarVec_t;
-
 /////////////////
 /// FUNCTIONS ///
 /////////////////
 void init_tactics_core(void);
+void idle_mode(void);
 void primary_tactic(void);
 void secondary_tactic(void);
 void manual_mode(void);

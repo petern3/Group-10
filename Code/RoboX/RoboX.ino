@@ -19,21 +19,20 @@
 #include <inttypes.h>
 #include <Servo.h>
 #include <Herkulex.h>
-#include <Stepper.h>
 #include <SPI.h>
 #include <SD.h>
 #include <TimerThree.h>
 #include <Wire.h>
-#include "Adafruit_TCS34725.h"
+#include <Adafruit_TCS34725.h>
 
 #include "config.h"
 #include "actuator_core.h"
 #include "exception_core.h"
 #include "interrupt_core.h"
 #include "map_core.h"
-#include "misc_core.h"
 #include "sensor_core.h"
 #include "tactics_core.h"
+#include "trig_core.h"
 #include "voice_core.h"
 
 //////////////////////
@@ -63,11 +62,14 @@ void loop() {
     case PRIMARY_MODE:
       primary_tactic();
       break;
+    case SECONDARY_MODE:
+      secondary_tactic();
+      break;
     case MANUAL_MODE:
       manual_mode();
       break;
     default:
-      secondary_tactic();
+      idle_mode();
   }
 }
 

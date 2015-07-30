@@ -98,33 +98,63 @@
 #define MOTOR_P 10
 
 /// STEPPER MOTOR CONFIG ///
-#define STEPPER1_SPR 1040 // Geared
-#define STEPPER2_SPR 1040 // Geared
+#define STEPPER1_SPR 1036 // 630/1.8*5.18 Geared
+#define STEPPER2_SPR 1036 // Geared
 //#define STEPPER3_SPR 200  // to calibrate
 //#define STEPPER4_SPR 200  // to calibrate
 
 /////////////////////
 /// SENSOR CONFIG ///
 /////////////////////
-#define IR_SHT_MIN_MM 40
-#define IR_SHT_MAX_MM 300
-#define IR_SHT_MIN_ADC 157    // To measure
+#define IR_SHT1_OFFSET {0, 0}
+#define IR_SHT1_ANGLE 0
+#define IR_MED1_OFFSET {0, 0}
+#define IR_MED1_ANGLE 0
+#define IR_MED2_OFFSET {0, 0}
+#define IR_MED2_ANGLE 0
+#define IR_LNG1_OFFSET {0, 0}
+#define IR_LNG1_ANGLE 0
+#define IR_LNG2_OFFSET {0, 0}
+#define IR_LNG2_ANGLE 0
+#define USONIC1_OFFSET {0, 0}
+#define USONIC1_ANGLE 0
+#define USONIC2_OFFSET {0, 0}
+#define USONIC2_ANGLE 0
+
+
+#define IR_SHT_MIN_ADC 157   // To measure
+#define IR_SHT_DV1_ADC 200   // to measure
+#define IR_SHT_DV2_ADC 400   // to measure
 #define IR_SHT_MAX_ADC 1023  // To measure
+#define IR_SHT_MIN_MM 40
+#define IR_SHT_DV1_MM 120
+#define IR_SHT_DV2_MM 200
+#define IR_SHT_MAX_MM 300
 
-#define IR_MED_MIN_MM 100
-#define IR_MED_MAX_MM 800
-#define IR_MED_MIN_ADC 0     // To measure
+#define IR_MED_MIN_ADC 0   // To measure
+#define IR_MED_DV1_ADC 200   // to measure
+#define IR_MED_DV2_ADC 400   // to measure
 #define IR_MED_MAX_ADC 1023  // To measure
+#define IR_MED_MIN_MM 100
+#define IR_MED_DV1_MM 300
+#define IR_MED_DV2_MM 500
+#define IR_MED_MAX_MM 800
 
-#define IR_LNG_MIN_MM 200
-#define IR_LNG_MAX_MM 1500
-#define IR_LNG_MIN_ADC 0     // To measure
+#define IR_LNG_MIN_ADC 0   // To measure
+#define IR_LNG_DV1_ADC 200   // to measure
+#define IR_LNG_DV2_ADC 400   // to measure
 #define IR_LNG_MAX_ADC 1023  // To measure
+#define IR_LNG_MIN_MM 200
+#define IR_LNG_DV1_MM 600
+#define IR_LNG_DV2_MM 1000
+#define IR_LNG_MAX_MM 1500
 
 #define USONIC_MIN_MM 20
 #define USONIC_MAX_MM 4000
 #define USONIC_MIN_ADC 0     // To measure
 #define USONIC_MAX_ADC 1023  // To measure
+
+#define WEIGHT_DETECT_TOLERANCE 10 // cm
 
 //////////////////
 /// MAP CONFIG ///

@@ -70,6 +70,7 @@ class ServoMotor {
 extern DCMotor DC;
 extern ServoMotor SERVO1;
 extern ServoMotor SERVO2;
+extern uint8_t SERVO_COLOUR;
 extern StepperMotor STEPPER1;
 extern StepperMotor STEPPER2;
 

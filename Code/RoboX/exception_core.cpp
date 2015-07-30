@@ -16,7 +16,6 @@
 ////////////////
 #include "exception_core.h"
 #include "voice_core.h"
-#include "misc_core.h"
 
 ///////////////
 /// GLOBALS ///
@@ -41,6 +40,18 @@ void init_exception_core(void) {
   
   PRINTLN("done");
 }
+
+uint8_t string_length(char* to_count) {
+  uint8_t index = 0;
+  char s = to_count[index];
+  
+  while (s != '\0') {
+    s = to_count[index];
+    index++;
+  }
+  return index;
+}
+
 
 /////////////////////////////////
 /// EXCEPTION CLASS FUNCTIONS ///

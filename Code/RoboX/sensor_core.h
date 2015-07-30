@@ -23,7 +23,9 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <Wire.h>
-#include "Adafruit_TCS34725.h"
+#include <Adafruit_TCS34725.h>
+
+#include "trig_core.h"
 
 ///////////////
 /// DEFINES ///
@@ -71,42 +73,49 @@
 #define NOT_VALID -1
 #define NOT_READ -2
 
+
 ///////////////
 /// CLASSES ///
 ///////////////
 class InfraredSensor {
   private:
-    uint8_t port;
+    uint8_t pin;
     int8_t type;
-    int16_t raw_value;
-    int16_t value;
+    int32_t raw_value;
+    CartVec offset;
+    PolarVec polar_value;
+    CartVec cart_value;
     void read_sht(void);
     void read_med(void);
     void read_lng(void);
   public:
-    void initialize(uint8_t init_port, uint8_t init_type);
+    void initialize(uint8_t init_pin, uint8_t init_type, int8_t init_offset[2], float init_angle);
     void update(void);
-    int16_t read(void);
+    CartVec cart_read(void);
+    PolarVec polar_read(void);
 };
 
 class UltrasonicSensor {
   private:
-    uint8_t trig;
-    uint8_t echo;
+    uint8_t trig_pin;
+    uint8_t echo_pin;
     int32_t raw_value;
-    int16_t value;
+    CartVec offset;
+    PolarVec polar_value;
+    CartVec cart_value;
   public:
-    void initialize(uint8_t init_trig, uint8_t init_echo);
+    void initialize(uint8_t init_trig_pin, uint8_t init_echo_pin, int8_t init_offset[2], float init_angle);
     void update(void);
-    int16_t read(void);
+    CartVec cart_read(void);
+    PolarVec polar_read(void);
 };
 
 class DigitalSensor {
   private:
-    uint8_t port;
+    uint8_t pin;
     bool value;
   public:
-  	void initialize(uint8_t init_port);
+  	void initialize(uint8_t init_pin);
     void update(void);
     bool read(void);
 };
@@ -135,7 +144,6 @@ class ColourSensor {
 /// GLOBALS ///
 ///////////////
 extern InfraredSensor IR_SHT1; //to rename to appropriate locations
-extern InfraredSensor IR_SHT2;
 extern InfraredSensor IR_MED1;
 extern InfraredSensor IR_MED2;
 extern InfraredSensor IR_LNG1;
@@ -148,11 +156,14 @@ extern DigitalSensor IR_VAR3;
 extern IMUSensor IMU;
 extern ColourSensor COLOUR;
 
+extern CartVec weight_location;
+
 /////////////////
 /// FUNCTIONS ///
 /////////////////
 void init_sensor_core(void);
 void update_sensors(void);
+bool weight_detect(void);
 
 
 

@@ -16,7 +16,7 @@
 ////////////////
 #include "interrupt_core.h"
 #include "actuator_core.h"
-#include "misc_core.h"
+#include "trig_core.h"
 #include "sensor_core.h"
 
 ///////////////
@@ -32,6 +32,7 @@ bool RIGHT_DIR = DC_FORWARD;
 
 volatile float LEFT_ROTATION = 0;
 volatile float RIGHT_ROTATION = 0;
+
 
 //////////////////
 /// INTERRUPTS ///

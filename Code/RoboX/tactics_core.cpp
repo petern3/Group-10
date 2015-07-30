@@ -19,13 +19,13 @@
 #include "exception_core.h"
 #include "interrupt_core.h"
 #include "map_core.h"
-#include "misc_core.h"
+#include "trig_core.h"
 #include "sensor_core.h"
 
 ///////////////
 /// GLOBALS ///
 ///////////////
-uint8_t OPERATION_MODE = DEFAULT_MODE;
+uint8_t OPERATION_MODE = IDLE_MODE;
 
 /////////////////
 /// FUNCTIONS ///
@@ -36,7 +36,7 @@ void init_tactics_core(void) {
   PRINTLN("done");
 }
 
-static void move_towards_target(PolarVec_t target) {
+static void move_towards_target(PolarVec target) {
   if (target.r > 255) {
     target.r = 255;
   }
@@ -50,30 +50,41 @@ static void move_towards_target(PolarVec_t target) {
   DC.drive(motor_speed, motor_rotation);
 }
 
-
-static CartVec_t get_local_target(void) {
-  CartVec_t target = {0, 0};
-  
-  
-  
-  return target;
-}
-
-static PolarVec_t cart_to_polar(CartVec_t cart) {
-  // Converts it to a bearing from -180 to 180 where 0 is North
-  PolarVec_t polar = {0, 0};
-  if (cart.x != 0 && cart.y != 0) {
-    polar.r = sqrt((cart.x*cart.x) + (cart.y*cart.y));
-    if (cart.x >= 0) {
-      polar.theta = pi_2 - atan(cart.y / cart.x);
-    } else {
-      polar.theta = -pi_2 - atan(cart.y / cart.x);
-    }
+void print_buffer(int16_t* to_print, uint16_t len) {
+  for (uint16_t i=0; i < len; i++) {
+    PRINT(to_print[i]);
+    PRINT("  ");
   }
-  return polar;
+  PRINTLN();
 }
 
 
+/////////////////
+/// IDLE MODE ///
+/////////////////
+void idle_mode(void) {
+  PRINTLN("Idling\n");
+  char serial_byte = '\0';
+  
+  while (OPERATION_MODE == IDLE_MODE) {
+    
+    #ifdef ENABLE_SERIAL
+    if (Serial.available() > 0) {
+      serial_byte = Serial.read();
+
+      if (serial_byte == PRIMARY_MODE) {
+        OPERATION_MODE = PRIMARY_MODE;
+      }
+      else if (serial_byte == SECONDARY_MODE) {
+        OPERATION_MODE = SECONDARY_MODE;
+      }
+      else if (serial_byte == MANUAL_MODE) {
+        OPERATION_MODE = MANUAL_MODE;
+      }
+    }
+    #endif
+  }
+}
 
 //////////////////////
 /// PRIMARY TACTIC ///
@@ -83,8 +94,9 @@ void primary_tactic(void) {
   Timer3.setPeriod(PRIMARY_TACTIC_PERIOD);
   Timer3.attachInterrupt(primary_tactic_ISR);
   
+  uint8_t operation_state = SEARCHING;
   Position_t position_target = {0, 0};
-  PolarVec_t polar_target = {0, 0};
+  PolarVec polar_target = {0, 0};
   char serial_byte = '\0';
   
   while (!SD_ERROR.is_active && OPERATION_MODE == PRIMARY_MODE) {
@@ -99,6 +111,9 @@ void primary_tactic(void) {
       }
       else if (serial_byte == MANUAL_MODE) {
         OPERATION_MODE = MANUAL_MODE;
+      }
+      else if (serial_byte == IDLE_MODE) {
+        OPERATION_MODE = IDLE_MODE;
       }
     }
     #endif
@@ -117,20 +132,51 @@ void primary_tactic(void) {
 ////////////////////////
 /// SECONDARY TACTIC ///
 ////////////////////////
+static CartVec get_local_target(void) {
+  CartVec target = {0, 0};
+  
+  return target;
+}
+
+
+
 void secondary_tactic(void) {
   PRINTLN("Starting secondary tactic:");
   Timer3.setPeriod(SECONDARY_TACTIC_PERIOD);
   Timer3.attachInterrupt(secondary_tactic_ISR);
-  
-  CartVec_t cart_target = {0, 0};
-  PolarVec_t polar_target = {0, 0};
+
+  uint8_t operation_state = SEARCHING;
+  CartVec cart_target = {0, 0};
+  PolarVec polar_target = {0, 0};
   char serial_byte = '\0';
   
   while(OPERATION_MODE == SECONDARY_MODE) {
     
-    cart_target = get_local_target();
+    switch (operation_state) {
+      case SEARCHING:
+        if (weight_detect() == true) {
+          operation_state = COLLECTING;
+        } else {
+          cart_target = get_local_target();
+        }
+        break;
+      case COLLECTING:
+        
+        if (weight_detect() == false) {
+          operation_state = SEARCHING;
+        } else {
+          cart_target = weight_location;
+        }
+        break;
+      case RETURNING:
+        cart_target = get_local_target();
+        break;
+      
+    }
+    
     polar_target = cart_to_polar(cart_target);
     move_towards_target(polar_target);
+    Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, polar_target.theta, 100, SERVO_COLOUR);
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
@@ -141,6 +187,9 @@ void secondary_tactic(void) {
       }
       else if (serial_byte == MANUAL_MODE) {
         OPERATION_MODE = MANUAL_MODE;
+      }
+      else if (serial_byte == IDLE_MODE) {
+        OPERATION_MODE = IDLE_MODE;
       }
     }
     #endif
@@ -204,6 +253,7 @@ void manual_mode(void) {
         TURNING = 0;
         PRINTLN("\tStopping");
       }
+      
       else if (serial_byte == EXTEND) {
         extend_magnets();
         PRINTLN("\tExtending magnets");
@@ -216,11 +266,15 @@ void manual_mode(void) {
         toggle_magnets();
         PRINTLN("\tToggling magnets");
       }
+      
       else if (serial_byte == PRIMARY_MODE) {
         OPERATION_MODE = PRIMARY_MODE;
       }
       else if (serial_byte == SECONDARY_MODE) {
         OPERATION_MODE = SECONDARY_MODE;
+      }
+      else if (serial_byte == IDLE_MODE) {
+        OPERATION_MODE = IDLE_MODE;
       }
       
       /*
