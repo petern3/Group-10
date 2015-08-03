@@ -27,13 +27,13 @@
 
 #include "config.h"
 #include "actuator_core.h"
+#include "audio_core.h"
 #include "exception_core.h"
 #include "interrupt_core.h"
 #include "map_core.h"
 #include "sensor_core.h"
 #include "tactics_core.h"
 #include "trig_core.h"
-#include "voice_core.h"
 
 //////////////////////
 /// INITIALIZATION ///
@@ -43,11 +43,11 @@ void setup() {
   PRINTLN("\nInitializing:");
   
   init_actuator_core();
+  init_audio_core();
   //init_exception_core();
   init_map_core();
   init_sensor_core();
   init_tactics_core();
-  init_voice_core();
   
   PRINTLN("Ready!\n");
   

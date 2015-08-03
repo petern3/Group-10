@@ -44,8 +44,8 @@ static void move_towards_target(PolarVec target) {
     target.theta = -target.theta + 180;
   }
   
-  int8_t motor_speed = MOTOR_P * target.r;
-  int8_t motor_rotation = MOTOR_P * target.theta;
+  int8_t motor_speed = SPEED_P * target.r;
+  int8_t motor_rotation = ROTATE_P * target.theta;
   
   DC.drive(motor_speed, motor_rotation);
 }
@@ -118,7 +118,7 @@ void primary_tactic(void) {
     }
     #endif
   }
-  PRINT("Primary tactic ");
+  PRINT("\nPrimary tactic ");
   Timer3.detachInterrupt();
   if (OPERATION_MODE == PRIMARY_MODE) {
     PRINTLN("failure\n");
@@ -134,6 +134,12 @@ void primary_tactic(void) {
 ////////////////////////
 static CartVec get_local_target(void) {
   CartVec target = {0, 0};
+  CartVec left_pos = IR_MED2.cart_read();
+  CartVec right_wall = IR_MED1.cart_read();
+  CartVec centre_wall = IR_LNG1.cart_read();
+  
+  //target.x = '
+  //target.y = 
   
   return target;
 }
@@ -144,7 +150,7 @@ void secondary_tactic(void) {
   PRINTLN("Starting secondary tactic:");
   Timer3.setPeriod(SECONDARY_TACTIC_PERIOD);
   Timer3.attachInterrupt(secondary_tactic_ISR);
-
+  
   uint8_t operation_state = SEARCHING;
   CartVec cart_target = {0, 0};
   PolarVec polar_target = {0, 0};
@@ -174,9 +180,9 @@ void secondary_tactic(void) {
       
     }
     
-    polar_target = cart_to_polar(cart_target);
+    polar_target = cart_target.polar();
     move_towards_target(polar_target);
-    Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, polar_target.theta, 100, SERVO_COLOUR);
+    Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, radians_to_degrees(polar_target.theta), 100, SERVO_COLOUR);
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
@@ -193,8 +199,18 @@ void secondary_tactic(void) {
       }
     }
     #endif
+
+    PRINT(IR_SHT1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED2.polar_read().r); PRINT("  ");
+    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
+    PRINT(IR_LNG2.polar_read().r); PRINT("  ");
+    PRINT(USONIC1.polar_read().r); PRINT("  ");
+    PRINT(USONIC2.polar_read().r); PRINT("  ");
+    PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read()); PRINT('\r');
+    
   }
-  PRINTLN("Secondary tactic ending\n");
+  PRINTLN("\nSecondary tactic ending\n");
   Timer3.detachInterrupt();
 }
 
@@ -298,12 +314,21 @@ void manual_mode(void) {
     
     DC.drive(FORWARD, TURNING);
     
+    PRINT(IR_SHT1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED2.polar_read().r); PRINT("  ");
+    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
+    PRINT(IR_LNG2.polar_read().r); PRINT("  ");
+    PRINT(USONIC1.polar_read().r); PRINT("  ");
+    PRINT(USONIC2.polar_read().r); PRINT("  ");
+    PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read()); PRINT('\r');
+    
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
     //COLOUR.read();
     //delay(200);
     
   }
-  PRINTLN("Receiving control\n");
+  PRINTLN("\nReceiving control\n");
   Timer3.detachInterrupt();
 }

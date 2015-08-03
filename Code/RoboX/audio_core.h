@@ -1,19 +1,19 @@
  ///////////////////////////////////////////////////////////////////////
 /*----------------------------------------------------------------------
- * voice_core.h
+ * audio_core.h
  *----------------------------------------------------------------------
  * 
  * Author:  Peter Nicholls
  * Created: 2015-05-30
  * Edited:  2015-05-31
  * 
- * The header file of the Voice Core.
+ * The header file of the Audio Core.
  * 
  *//////////////////////////////////////////////////////////////////////
  
 
-#ifndef VOICE_CORE_H
-#define VOICE_CORE_H
+#ifndef AUDIO_CORE_H
+#define AUDIO_CORE_H
 
 ////////////////
 /// INCLUDES ///
@@ -21,6 +21,7 @@
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
+//#include <Tone.h>
 
 ///////////////
 /// DEFINES ///
@@ -115,6 +116,10 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
+#define OCTAVE_OFFSET 0
+
+#define isdigit(n) (n >= '0' && n <= '9')
+
 ///////////////
 /// GLOBALS ///
 ///////////////
@@ -123,8 +128,8 @@ extern bool SOUNDS_ON;
 /////////////////
 /// FUNCTIONS ///
 /////////////////
-void init_voice_core(void);
-void play_sound(String file_name);
+void init_audio_core(void);
+void play_sound(char* file_name);
 
 
 #endif

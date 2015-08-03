@@ -15,7 +15,7 @@
 /// INCLUDES ///
 ////////////////
 #include "exception_core.h"
-#include "voice_core.h"
+#include "audio_core.h"
 
 ///////////////
 /// GLOBALS ///

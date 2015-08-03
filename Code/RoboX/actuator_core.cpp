@@ -45,8 +45,10 @@ void init_actuator_core(void) {
   
   attachInterrupt(DC_LEFT_INTERRUPT_PIN, left_encoder_ISR, RISING);  // can do 'CHANGE', but would include twice the interrupts (high CPU load)
   attachInterrupt(DC_RIGHT_INTERRUPT_PIN, right_encoder_ISR, RISING);
-  
-  DC.calibrate();
+
+  #ifdef AUTO_CALIBRATE_DC
+    DC.calibrate();
+  #endif
   
   if (DC_MOTOR_ERROR.is_active) {
     PRINTLN("failed");

@@ -43,24 +43,24 @@
 
 
 #define IR_SHT1_PIN A0 //10
-#define IR_SHT2_PIN A1 //11
-#define IR_MED1_PIN A9
-#define IR_MED2_PIN A8
-#define IR_LNG1_PIN A7
-#define IR_LNG2_PIN A6
+//#define IR_SHT2_PIN A1 //11
+#define IR_MED1_PIN A2
+#define IR_MED2_PIN A3
+#define IR_LNG1_PIN A4
+#define IR_LNG2_PIN A5
 #define USONIC1_TRIG_PIN 11
 #define USONIC1_ECHO_PIN 10
-#define USONIC2_TRIG_PIN 11
-#define USONIC2_ECHO_PIN 10
-#define SONAR_PIN A3
+#define USONIC2_TRIG_PIN 9
+#define USONIC2_ECHO_PIN 8
+//#define SONAR_PIN A6
 
-#define IR_VAR1_PIN 29
-#define IR_VAR2_PIN 28
-#define IR_VAR3_PIN 27
+#define IR_VAR1_PIN 37
+#define IR_VAR2_PIN 36
+#define IR_VAR3_PIN 35
 
 #define CHIP_SELECT_PIN 53
 
-#define SPEAKER_PIN 8
+#define SPEAKER_PIN 2
 
 ////////////////////////
 /// SCHEDULER CONFIG ///
@@ -93,9 +93,11 @@
 #define ENCODER_RESET_TIMEOUT 10000 // microseconds
 #define DC_FORWARD true
 #define DC_BACKWARD false
+//#define AUTO_CALIBRATE_DC
 #define DC_CALIBRATION_LIMIT 15 // 90 +/- n
 
-#define MOTOR_P 10
+#define SPEED_P 10
+#define ROTATE_P 10
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 1036 // 630/1.8*5.18 Geared
@@ -149,10 +151,7 @@
 #define IR_LNG_DV2_MM 1000
 #define IR_LNG_MAX_MM 1500
 
-#define USONIC_MIN_MM 20
-#define USONIC_MAX_MM 4000
-#define USONIC_MIN_ADC 0     // To measure
-#define USONIC_MAX_ADC 1023  // To measure
+#define USONIC_TIMEOUT 4640 //29 * 2 * (80cm), microseconds
 
 #define WEIGHT_DETECT_TOLERANCE 10 // cm
 
@@ -180,7 +179,7 @@
   #define PRINTLN(s)
 #endif
 
-//#define ENABLE_SOUNDS  // define if you want to play sounds
+#define ENABLE_SOUNDS  // define if you want to play sounds
 //#define DEBUG_ERROR_SOUNDS  // define if you only want error sounds
 
 //#define DEBUG_MAP_NUMBERS  // define if you want to display numbers instead of symbols

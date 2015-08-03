@@ -38,6 +38,8 @@ ColourSensor COLOUR;
 int8_t NO_WEIGHT[2] = {-1, -1};
 CartVec weight_location = {-1, -1};
 
+uint32_t USONIC_TIMEOUT_VALUE = USONIC_TIMEOUT;
+
 /////////////////
 /// FUNCTIONS ///
 /////////////////
@@ -105,13 +107,14 @@ void update_sensors(void) {
   IR_MED2.update();
   IR_LNG1.update();
   IR_LNG2.update();
-  //USONIC1.update();
-  //USONIC2.update();
+  
+  USONIC1.update();
+  USONIC2.update();
   
   IR_VAR1.update();
   IR_VAR2.update();
   IR_VAR3.update();
-  //PRINTLN(USONIC1.read());
+  
   //IMU.update();
   //COLOUR.update();
 }
@@ -153,13 +156,13 @@ void InfraredSensor::update(void) {
 
 PolarVec InfraredSensor::polar_read(void) {
   if (this->polar_value.r == NOT_READ) {  // Only converts value once
-    if (type == SHT_RANGE) {
+    if (this->type == SHT_RANGE) {
       this->read_sht();
     }
-    else if (type == MED_RANGE) {
+    else if (this->type == MED_RANGE) {
       this->read_med();
     }
-    else if (type == LNG_RANGE) {
+    else if (this->type == LNG_RANGE) {
       this->read_lng();
     }
   }
@@ -181,13 +184,13 @@ void InfraredSensor::read_sht(void) {
   this->polar_value.r = this->raw_value;
   
   if (this->raw_value >= IR_SHT_MIN_ADC && this->raw_value < IR_SHT_DV1_ADC) {
-    map(this->polar_value.r, IR_SHT_MIN_ADC, IR_SHT_DV1_ADC, IR_SHT_MIN_MM, IR_SHT_DV1_MM);
+    //map(this->polar_value.r, IR_SHT_MIN_ADC, IR_SHT_DV1_ADC, IR_SHT_MIN_MM, IR_SHT_DV1_MM);
   }
   else if (this->raw_value >= IR_SHT_DV1_ADC && this->raw_value < IR_SHT_DV2_ADC) {
-    map(this->polar_value.r, IR_SHT_DV1_ADC, IR_SHT_DV2_ADC, IR_SHT_DV1_MM, IR_SHT_DV2_MM);
+    //map(this->polar_value.r, IR_SHT_DV1_ADC, IR_SHT_DV2_ADC, IR_SHT_DV1_MM, IR_SHT_DV2_MM);
   }
   else if (this->raw_value >= IR_SHT_DV2_ADC && this->raw_value < IR_SHT_MAX_ADC) {
-    map(this->polar_value.r, IR_SHT_DV2_ADC, IR_SHT_MAX_ADC, IR_SHT_DV2_MM, IR_SHT_MAX_MM);
+    //map(this->polar_value.r, IR_SHT_DV2_ADC, IR_SHT_MAX_ADC, IR_SHT_DV2_MM, IR_SHT_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
   }
@@ -197,13 +200,13 @@ void InfraredSensor::read_med(void) {
   this->polar_value.r = this->raw_value;
   
   if (this->raw_value >= IR_MED_MIN_ADC && this->raw_value < IR_MED_DV1_ADC) {
-    map(this->polar_value.r, IR_MED_MIN_ADC, IR_MED_DV1_ADC, IR_MED_MIN_MM, IR_MED_DV1_MM);
+    //map(this->polar_value.r, IR_MED_MIN_ADC, IR_MED_DV1_ADC, IR_MED_MIN_MM, IR_MED_DV1_MM);
   }
   else if (this->raw_value >= IR_MED_DV1_ADC && this->raw_value < IR_MED_DV2_ADC) {
-    map(this->polar_value.r, IR_MED_DV1_ADC, IR_MED_DV2_ADC, IR_MED_DV1_MM, IR_MED_DV2_MM);
+    //map(this->polar_value.r, IR_MED_DV1_ADC, IR_MED_DV2_ADC, IR_MED_DV1_MM, IR_MED_DV2_MM);
   }
   else if (this->raw_value >= IR_MED_DV2_ADC && this->raw_value < IR_MED_MAX_ADC) {
-    map(this->polar_value.r, IR_MED_DV2_ADC, IR_MED_MAX_ADC, IR_MED_DV2_MM, IR_MED_MAX_MM);
+    //map(this->polar_value.r, IR_MED_DV2_ADC, IR_MED_MAX_ADC, IR_MED_DV2_MM, IR_MED_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
   }
@@ -213,13 +216,13 @@ void InfraredSensor::read_lng(void) {
   this->polar_value.r = this->raw_value;
   
   if (this->raw_value >= IR_LNG_MIN_ADC && this->raw_value < IR_LNG_DV1_ADC) {
-    map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
+    //map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
   }
   else if (this->raw_value >= IR_LNG_DV1_ADC && this->raw_value < IR_LNG_DV2_ADC) {
-    map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
+    //map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
   }
   else if (this->raw_value >= IR_LNG_DV2_ADC && this->raw_value < IR_LNG_MAX_ADC) {
-    map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
+    //map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
   }
@@ -246,14 +249,14 @@ void UltrasonicSensor::update(void) {
   delayMicroseconds(10);
   digitalWrite(this->trig_pin, LOW);
   
-  this->raw_value = pulseIn(this->echo_pin, HIGH);
+  this->raw_value = pulseIn(this->echo_pin, HIGH, USONIC_TIMEOUT_VALUE);
   this->polar_value.r = NOT_READ;
   this->cart_value.x = NOT_READ;
 }
 
 PolarVec UltrasonicSensor::polar_read(void) {
   if (this->polar_value.r == NOT_READ) {  // Only converts value once
-    if (this->raw_value < 1000) { // to change
+    if (this->raw_value < USONIC_TIMEOUT) { // to check
       this->polar_value.r = this->raw_value / 29 / 2;  // microseconds to centimeters
     } else {
       this->polar_value.r = NOT_VALID;
