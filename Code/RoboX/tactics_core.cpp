@@ -37,20 +37,52 @@ void init_tactics_core(void) {
 }
 
 static void move_towards_target(PolarVec target) {
+  int16_t angle = radians_to_degrees(target.theta);
+  
   if (target.r > 255) {
     target.r = 255;
   }
-  if (target.theta > 180) {
-    target.theta = -target.theta + 180;
+  if (angle > 180) {
+    angle = -angle + 180;
   }
   
   int8_t motor_speed = SPEED_P * target.r;
-  int8_t motor_rotation = ROTATE_P * target.theta;
+  int8_t motor_rotation = ROTATE_P * angle;
   
   DC.drive(motor_speed, motor_rotation);
 }
 
-void print_buffer(int16_t* to_print, uint16_t len) {
+static void point_towards_target(PolarVec target) {
+  int16_t angle = radians_to_degrees(target.theta);
+  if (angle > 150) {
+    Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle-180, 200, LED_RED);
+  }
+  else if (angle < -150) {
+    Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle+180, 200, LED_RED);
+  } else {
+    Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle, 200, SERVO_COLOUR);
+    //PRINT(angle);
+  }
+}
+
+static void debug_sensors(void) {
+    
+    PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
+    PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
+        
+    //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED2.polar_read().r); PRINT("  ");
+    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
+    //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
+    PRINT(USONIC1.polar_read().r); PRINT("  ");
+    PRINT(USONIC2.polar_read().r); PRINT("  ");
+    //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
+    PRINT('\r');
+  
+}
+
+static void print_buffer(int16_t* to_print, uint16_t len) {
   for (uint16_t i=0; i < len; i++) {
     PRINT(to_print[i]);
     PRINT("  ");
@@ -65,13 +97,14 @@ void print_buffer(int16_t* to_print, uint16_t len) {
 void idle_mode(void) {
   PRINTLN("Idling\n");
   char serial_byte = '\0';
+  uint32_t initial_time = millis();
   
   while (OPERATION_MODE == IDLE_MODE) {
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
       serial_byte = Serial.read();
-
+      
       if (serial_byte == PRIMARY_MODE) {
         OPERATION_MODE = PRIMARY_MODE;
       }
@@ -83,6 +116,9 @@ void idle_mode(void) {
       }
     }
     #endif
+    if (millis() - initial_time > IDLE_TIMEOUT) {
+      OPERATION_MODE = PRIMARY_MODE;
+    }
   }
 }
 
@@ -134,13 +170,34 @@ void primary_tactic(void) {
 ////////////////////////
 static CartVec get_local_target(void) {
   CartVec target = {0, 0};
-  CartVec left_pos = IR_MED2.cart_read();
+  CartVec left_wall = IR_MED2.cart_read();
   CartVec right_wall = IR_MED1.cart_read();
   CartVec centre_wall = IR_LNG1.cart_read();
   
-  //target.x = '
-  //target.y = 
+  // x value
+  if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) {
+    target.x = left_wall.x + ROBOT_DIAMETER;
+  }
+  else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) {
+    target.x = right_wall.x - ROBOT_DIAMETER;
+  } else {
+    target.x = (left_wall.x + right_wall.x) / 2;
+  }
   
+  // y value
+  if (left_wall.y != NOT_VALID && right_wall.y == NOT_VALID) {
+    target.y = (left_wall.y) - ROBOT_DIAMETER;
+  }
+  else if (left_wall.y == NOT_VALID && right_wall.y != NOT_VALID) {
+    target.y = (right_wall.y) - ROBOT_DIAMETER;
+  }
+  else  if (left_wall.y == NOT_VALID && right_wall.y == NOT_VALID) {
+    target.y = ROBOT_DIAMETER;
+  } else {
+    target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_DIAMETER;
+  }
+  //target.x = -100;
+  //target.y = 0;
   return target;
 }
 
@@ -160,7 +217,7 @@ void secondary_tactic(void) {
     
     switch (operation_state) {
       case SEARCHING:
-        if (weight_detect() == true) {
+        if (false) { //weight_detect() == true) {
           operation_state = COLLECTING;
         } else {
           cart_target = get_local_target();
@@ -182,7 +239,7 @@ void secondary_tactic(void) {
     
     polar_target = cart_target.polar();
     move_towards_target(polar_target);
-    Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, radians_to_degrees(polar_target.theta), 100, SERVO_COLOUR);
+    point_towards_target(polar_target);
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
@@ -199,15 +256,11 @@ void secondary_tactic(void) {
       }
     }
     #endif
-
-    PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED2.polar_read().r); PRINT("  ");
-    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
-    PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    PRINT(USONIC1.polar_read().r); PRINT("  ");
-    PRINT(USONIC2.polar_read().r); PRINT("  ");
-    PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read()); PRINT('\r');
+    
+    PRINT("P ("); PRINT(polar_target.r); PRINT(", "); PRINT(radians_to_degrees(polar_target.theta)); PRINT(") ");
+    PRINT("C ("); PRINT(cart_target.x); PRINT(", "); PRINT(cart_target.y); PRINT(") ");
+    
+    debug_sensors();
     
   }
   PRINTLN("\nSecondary tactic ending\n");
@@ -248,7 +301,7 @@ void manual_mode(void) {
         PRINT("\tForward speed value is ");
         PRINTLN(FORWARD);
       }
-      else if (serial_byte == LFT) {
+      else if (serial_byte == RHT) {
         TURNING += TURNING_INCREMENT;
         if (TURNING > 90) {
           TURNING = 90;
@@ -256,7 +309,7 @@ void manual_mode(void) {
         PRINT("\tTurning speed value is ");
         PRINTLN(TURNING);
       }
-      else if (serial_byte == RHT) {
+      else if (serial_byte == LFT) {
         TURNING -= TURNING_INCREMENT;
         if (TURNING < -90) {
           TURNING = -90;
@@ -314,14 +367,7 @@ void manual_mode(void) {
     
     DC.drive(FORWARD, TURNING);
     
-    PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED2.polar_read().r); PRINT("  ");
-    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
-    PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    PRINT(USONIC1.polar_read().r); PRINT("  ");
-    PRINT(USONIC2.polar_read().r); PRINT("  ");
-    PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read()); PRINT('\r');
+    debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);

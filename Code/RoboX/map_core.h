@@ -21,7 +21,6 @@
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
-#include <stdlib.h>
 #include <SPI.h>
 #include <SD.h>
 

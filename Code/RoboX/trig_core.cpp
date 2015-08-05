@@ -86,7 +86,7 @@ CartVec CartVec::cart(void) {
 PolarVec CartVec::polar(void) {
   // Converts it to a bearing from -pi to pi where 0 is North
   PolarVec polar = {0, 0};
-  if (this->x != 0 && this->y != 0) {
+  if (this->x != 0 || this->y != 0) {
     polar.r = sqrt((this->x*this->x) + (this->y*this->y));
     if (this->x >= 0) {
       polar.theta = pi_2 - atan(this->y / this->x);
@@ -170,8 +170,8 @@ CartVec PolarVec::operator+(CartVec obj) {
 CartVec PolarVec::cart(void) {
   // Converts it from a bearing (from -pi to pi where 0 is North) to cartesian
   CartVec cart = {0, 0};
-  cart.x = this->r * cos(this->theta + 90);
-  cart.y = this->r * sin(this->theta + 90);
+  cart.x = this->r * cos(-this->theta + pi_2);
+  cart.y = this->r * sin(-this->theta + pi_2);
   
   return cart;
 }

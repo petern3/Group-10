@@ -21,7 +21,6 @@
 #include "Arduino.h"
 #include "config.h"
 #include <inttypes.h>
-#include <stdlib.h>
 #include <Wire.h>
 #include <Adafruit_TCS34725.h>
 
@@ -73,6 +72,15 @@
 #define NOT_VALID -1
 #define NOT_READ -2
 
+///////////////
+/// STRUCTS ///
+///////////////
+typedef struct {
+  uint8_t windex;
+  uint8_t rindex;
+  uint8_t size;
+  uint32_t* data;
+} CircBuf_t;
 
 ///////////////
 /// CLASSES ///
@@ -89,7 +97,7 @@ class InfraredSensor {
     void read_med(void);
     void read_lng(void);
   public:
-    int32_t raw_value;
+    CircBuf_t raw_value;  //int32_t raw_value;
     void initialize(uint8_t init_pin, uint8_t init_type, int8_t init_offset[2], float init_angle);
     void update(void);
     CartVec cart_read(void);

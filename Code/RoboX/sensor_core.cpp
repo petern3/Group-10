@@ -38,7 +38,7 @@ ColourSensor COLOUR;
 int8_t NO_WEIGHT[2] = {-1, -1};
 CartVec weight_location = {-1, -1};
 
-uint32_t USONIC_TIMEOUT_VALUE = USONIC_TIMEOUT;
+//uint32_t USONIC_TIMEOUT_VALUE = USONIC_TIMEOUT;
 
 /////////////////
 /// FUNCTIONS ///
@@ -83,13 +83,13 @@ void init_sensor_core(void) {
   int8_t USONIC1_OFFSET_TEMP[2] = USONIC1_OFFSET;
   int8_t USONIC2_OFFSET_TEMP[2] = USONIC2_OFFSET;
 
-  IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE, IR_SHT1_OFFSET_TEMP, IR_SHT1_ANGLE);
-  IR_MED1.initialize(IR_MED1_PIN, MED_RANGE, IR_MED1_OFFSET_TEMP, IR_MED1_ANGLE);
-  IR_MED2.initialize(IR_MED2_PIN, MED_RANGE, IR_MED2_OFFSET_TEMP, IR_MED2_ANGLE);
-  IR_LNG1.initialize(IR_LNG1_PIN, LNG_RANGE, IR_LNG1_OFFSET_TEMP, IR_LNG1_ANGLE);
-  IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE, IR_LNG2_OFFSET_TEMP, IR_LNG2_ANGLE);
-  USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN, USONIC1_OFFSET_TEMP, USONIC1_ANGLE);
-  USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC1_OFFSET_TEMP, USONIC1_ANGLE);
+  IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE, IR_SHT1_OFFSET_TEMP, degrees_to_radians(IR_SHT1_ANGLE));
+  IR_MED1.initialize(IR_MED1_PIN, MED_RANGE, IR_MED1_OFFSET_TEMP, degrees_to_radians(IR_MED1_ANGLE));
+  IR_MED2.initialize(IR_MED2_PIN, MED_RANGE, IR_MED2_OFFSET_TEMP, degrees_to_radians(IR_MED2_ANGLE));
+  IR_LNG1.initialize(IR_LNG1_PIN, LNG_RANGE, IR_LNG1_OFFSET_TEMP, degrees_to_radians(IR_LNG1_ANGLE));
+  IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE, IR_LNG2_OFFSET_TEMP, degrees_to_radians(IR_LNG2_ANGLE));
+  USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN, USONIC1_OFFSET_TEMP, degrees_to_radians(USONIC1_ANGLE));
+  USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC2_OFFSET_TEMP, degrees_to_radians(USONIC2_ANGLE));
   
   IR_VAR1.initialize(IR_VAR1_PIN);
   IR_VAR2.initialize(IR_VAR2_PIN);
@@ -121,20 +121,49 @@ void update_sensors(void) {
 
 bool weight_detect(void) {
 
-  // Check left. No need for abs as the lower one (USONIC) should always be less.
-  if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE) {
-    weight_location = USONIC1.cart_read();
-    return true;
+  // Check right. No need for abs as the lower one (USONIC) should always be less.
+  if (USONIC1.polar_read().r != NOT_VALID) { 
+    if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+        IR_MED1.polar_read().r == NOT_VALID) {
+      weight_location = USONIC1.cart_read();
+      return true;
+    }
   }
-  // Check right
-  else if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE) {
-    weight_location = USONIC2.cart_read();
-    return true;
+  // Check left
+  if (USONIC2.polar_read().r != NOT_VALID) { 
+    if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+        IR_MED1.polar_read().r == NOT_VALID) {
+      weight_location = USONIC2.cart_read();
+      return true;
+    }
   }
-  else {
-    weight_location = NO_WEIGHT;
-    return false;
+  weight_location = NO_WEIGHT;
+  return false;
+}
+
+static void buffer_initialize(CircBuf_t* buffer, uint8_t size) {
+  buffer->windex = 0;
+  buffer->rindex = 0;
+  buffer->size = size;
+  buffer->data =
+  (uint32_t *) calloc (size, sizeof(uint32_t));
+  // Note use of calloc() to clear contents.
+}
+
+static void buffer_store(CircBuf_t* buffer, uint32_t to_store){
+  buffer->data[buffer->windex] = to_store;
+  buffer->windex++;
+  if (buffer->windex >= buffer->size) {
+    buffer->windex = 0;
   }
+}
+
+static uint32_t buffer_average(CircBuf_t buffer) {
+  uint32_t sum = 0;
+  for (uint8_t i=0; i < buffer.size; i++) {
+    sum += buffer.data[i];
+  }
+  return sum / buffer.size;
 }
 
 
@@ -146,10 +175,16 @@ void InfraredSensor::initialize(uint8_t init_pin, uint8_t init_type, int8_t init
   this->type = init_type;
   this->offset = init_offset;
   this->polar_value.theta = init_angle;
+  buffer_initialize(&this->raw_value, SENSOR_BUFFER_SIZE);
 }
 
 void InfraredSensor::update(void) {
-  this->raw_value = analogRead(this->pin);
+  /*int32_t sum = 0;
+  for (uint8_t i=0; i < SENSOR_BUFFER_SIZE; i++) {
+    sum += analogRead(this->pin);
+  }
+  this->raw_value = sum / SENSOR_BUFFER_SIZE;*/
+  buffer_store(&this->raw_value, analogRead(this->pin));
   this->polar_value.r = NOT_READ;
   this->cart_value.x = NOT_READ;
 }
@@ -173,6 +208,7 @@ CartVec InfraredSensor::cart_read(void) {
   if (this->cart_value.x == NOT_READ) {  // Only converts value once
     if (polar_read().r == NOT_VALID) {
       this->cart_value.x = NOT_VALID;
+      this->cart_value.y = NOT_VALID;
     } else {
     this->cart_value = this->polar_value + this->offset;
     }
@@ -181,15 +217,16 @@ CartVec InfraredSensor::cart_read(void) {
 }
 
 void InfraredSensor::read_sht(void) {
-  this->polar_value.r = this->raw_value;
+  uint32_t average = buffer_average(this->raw_value);
+  this->polar_value.r = average;
   
-  if (this->raw_value >= IR_SHT_MIN_ADC && this->raw_value < IR_SHT_DV1_ADC) {
+  if (average >= IR_SHT_MIN_ADC && average < IR_SHT_DV1_ADC) {
     //map(this->polar_value.r, IR_SHT_MIN_ADC, IR_SHT_DV1_ADC, IR_SHT_MIN_MM, IR_SHT_DV1_MM);
   }
-  else if (this->raw_value >= IR_SHT_DV1_ADC && this->raw_value < IR_SHT_DV2_ADC) {
+  else if (average >= IR_SHT_DV1_ADC && average < IR_SHT_DV2_ADC) {
     //map(this->polar_value.r, IR_SHT_DV1_ADC, IR_SHT_DV2_ADC, IR_SHT_DV1_MM, IR_SHT_DV2_MM);
   }
-  else if (this->raw_value >= IR_SHT_DV2_ADC && this->raw_value < IR_SHT_MAX_ADC) {
+  else if (average >= IR_SHT_DV2_ADC && average < IR_SHT_MAX_ADC) {
     //map(this->polar_value.r, IR_SHT_DV2_ADC, IR_SHT_MAX_ADC, IR_SHT_DV2_MM, IR_SHT_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
@@ -197,31 +234,40 @@ void InfraredSensor::read_sht(void) {
 }
 
 void InfraredSensor::read_med(void) {
-  this->polar_value.r = this->raw_value;
+  // ADC        Distance
+  //  - \     /   800
+  //     \   /    400
+  //      \ /     200
+  //  +    *      100
   
-  if (this->raw_value >= IR_MED_MIN_ADC && this->raw_value < IR_MED_DV1_ADC) {
-    //map(this->polar_value.r, IR_MED_MIN_ADC, IR_MED_DV1_ADC, IR_MED_MIN_MM, IR_MED_DV1_MM);
+  uint32_t average = buffer_average(this->raw_value);
+  this->polar_value.r = average;
+
+  // Minimum range, largest ADC
+  if (average <= IR_MED_MIN_ADC && average > IR_MED_DV1_ADC) {
+    this->polar_value.r = map(this->polar_value.r, IR_MED_MIN_ADC, IR_MED_DV1_ADC, IR_MED_MIN_MM, IR_MED_DV1_MM);
   }
-  else if (this->raw_value >= IR_MED_DV1_ADC && this->raw_value < IR_MED_DV2_ADC) {
-    //map(this->polar_value.r, IR_MED_DV1_ADC, IR_MED_DV2_ADC, IR_MED_DV1_MM, IR_MED_DV2_MM);
+  else if (average <= IR_MED_DV1_ADC && average > IR_MED_DV2_ADC) {
+    this->polar_value.r = map(this->polar_value.r, IR_MED_DV1_ADC, IR_MED_DV2_ADC, IR_MED_DV1_MM, IR_MED_DV2_MM);
   }
-  else if (this->raw_value >= IR_MED_DV2_ADC && this->raw_value < IR_MED_MAX_ADC) {
-    //map(this->polar_value.r, IR_MED_DV2_ADC, IR_MED_MAX_ADC, IR_MED_DV2_MM, IR_MED_MAX_MM);
+  else if (average <= IR_MED_DV2_ADC && average >= IR_MED_MAX_ADC) {
+    this->polar_value.r = map(this->polar_value.r, IR_MED_DV2_ADC, IR_MED_MAX_ADC, IR_MED_DV2_MM, IR_MED_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
   }
 }
 
 void InfraredSensor::read_lng(void) {
-  this->polar_value.r = this->raw_value;
+  uint32_t average = buffer_average(this->raw_value);
+  this->polar_value.r = average;
   
-  if (this->raw_value >= IR_LNG_MIN_ADC && this->raw_value < IR_LNG_DV1_ADC) {
+  if (average >= IR_LNG_MIN_ADC && average < IR_LNG_DV1_ADC) {
     //map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
   }
-  else if (this->raw_value >= IR_LNG_DV1_ADC && this->raw_value < IR_LNG_DV2_ADC) {
+  else if (average >= IR_LNG_DV1_ADC && average < IR_LNG_DV2_ADC) {
     //map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
   }
-  else if (this->raw_value >= IR_LNG_DV2_ADC && this->raw_value < IR_LNG_MAX_ADC) {
+  else if (average >= IR_LNG_DV2_ADC && average < IR_LNG_MAX_ADC) {
     //map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
@@ -243,21 +289,32 @@ void UltrasonicSensor::initialize(uint8_t init_trig_pin, uint8_t init_echo_pin, 
 }
 
 void UltrasonicSensor::update(void) {
+  /*int32_t sum = 0;
+  for (uint8_t i=0; i < SENSOR_BUFFER_SIZE; i++) {
+    digitalWrite(this->trig_pin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(this->trig_pin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(this->trig_pin, LOW);
+  
+    sum += pulseIn(this->echo_pin, HIGH, USONIC_TIMEOUT_VALUE);
+  }
+  this->raw_value = sum / SENSOR_BUFFER_SIZE;*/
   digitalWrite(this->trig_pin, LOW);
   delayMicroseconds(2);
   digitalWrite(this->trig_pin, HIGH);
   delayMicroseconds(10);
   digitalWrite(this->trig_pin, LOW);
+  this->raw_value = (this->raw_value + pulseIn(this->echo_pin, HIGH, USONIC_TIMEOUT)) / 2;
   
-  this->raw_value = pulseIn(this->echo_pin, HIGH, USONIC_TIMEOUT_VALUE);
   this->polar_value.r = NOT_READ;
   this->cart_value.x = NOT_READ;
 }
 
 PolarVec UltrasonicSensor::polar_read(void) {
   if (this->polar_value.r == NOT_READ) {  // Only converts value once
-    if (this->raw_value < USONIC_TIMEOUT) { // to check
-      this->polar_value.r = this->raw_value / 29 / 2;  // microseconds to centimeters
+    if (this->raw_value != 0) { // due to pulseIn function
+      this->polar_value.r = this->raw_value / 5.8; // 29 / 2;  // microseconds to millimeters
     } else {
       this->polar_value.r = NOT_VALID;
     }
@@ -269,6 +326,7 @@ CartVec UltrasonicSensor::cart_read(void) {
   if (this->cart_value.x == NOT_READ) {  // Only converts value once
     if (polar_read().r == NOT_VALID) {
       this->cart_value.x = NOT_VALID;
+      this->cart_value.y = NOT_VALID;
     } else {
     this->cart_value = this->polar_value + this->offset;
     }

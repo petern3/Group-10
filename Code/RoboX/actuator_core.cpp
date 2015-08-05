@@ -12,7 +12,7 @@
  *//////////////////////////////////////////////////////////////////////
 
 
-#include "actuator_core.h"
+#include "actuator_core.h";
 #include "exception_core.h"
 #include "interrupt_core.h"
 #include "trig_core.h"
