@@ -2,7 +2,7 @@ clear, clc
 close all
 
 force_required = 150; %N
-motor_torque = 1.76; %Nm
+motor_torque = 1.76*2; %Nm
 
 radius_gear = 0.010; %needs to be more then half the distance of our tavel
 radius_rod = 0.030;
