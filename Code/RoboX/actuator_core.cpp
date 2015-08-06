@@ -52,7 +52,8 @@ void init_actuator_core(void) {
   
   if (DC_MOTOR_ERROR.is_active) {
     PRINTLN("failed");
-  } else {
+  }
+  else {
     PRINT("zero set to ");
     PRINTLN(DC.zero);
   }

@@ -59,15 +59,16 @@ static void point_towards_target(PolarVec target) {
   }
   else if (angle < -150) {
     Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle+180, 200, LED_RED);
-  } else {
+  }
+  else {
     Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle, 200, SERVO_COLOUR);
   }
 }
 
 static void debug_sensors(void) {
     
-    //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
-    //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
+    PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
+    PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
     PRINT(IR_MED1.polar_read().r); PRINT("  ");
@@ -179,7 +180,8 @@ static CartVec get_local_target(void) {
   }
   else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) { // right wall found, not left wall
     target.x = right_wall.x - ROBOT_RADIUS;
-  } else { // If both walls found (or no walls)
+  }
+  else { // If both walls found (or no walls)
     target.x = (left_wall.x + right_wall.x) / 2;
   }
   
