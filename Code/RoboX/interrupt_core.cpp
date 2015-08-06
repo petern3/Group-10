@@ -40,7 +40,7 @@ volatile float RIGHT_ROTATION = 0;
 void left_encoder_ISR(void) {
   
   uint32_t left_curr_time = micros();
-
+  
   if (LEFT_DIR == DC_FORWARD) {
     LEFT_ROTATION = -ENCODER_INCREMENT*1000000 / (left_curr_time - left_prev_time);
   } else {
@@ -53,6 +53,7 @@ void left_encoder_ISR(void) {
 void right_encoder_ISR(void) {
   
   uint32_t right_curr_time = micros();
+  
   if (RIGHT_DIR == DC_FORWARD) {
     RIGHT_ROTATION = -ENCODER_INCREMENT*1000000 / (right_curr_time - right_prev_time);
   } else {

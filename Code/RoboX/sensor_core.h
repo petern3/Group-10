@@ -96,12 +96,13 @@ class InfraredSensor {
     void read_sht(void);
     void read_med(void);
     void read_lng(void);
-  public:
     CircBuf_t raw_value;  //int32_t raw_value;
+  public:
     void initialize(uint8_t init_pin, uint8_t init_type, int8_t init_offset[2], float init_angle);
     void update(void);
     CartVec cart_read(void);
     PolarVec polar_read(void);
+    bool is_valid(void);
 };
 
 class UltrasonicSensor {
@@ -112,12 +113,13 @@ class UltrasonicSensor {
     CartVec offset;
     PolarVec polar_value;
     CartVec cart_value;
-  public:
     int32_t raw_value;
+  public:
     void initialize(uint8_t init_trig_pin, uint8_t init_echo_pin, int8_t init_offset[2], float init_angle);
     void update(void);
     CartVec cart_read(void);
     PolarVec polar_read(void);
+    bool is_valid(void);
 };
 
 class DigitalSensor {

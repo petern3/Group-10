@@ -54,7 +54,7 @@ NOTE_C7, NOTE_CS7, NOTE_D7, NOTE_DS7, NOTE_E7, NOTE_F7, NOTE_FS7, NOTE_G7, NOTE_
 //char *song = "smbdeath:d=4,o=5,b=90:32c6,32c6,32c6,8p,16b,16f6,16p,16f6,16f.6,16e.6,16d6,16c6,16p,16e,16p,16c";
 //char *song = "ducktales:d=4,o=5,b=112:8e6,8e6,16p,16g6,8b6,g#6,p,8e6,8d6,8c6,8d6,8e6,8d6,8c6,8d6,8e6,8e6,16p,16g6,8b6,g#6,p,8e6,8d6,8c6,8d6,8e6,8d6,8c6,8g6,8e6,8e6";
 //char *song = "Zelda1:d=4,o=5,b=125:a#,f.,8a#,16a#,16c6,16d6,16d#6,2f6,8p,8f6,16f.6,16f#6,16g#.6,2a#.6,16a#.6,16g#6,16f#.6,8g#.6,16f#.6,2f6,f6,8d#6,16d#6,16f6,2f#6,8f6,8d#6,8c#6,16c#6,16d#6,2f6,8d#6,8c#6,8c6,16c6,16d6,2e6,g6,8f6,16f,16f,8f,16f,16f,8f,16f,16f,8f,8f,a#,f.,8a#,16a#,16c6,16d6,16d#6,2f6,8p,8f6,16f.6,16f#6,16g#.6,2a#.6,c#7,c7,2a6,f6,2f#.6,a#6,a6,2f6,f6,2f#.6,a#6,a6,2f6,d6,2d#.6,f#6,f6,2c#6,a#,c6,16d6,2e6,g6,8f6,16f,16f,8f,16f,16f,8f,16f,16f,8f,8f";
-char *song = "smario2:d=4,o=5,b=125:8g,16c,8e,8g.,16c,8e,16g,16c,16e,16g,8b,a,8p,16c,8g,16c,8e,8g.,16c,8e,16g,16c#,16e,16g,8b,a,8p,16b,8c6,16b,8c6,8a.,16c6,8b,16a,8g,16f#,8g,8e.,16c,8d,16e,8f,16e,8f,8b.4,16e,8d.,c";
+//char *song = "smario2:d=4,o=5,b=125:8g,16c,8e,8g.,16c,8e,16g,16c,16e,16g,8b,a,8p,16c,8g,16c,8e,8g.,16c,8e,16g,16c#,16e,16g,8b,a,8p,16b,8c6,16b,8c6,8a.,16c6,8b,16a,8g,16f#,8g,8e.,16c,8d,16e,8f,16e,8f,8b.4,16e,8d.,c";
 //char *song = "smb3lvl1:d=4,o=5,b=80:16g,32c,16g.,16a,32c,16a.,16b,32c,16b,16a.,32g#,16a.,16g,32c,16g.,16a,32c,16a,4b.,32p,16c6,32f,16c.6,16d6,32f,16d.6,16e6,32f,16e6,16d.6,32c#6,16d.6,16c6,32f,16c.6,16d6,32f,16d6,4e.6,32p,16g,32c,16g.,16a,32c,16a.,16b,32c,16b,16a.,32g#,16a.,16c6,8c.6,32p,16c6,4c.6";
 //char *song = "shinobi:d=4,o=5,b=140:b,f#6,d6,b,g,f#,e,2f#.,a,1f#,p,b,f#6,d6,b,g,f#,e,1f#.,8a,1b.,8a,1f#.,8a,1b.,8a,1f#.";
 //char *song = "outrun_magic:d=4,o=5,b=160:f6,d#6,8g#.6,f6,d#6,8c#.6,d#6,c6,2g#.,c#6,c6,8d#.6,c#6,c6,8f.,a#,16c.6,1a#,f6,d#6,8g#.6,f6,d#6,8c#.6,d#6,c6,2g#.,c#6,c6,8d#.6,c#6,c6,16f.,16g#.,c6,2a#.";
@@ -63,6 +63,10 @@ char *song = "smario2:d=4,o=5,b=125:8g,16c,8e,8g.,16c,8e,16g,16c,16e,16g,8b,a,8p
 //char *song = "smwwd1:d=4,o=5,b=125:a,8f.,16c,16d,16f,16p,f,16d,16c,16p,16f,16p,16f,16p,8c6,8a.,g,16c,a,8f.,16c,16d,16f,16p,f,16d,16c,16p,16f,16p,16a#,16a,16g,2f,16p,8a.,8f.,8c,8a.,f,16g#,16f,16c,16p,8g#.,2g,8a.,8f.,8c,8a.,f,16g#,16f,8c,2c6";
 //char *song = "dkong:d=4,o=5,b=160:2c,8d.,d#.,c.,16b,16c6,16b,16c6,16b,16c6,16b,16c6,16b,16c6,16b,16c6,16b,2c6";
 //char *song = "dkong:d=4,o=5,b=160:2c,8d.,d#.,c.,16b,16c6,16b,16c6,16b,16c6,16b,16c6,16b,16c6,16b,16c6,16b,2c6";
+char *song = "KnightRider:d=4,o=5,b=63:16e,32f,32e,8b,16e6,32f6,32e6,8b,16e,32f,32e,16b,16e6,d6,8p,p,16e,32f,32e,8b,16e6,32f6,32e6,8b,16e,32f,32e,16b,16e6,f6,p";
+//char *song = "KnightRider:d=4,o=5,b=125:16e,16p,16f,16e,16e,16p,16e,16e,16f,16e,16e,16e,16d#,16e,16e,16e,16e,16p,16f,16e,16e,16p,16f,16e,16f,16e,16e,16e,16d#,16e,16e,16e,16d,16p,16e,16d,16d,16p,16e,16d,16e,16d,16d,16d,16c,16d,16d,16d,16d,16p,16e,16d,16d,16p,16e,16d,16e,16d,16d,16d,16c,16d,16d,16d";
+//char *song = "Star Trek:d=4,o=5,b=63:8f.,16a#,d#.6,8d6,16a#.,16g.,16c.6,f6";
+//char *song = "The final countdown: :d=4,o=5,b=125:p,8p,16b,16a,b,e,p,8p,16c6,16b,8c6,8b,a,p,8p,16c6,16b,c6,e,p,8p,16a,16g,8a,8g,8f#,8a,g.,16f#,16g,a.,16g,16a,8b,8a,8g,8f#,e,c6,2b.,16b,16c6,16b,16a,1b";
 
 
 /////////////////
@@ -74,55 +78,56 @@ void play_rtttl(uint8_t pin, char* p)
 
   byte default_dur = 4;
   byte default_oct = 6;
-  int bpm = 63;
+  uint8_t bpm = 63;
   int num;
-  long wholenote;
-  long duration;
+  uint32_t wholenote;
+  uint32_t duration;
   byte note;
   byte scale;
 
   // format: d=N,o=N,b=NNN:
   // find the start (skip name, etc)
 
-  while(*p != ':') p++;    // ignore name
+  while (*p != ':') {
+    p++;    // ignore name
+  }
   p++;                     // skip ':'
 
   // get default duration
-  if(*p == 'd')
-  {
+  if (*p == 'd') {
     p++; p++;              // skip "d="
     num = 0;
-    while(isdigit(*p))
-    {
+    while (isdigit(*p)) {
       num = (num * 10) + (*p++ - '0');
     }
-    if(num > 0) default_dur = num;
+    if (num > 0) {
+      default_dur = num;
+    }
     p++;                   // skip comma
   }
 
   Serial.print("ddur: "); Serial.println(default_dur, 10);
 
   // get default octave
-  if(*p == 'o')
-  {
+  if(*p == 'o') {
     p++; p++;              // skip "o="
     num = *p++ - '0';
-    if(num >= 3 && num <=7) default_oct = num;
+    if (num >= 3 && num <=7) {
+      default_oct = num;
+    }
     p++;                   // skip comma
   }
 
   Serial.print("doct: "); Serial.println(default_oct, 10);
 
   // get BPM
-  if(*p == 'b')
-  {
+  if (*p == 'b') {
     p++; p++;              // skip "b="
     num = 0;
-    while(isdigit(*p))
-    {
+    while (isdigit(*p)) {
       num = (num * 10) + (*p++ - '0');
     }
-    bpm = num;
+    bpm = 1.3 * num;
     p++;                   // skip colon
   }
 
@@ -135,23 +140,23 @@ void play_rtttl(uint8_t pin, char* p)
 
 
   // now begin note loop
-  while(*p)
-  {
+  while (*p) {
     // first, get note duration, if available
     num = 0;
-    while(isdigit(*p))
-    {
+    while (isdigit(*p)) {
       num = (num * 10) + (*p++ - '0');
     }
    
-    if(num) duration = wholenote / num;
-    else duration = wholenote / default_dur;  // we will need to check if we are a dotted note after
+    if (num) {
+      duration = wholenote / num;
+    } else {
+      duration = wholenote / default_dur;  // we will need to check if we are a dotted note after
+    }
 
     // now get the note
     note = 0;
-
-    switch(*p)
-    {
+    
+    switch (*p) {
       case 'c':
         note = 1;
         break;
@@ -180,39 +185,33 @@ void play_rtttl(uint8_t pin, char* p)
     p++;
 
     // now, get optional '#' sharp
-    if(*p == '#')
-    {
+    if (*p == '#') {
       note++;
       p++;
     }
 
     // now, get optional '.' dotted note
-    if(*p == '.')
-    {
+    if (*p == '.') {
       duration += duration/2;
       p++;
     }
  
     // now, get scale
-    if(isdigit(*p))
-    {
+    if (isdigit(*p)) {
       scale = *p - '0';
       p++;
-    }
-    else
-    {
+    } else {
       scale = default_oct;
     }
 
     scale += OCTAVE_OFFSET;
 
-    if(*p == ',')
+    if (*p == ',') {
       p++;       // skip comma for next note (or we may be at the end)
-
+    }
     // now play the note
-
-    if(note)
-    {
+    
+    if (note) {
       Serial.print("Playing: ");
       Serial.print(scale, 10); Serial.print(' ');
       Serial.print(note, 10); Serial.print(" (");
@@ -220,10 +219,12 @@ void play_rtttl(uint8_t pin, char* p)
       Serial.print(") ");
       Serial.println(duration, 10);
       tone(pin, notes[(scale - 4) * 12 + note], duration);
+      
+      uint32_t pauseBetweenNotes = duration * 1.30;
+      delay(pauseBetweenNotes);
+      
       noTone(pin);
-    }
-    else
-    {
+    } else {
       Serial.print("Pausing: ");
       Serial.println(duration, 10);
       delay(duration);

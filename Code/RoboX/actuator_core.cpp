@@ -69,10 +69,10 @@ void init_actuator_core(void) {
   // Smart Servos
   Herkulex.beginSerial2(115200);  // When in port C2 for Transmit/Receive #2
   Herkulex.reboot(SMART_SERVO1_ADDRESS);
-  //delay(500);
+  delay(500);
   Herkulex.initialize();
   //delay(200);
-  Herkulex.setLed(SMART_SERVO1_ADDRESS, SERVO_COLOUR);
+  Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
   
   PRINTLN("done");
 }
@@ -94,7 +94,7 @@ void DCMotor::calibrate(void) {
   uint8_t dc_low_limit = this->zero;
   
   // get the point at which the motor moves forward
-  while (LEFT_ROTATION == 0.0 && RIGHT_ROTATION == 0.0) {
+  while (LEFT_ROTATION == 0.0 || RIGHT_ROTATION == 0.0) {
     this->left_motor.write(dc_high_limit);
     this->right_motor.write(dc_high_limit);
     if (dc_high_limit > (this->zero + DC_CALIBRATION_LIMIT)) {
@@ -114,7 +114,7 @@ void DCMotor::calibrate(void) {
   RIGHT_ROTATION = 0.0;
   
   // get the point at which the motors move backward
-  while (LEFT_ROTATION == 0.0 && RIGHT_ROTATION == 0.0) {
+  while (LEFT_ROTATION == 0.0 || RIGHT_ROTATION == 0.0) {
     this->left_motor.write(dc_low_limit);
     this->right_motor.write(dc_low_limit);
     if (dc_low_limit < (this->zero - DC_CALIBRATION_LIMIT)) {
@@ -147,8 +147,8 @@ void DCMotor::drive(int8_t motor_speed, int8_t motor_rotation=0) {
     motor_rotation = -90;
   }
   
-  int16_t left_drive = this->zero - motor_speed + motor_rotation;  // subtract motor speed due to upside-down chassis
-  int16_t right_drive = this->zero - motor_speed - motor_rotation;
+  int16_t left_drive = this->zero - (motor_speed + motor_rotation);  // subtract motor speed due to upside-down chassis
+  int16_t right_drive = this->zero - (motor_speed - motor_rotation);
   
   if (left_drive < 0) {
     left_drive = 0;

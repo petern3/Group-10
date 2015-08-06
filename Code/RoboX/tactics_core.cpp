@@ -61,15 +61,14 @@ static void point_towards_target(PolarVec target) {
     Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle+180, 200, LED_RED);
   } else {
     Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle, 200, SERVO_COLOUR);
-    //PRINT(angle);
   }
 }
 
 static void debug_sensors(void) {
     
-    PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
-    PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
-        
+    //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
+    //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
+    
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
     PRINT(IR_MED1.polar_read().r); PRINT("  ");
     PRINT(IR_MED2.polar_read().r); PRINT("  ");
@@ -176,25 +175,25 @@ static CartVec get_local_target(void) {
   
   // x value
   if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) {
-    target.x = left_wall.x + ROBOT_DIAMETER;
+    target.x = left_wall.x + ROBOT_RADIUS;
   }
   else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) {
-    target.x = right_wall.x - ROBOT_DIAMETER;
+    target.x = right_wall.x - ROBOT_RADIUS;
   } else {
     target.x = (left_wall.x + right_wall.x) / 2;
   }
   
   // y value
   if (left_wall.y != NOT_VALID && right_wall.y == NOT_VALID) {
-    target.y = (left_wall.y) - ROBOT_DIAMETER;
+    target.y = (left_wall.y) - ROBOT_RADIUS;
   }
   else if (left_wall.y == NOT_VALID && right_wall.y != NOT_VALID) {
-    target.y = (right_wall.y) - ROBOT_DIAMETER;
+    target.y = (right_wall.y) - ROBOT_RADIUS;
   }
   else  if (left_wall.y == NOT_VALID && right_wall.y == NOT_VALID) {
-    target.y = ROBOT_DIAMETER;
+    target.y = ROBOT_RADIUS;
   } else {
-    target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_DIAMETER;
+    target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_RADIUS;
   }
   //target.x = -100;
   //target.y = 0;
@@ -213,12 +212,15 @@ void secondary_tactic(void) {
   PolarVec polar_target = {0, 0};
   char serial_byte = '\0';
   
+  SERVO_COLOUR = LED_BLUE;
+  
   while(OPERATION_MODE == SECONDARY_MODE) {
     
     switch (operation_state) {
       case SEARCHING:
-        if (false) { //weight_detect() == true) {
+        if (weight_detect() == true) {
           operation_state = COLLECTING;
+          SERVO_COLOUR = LED_GREEN;
         } else {
           cart_target = get_local_target();
         }
@@ -227,6 +229,7 @@ void secondary_tactic(void) {
         
         if (weight_detect() == false) {
           operation_state = SEARCHING;
+          SERVO_COLOUR = LED_BLUE;
         } else {
           cart_target = weight_location;
         }
@@ -346,31 +349,39 @@ void manual_mode(void) {
         OPERATION_MODE = IDLE_MODE;
       }
       
-      /*
+      
       else if (serial_byte == 'q') {
         Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 150, 200, LED_BLUE);
-        PRINTLN("\tMoving smart servo to 10");
+        PRINTLN("\tMoving smart servo to 150");
       }
       else if (serial_byte == 'e') {
         Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, -150, 200, LED_GREEN);
-        PRINTLN("\tMoving smart servo to -180");
+        PRINTLN("\tMoving smart servo to -150");
       }
       else if (serial_byte == 'z') {
         Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, LED_WHITE);
         PRINTLN("\tMoving smart servo to 0");
-      }*/
-      
+      }
       
     }
     
     #endif
     
     DC.drive(FORWARD, TURNING);
-    
+
+    if (weight_detect() == true) {
+      SERVO_COLOUR = LED_GREEN;
+      point_towards_target(weight_location.polar());
+    } else {
+      SERVO_COLOUR = LED_BLUE;
+      Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
+    }
+        
     debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
+    //PRINTLN();
     //COLOUR.read();
     //delay(200);
     

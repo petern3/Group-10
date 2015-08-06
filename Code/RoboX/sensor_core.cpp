@@ -274,6 +274,9 @@ void InfraredSensor::read_lng(void) {
   }
 }
 
+bool InfraredSensor::is_valid(void) {
+  return polar_read().r != NOT_VALID;
+}
 
 /////////////////////////////////////////
 /// ULTRASONIC SENSOR CLASS FUNCTIONS ///
@@ -305,7 +308,7 @@ void UltrasonicSensor::update(void) {
   digitalWrite(this->trig_pin, HIGH);
   delayMicroseconds(10);
   digitalWrite(this->trig_pin, LOW);
-  this->raw_value = (this->raw_value + pulseIn(this->echo_pin, HIGH, USONIC_TIMEOUT)) / 2;
+  this->raw_value = pulseIn(this->echo_pin, HIGH, USONIC_TIMEOUT);
   
   this->polar_value.r = NOT_READ;
   this->cart_value.x = NOT_READ;
@@ -332,6 +335,10 @@ CartVec UltrasonicSensor::cart_read(void) {
     }
   }
   return this->cart_value;
+}
+
+bool UltrasonicSensor::is_valid(void) {
+  return polar_read().r != NOT_VALID;
 }
 
 ///////////////////////////////////////

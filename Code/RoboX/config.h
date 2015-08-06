@@ -22,8 +22,8 @@
 //////////////
 // analogWrite() will not work on pins 9 and 10 due to TimerThree
 // analogWrite() may not work on pins 11 and 3 due to Speaker
-#define DC_LEFT_PIN 13
-#define DC_RIGHT_PIN 12
+#define DC_LEFT_PIN 12
+#define DC_RIGHT_PIN 13
 #define DC_LEFT_INTERRUPT_PIN 5  // to check
 #define DC_RIGHT_INTERRUPT_PIN 4
 
@@ -60,7 +60,7 @@
 
 #define CHIP_SELECT_PIN 53
 
-#define SPEAKER_PIN 2
+#define SPEAKER_PIN 6
 
 ////////////////////////
 /// SCHEDULER CONFIG ///
@@ -99,7 +99,7 @@
 #define DC_CALIBRATION_LIMIT 15 // 90 +/- n
 
 #define SPEED_P 0.1
-#define ROTATE_P 0.2
+#define ROTATE_P 0.25
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 1036 // 630/1.8*5.18 Geared
@@ -112,17 +112,17 @@
 /////////////////////
 #define IR_SHT1_OFFSET {0, 0}
 #define IR_SHT1_ANGLE 0
-#define IR_MED1_OFFSET {-85, 0}
+#define IR_MED1_OFFSET {-85, 50}
 #define IR_MED1_ANGLE 35
-#define IR_MED2_OFFSET {85, 0}
+#define IR_MED2_OFFSET {85, 50}
 #define IR_MED2_ANGLE -35
 #define IR_LNG1_OFFSET {0, 0}
 #define IR_LNG1_ANGLE 0
 #define IR_LNG2_OFFSET {0, 0}
 #define IR_LNG2_ANGLE 0
-#define USONIC1_OFFSET {-135, 100}
+#define USONIC1_OFFSET {-135, 150}
 #define USONIC1_ANGLE 50
-#define USONIC2_OFFSET {135, 100}
+#define USONIC2_OFFSET {135, 150}
 #define USONIC2_ANGLE -50
 
 
