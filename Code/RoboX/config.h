@@ -116,7 +116,7 @@
 #define IR_MED1_ANGLE 35
 #define IR_MED2_OFFSET {85, 50}
 #define IR_MED2_ANGLE -35
-#define IR_LNG1_OFFSET {0, 0}
+#define IR_LNG1_OFFSET {0, 60}
 #define IR_LNG1_ANGLE 0
 #define IR_LNG2_OFFSET {0, 0}
 #define IR_LNG2_ANGLE 0
@@ -146,10 +146,10 @@
 #define IR_MED_DV2_MM 500
 #define IR_MED_MAX_MM 800
 
-#define IR_LNG_MIN_ADC 0   // To measure
-#define IR_LNG_DV1_ADC 200   // to measure
-#define IR_LNG_DV2_ADC 400   // to measure
-#define IR_LNG_MAX_ADC 1023  // To measure
+#define IR_LNG_MIN_ADC 1000   // To measure
+#define IR_LNG_DV1_ADC 370   // to measure
+#define IR_LNG_DV2_ADC 212   // to measure
+#define IR_LNG_MAX_ADC 135  // To measure
 #define IR_LNG_MIN_MM 200
 #define IR_LNG_DV1_MM 600
 #define IR_LNG_DV2_MM 1000
@@ -165,7 +165,7 @@
 #define SONAR_MAX_MM 1500
 
 #define USONIC_TIMEOUT 4060ul //5.8*700mm, microseconds
-#define SENSOR_BUFFER_SIZE 3
+#define SENSOR_BUFFER_SIZE 10
 
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
 

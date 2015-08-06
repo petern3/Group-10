@@ -26,6 +26,7 @@
 /// GLOBALS ///
 ///////////////
 uint8_t OPERATION_MODE = IDLE_MODE;
+int wall = 0;
 
 /////////////////
 /// FUNCTIONS ///
@@ -78,7 +79,7 @@ static void debug_sensors(void) {
     PRINT(USONIC1.polar_read().r); PRINT("  ");
     PRINT(USONIC2.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
-    PRINT('\r');
+    PRINT('\n');
   
 }
 
@@ -173,30 +174,46 @@ static CartVec get_local_target(void) {
   CartVec left_wall = IR_MED2.cart_read();
   CartVec right_wall = IR_MED1.cart_read();
   CartVec centre_wall = IR_LNG1.cart_read();
+  // left wall == 1, right wall == 2
   
-  // x value
+  // x value WIDTH
   if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) { // left wall found, not right wall
     target.x = left_wall.x + ROBOT_RADIUS;
+    wall = 1;
   }
   else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) { // right wall found, not left wall
     target.x = right_wall.x - ROBOT_RADIUS;
-  }
+    wall = 2;
+  } 
   else { // If both walls found (or no walls)
-    target.x = (left_wall.x + right_wall.x) / 2;
+    if (wall == 1){ //left wall
+      target.x = 100;  //(left_wall.x + right_wall.x) / 2;
+    }
+    else if (wall == 2){ //right wall
+      target.x = -100;
+    }
+    //wall = 0;
   }
   
-  // y value
+  // y value LENGTH
   if (left_wall.y != NOT_VALID && right_wall.y == NOT_VALID) { // left wall found, not right wall
     target.y = (left_wall.y) - ROBOT_RADIUS;
   }
   else if (left_wall.y == NOT_VALID && right_wall.y != NOT_VALID) { // right wall found, not left wall
     target.y = (right_wall.y) - ROBOT_RADIUS;
   }
-  else  if (left_wall.y == NOT_VALID && right_wall.y == NOT_VALID) { // No walls found
+  else  if (left_wall.y == NOT_VALID && right_wall.y == NOT_VALID) { // No walls found move fall
     target.y = ROBOT_RADIUS;
   }
-  else {
-    target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_RADIUS; // Both walls found
+  else { // Both walls found / corner
+    target.y=1;
+    /*if (centre_wall.y != NOT_VALID) { // Corner found
+      target.x = 400;
+      target.y = -300;
+    }
+    else {*/
+      //target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_RADIUS; // Gap found
+    //}
   }
   //target.x = -100;
   //target.y = 0;
@@ -224,7 +241,8 @@ void secondary_tactic(void) {
         if (weight_detect() == true) {
           operation_state = COLLECTING;
           SERVO_COLOUR = LED_GREEN;
-        } else {
+        } 
+        else {
           cart_target = get_local_target();
         }
         break;
@@ -233,7 +251,8 @@ void secondary_tactic(void) {
         if (weight_detect() == false) {
           operation_state = SEARCHING;
           SERVO_COLOUR = LED_BLUE;
-        } else {
+        } 
+        else {
           cart_target = weight_location;
         }
         break;

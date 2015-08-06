@@ -212,8 +212,9 @@ CartVec InfraredSensor::cart_read(void) {
     if (polar_read().r == NOT_VALID) {
       this->cart_value.x = NOT_VALID;
       this->cart_value.y = NOT_VALID;
-    } else {
-    this->cart_value = this->polar_value + this->offset;
+    } 
+    else {
+      this->cart_value = this->polar_value + this->offset;
     }
   }
   return this->cart_value;
@@ -231,7 +232,8 @@ void InfraredSensor::read_sht(void) {
   }
   else if (average >= IR_SHT_DV2_ADC && average < IR_SHT_MAX_ADC) {
     //this->polar_value.r = map(this->polar_value.r, IR_SHT_DV2_ADC, IR_SHT_MAX_ADC, IR_SHT_DV2_MM, IR_SHT_MAX_MM);
-  } else {
+  } 
+  else {
     this->polar_value.r = NOT_VALID;
   }
 }
@@ -255,7 +257,8 @@ void InfraredSensor::read_med(void) {
   }
   else if (average <= IR_MED_DV2_ADC && average >= IR_MED_MAX_ADC) {
     this->polar_value.r = map(this->polar_value.r, IR_MED_DV2_ADC, IR_MED_MAX_ADC, IR_MED_DV2_MM, IR_MED_MAX_MM);
-  } else {
+  } 
+  else {
     this->polar_value.r = NOT_VALID;
   }
 }
@@ -264,15 +267,16 @@ void InfraredSensor::read_lng(void) {
   uint32_t average = buffer_average(this->raw_value);
   this->polar_value.r = average;
   
-  if (average >= IR_LNG_MIN_ADC && average < IR_LNG_DV1_ADC) {
-    //this->polar_value.r = map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
+  if (average <= IR_LNG_MIN_ADC && average > IR_LNG_DV1_ADC) {
+    this->polar_value.r = map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
   }
-  else if (average >= IR_LNG_DV1_ADC && average < IR_LNG_DV2_ADC) {
-    //this->polar_value.r = map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
+  else if (average <= IR_LNG_DV1_ADC && average > IR_LNG_DV2_ADC) {
+    this->polar_value.r = map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
   }
-  else if (average >= IR_LNG_DV2_ADC && average < IR_LNG_MAX_ADC) {
-    //this->polar_value.r = map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
-  } else {
+  else if (average <= IR_LNG_DV2_ADC && average >= IR_LNG_MAX_ADC) {
+    this->polar_value.r = map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
+  } 
+  else {
     this->polar_value.r = NOT_VALID;
   }
 }
