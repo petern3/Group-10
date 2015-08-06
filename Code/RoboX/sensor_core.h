@@ -113,7 +113,7 @@ class UltrasonicSensor {
     CartVec offset;
     PolarVec polar_value;
     CartVec cart_value;
-    int32_t raw_value;
+    uint32_t raw_value;
   public:
     void initialize(uint8_t init_trig_pin, uint8_t init_echo_pin, int8_t init_offset[2], float init_angle);
     void update(void);

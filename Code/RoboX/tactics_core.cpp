@@ -46,7 +46,13 @@ static void move_towards_target(PolarVec target) {
   if (angle > 180) {
     angle = -angle + 180;
   }
-  
+  /*
+  if (angle > 90) {
+    if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 30) {
+      weight_location = USONIC1.cart_read();
+      return true;
+    }
+  }*/
   int8_t motor_speed = SPEED_P * target.r;
   int8_t motor_rotation = ROTATE_P * angle;
   
@@ -67,6 +73,9 @@ static void point_towards_target(PolarVec target) {
 }
 
 static void debug_sensors(void) {
+    
+    PRINT("L ("); PRINT(USONIC1.polar_read().cart().x); PRINT(", "); PRINT(USONIC1.polar_read().cart().y); PRINT(") ");
+    PRINT("R ("); PRINT(USONIC2.polar_read().cart().x); PRINT(", "); PRINT(USONIC2.polar_read().cart().y); PRINT(") ");
     
     PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
     PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
@@ -178,14 +187,17 @@ static CartVec get_local_target(void) {
   
   // x value WIDTH
   if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) { // left wall found, not right wall
-    target.x = left_wall.x + ROBOT_RADIUS;
+    target.x = left_wall.x + ROBOT_DIAMETER;
     wall = 1;
   }
   else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) { // right wall found, not left wall
-    target.x = right_wall.x - ROBOT_RADIUS;
+    target.x = right_wall.x - ROBOT_DIAMETER;
     wall = 2;
   } 
-  else { // If both walls found (or no walls)
+  else if (left_wall.x == NOT_VALID && right_wall.x == NOT_VALID) { // no wall found
+    target.x = 0 ;
+  }
+  else { // If both walls found
     if (wall == 1){ //left wall
       target.x = 100;  //(left_wall.x + right_wall.x) / 2;
     }
@@ -206,7 +218,7 @@ static CartVec get_local_target(void) {
     target.y = ROBOT_RADIUS;
   }
   else { // Both walls found / corner
-    target.y=1;
+    target.y = 0;
     /*if (centre_wall.y != NOT_VALID) { // Corner found
       target.x = 400;
       target.y = -300;
@@ -215,6 +227,9 @@ static CartVec get_local_target(void) {
       //target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_RADIUS; // Gap found
     //}
   }
+  /*if (IR_LNG1.is_valid() && IR_LNG1 < 100) {
+    target.
+  }*/
   //target.x = -100;
   //target.y = 0;
   return target;

@@ -6,7 +6,7 @@
  * Author:  Peter Nicholls
  * Created: 2015-05-26
  * Edited:  2015-06-18
- * w
+ * 
  * This file is the main file, contatining the overall initialization
  * sequence and program kernel.
  * 

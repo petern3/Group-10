@@ -128,16 +128,20 @@ bool weight_detect(void) {
   if (USONIC1.is_valid()) { 
     if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
         IR_MED1.polar_read().r == NOT_VALID) {
-      weight_location = USONIC1.cart_read();
-      return true;
+       if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
+        weight_location = USONIC1.cart_read();
+        return true;
+       }
     }
   }
   // Check left
   if (USONIC2.is_valid()) { 
     if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
         IR_MED1.polar_read().r == NOT_VALID) {
-      weight_location = USONIC2.cart_read();
-      return true;
+      if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
+        weight_location = USONIC2.cart_read();
+        return true;
+       }
     }
   }
   weight_location = NO_WEIGHT;
@@ -167,6 +171,22 @@ static uint32_t buffer_average(CircBuf_t buffer) {
     sum += buffer.data[i];
   }
   return sum / buffer.size;
+}
+
+static uint32_t buffer_average_non_zero(CircBuf_t buffer) {
+  uint32_t sum = 0;
+  bool is_zero = false;
+  for (uint8_t i=0; i < buffer.size; i++) {
+    if (buffer.data[i]) {
+      is_zero = true;
+    }
+    sum += buffer.data[i];
+  }
+  if (is_zero) {
+    return 0;
+  } else {
+    return sum / buffer.size;
+  }
 }
 
 
@@ -338,7 +358,7 @@ CartVec UltrasonicSensor::cart_read(void) {
       this->cart_value.x = NOT_VALID;
       this->cart_value.y = NOT_VALID;
     } else {
-    this->cart_value = this->polar_value + this->offset;
+      this->cart_value = this->polar_value + this->offset;
     }
   }
   return this->cart_value;
