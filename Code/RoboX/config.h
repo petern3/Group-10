@@ -52,7 +52,7 @@
 #define USONIC2_ECHO_PIN 10
 #define USONIC1_TRIG_PIN 9
 #define USONIC1_ECHO_PIN 8
-//#define SONAR_PIN A6
+#define SONAR1_PIN A3
 
 #define IR_VAR1_PIN 37
 #define IR_VAR2_PIN 36
@@ -124,6 +124,8 @@
 #define USONIC1_ANGLE 50
 #define USONIC2_OFFSET {135, 150}
 #define USONIC2_ANGLE -50
+#define SONAR1_OFFSET {0, 50}
+#define SONAR1_ANGLE 0
 
 
 #define IR_SHT_MIN_ADC 157   // To measure
@@ -152,6 +154,15 @@
 #define IR_LNG_DV1_MM 600
 #define IR_LNG_DV2_MM 1000
 #define IR_LNG_MAX_MM 1500
+
+#define SONAR_MIN_ADC 0   // To measure
+#define SONAR_DV1_ADC 200   // to measure
+#define SONAR_DV2_ADC 400   // to measure
+#define SONAR_MAX_ADC 1023  // To measure
+#define SONAR_MIN_MM 200
+#define SONAR_DV1_MM 600
+#define SONAR_DV2_MM 1000
+#define SONAR_MAX_MM 1500
 
 #define USONIC_TIMEOUT 4060ul //5.8*700mm, microseconds
 #define SENSOR_BUFFER_SIZE 3

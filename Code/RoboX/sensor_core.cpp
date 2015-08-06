@@ -27,6 +27,7 @@ InfraredSensor IR_LNG1;
 InfraredSensor IR_LNG2;
 UltrasonicSensor USONIC1;
 UltrasonicSensor USONIC2;
+SonarSensor SONAR1;
 
 DigitalSensor IR_VAR1;
 DigitalSensor IR_VAR2;
@@ -82,6 +83,7 @@ void init_sensor_core(void) {
   int8_t IR_LNG2_OFFSET_TEMP[2] = IR_LNG2_OFFSET;
   int8_t USONIC1_OFFSET_TEMP[2] = USONIC1_OFFSET;
   int8_t USONIC2_OFFSET_TEMP[2] = USONIC2_OFFSET;
+  int8_t SONAR1_OFFSET_TEMP[2] = SONAR1_OFFSET;
 
   IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE, IR_SHT1_OFFSET_TEMP, degrees_to_radians(IR_SHT1_ANGLE));
   IR_MED1.initialize(IR_MED1_PIN, MED_RANGE, IR_MED1_OFFSET_TEMP, degrees_to_radians(IR_MED1_ANGLE));
@@ -90,6 +92,7 @@ void init_sensor_core(void) {
   IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE, IR_LNG2_OFFSET_TEMP, degrees_to_radians(IR_LNG2_ANGLE));
   USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN, USONIC1_OFFSET_TEMP, degrees_to_radians(USONIC1_ANGLE));
   USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC2_OFFSET_TEMP, degrees_to_radians(USONIC2_ANGLE));
+  SONAR1.initialize(SONAR1_PIN, SONAR1_OFFSET_TEMP, degrees_to_radians(SONAR1_ANGLE));
   
   IR_VAR1.initialize(IR_VAR1_PIN);
   IR_VAR2.initialize(IR_VAR2_PIN);
@@ -122,7 +125,7 @@ void update_sensors(void) {
 bool weight_detect(void) {
 
   // Check right. No need for abs as the lower one (USONIC) should always be less.
-  if (USONIC1.polar_read().r != NOT_VALID) { 
+  if (USONIC1.is_valid()) { 
     if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
         IR_MED1.polar_read().r == NOT_VALID) {
       weight_location = USONIC1.cart_read();
@@ -130,7 +133,7 @@ bool weight_detect(void) {
     }
   }
   // Check left
-  if (USONIC2.polar_read().r != NOT_VALID) { 
+  if (USONIC2.is_valid()) { 
     if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
         IR_MED1.polar_read().r == NOT_VALID) {
       weight_location = USONIC2.cart_read();
@@ -221,13 +224,13 @@ void InfraredSensor::read_sht(void) {
   this->polar_value.r = average;
   
   if (average >= IR_SHT_MIN_ADC && average < IR_SHT_DV1_ADC) {
-    //map(this->polar_value.r, IR_SHT_MIN_ADC, IR_SHT_DV1_ADC, IR_SHT_MIN_MM, IR_SHT_DV1_MM);
+    //this->polar_value.r = map(this->polar_value.r, IR_SHT_MIN_ADC, IR_SHT_DV1_ADC, IR_SHT_MIN_MM, IR_SHT_DV1_MM);
   }
   else if (average >= IR_SHT_DV1_ADC && average < IR_SHT_DV2_ADC) {
-    //map(this->polar_value.r, IR_SHT_DV1_ADC, IR_SHT_DV2_ADC, IR_SHT_DV1_MM, IR_SHT_DV2_MM);
+    //this->polar_value.r = map(this->polar_value.r, IR_SHT_DV1_ADC, IR_SHT_DV2_ADC, IR_SHT_DV1_MM, IR_SHT_DV2_MM);
   }
   else if (average >= IR_SHT_DV2_ADC && average < IR_SHT_MAX_ADC) {
-    //map(this->polar_value.r, IR_SHT_DV2_ADC, IR_SHT_MAX_ADC, IR_SHT_DV2_MM, IR_SHT_MAX_MM);
+    //this->polar_value.r = map(this->polar_value.r, IR_SHT_DV2_ADC, IR_SHT_MAX_ADC, IR_SHT_DV2_MM, IR_SHT_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
   }
@@ -262,13 +265,13 @@ void InfraredSensor::read_lng(void) {
   this->polar_value.r = average;
   
   if (average >= IR_LNG_MIN_ADC && average < IR_LNG_DV1_ADC) {
-    //map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
+    //this->polar_value.r = map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
   }
   else if (average >= IR_LNG_DV1_ADC && average < IR_LNG_DV2_ADC) {
-    //map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
+    //this->polar_value.r = map(this->polar_value.r, IR_LNG_DV1_ADC, IR_LNG_DV2_ADC, IR_LNG_DV1_MM, IR_LNG_DV2_MM);
   }
   else if (average >= IR_LNG_DV2_ADC && average < IR_LNG_MAX_ADC) {
-    //map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
+    //this->polar_value.r = map(this->polar_value.r, IR_LNG_DV2_ADC, IR_LNG_MAX_ADC, IR_LNG_DV2_MM, IR_LNG_MAX_MM);
   } else {
     this->polar_value.r = NOT_VALID;
   }
@@ -340,6 +343,65 @@ CartVec UltrasonicSensor::cart_read(void) {
 bool UltrasonicSensor::is_valid(void) {
   return polar_read().r != NOT_VALID;
 }
+
+////////////////////////////////////
+/// SONAR SENSOR CLASS FUNCTIONS ///
+////////////////////////////////////
+void SonarSensor::initialize(uint8_t init_pin, int8_t init_offset[2], float init_angle) {
+  this->pin = init_pin;
+  this->offset = init_offset;
+  this->polar_value.theta = init_angle;
+  buffer_initialize(&this->raw_value, SENSOR_BUFFER_SIZE);
+}
+
+void SonarSensor::update(void) {
+  /*int32_t sum = 0;
+  for (uint8_t i=0; i < SENSOR_BUFFER_SIZE; i++) {
+    sum += analogRead(this->pin);
+  }
+  this->raw_value = sum / SENSOR_BUFFER_SIZE;*/
+  buffer_store(&this->raw_value, analogRead(this->pin));
+  this->polar_value.r = NOT_READ;
+  this->cart_value.x = NOT_READ;
+}
+
+PolarVec SonarSensor::polar_read(void) {
+  if (this->polar_value.r == NOT_READ) {  // Only converts value once
+    uint32_t average = buffer_average(this->raw_value);
+    this->polar_value.r = average;
+    
+    // Minimum range, largest ADC
+    if (average <= SONAR_MIN_ADC && average > SONAR_DV1_ADC) {
+      //this->polar_value.r = map(this->polar_value.r, SONAR_MIN_ADC, SONAR_DV1_ADC, SONAR_MIN_MM, SONAR_DV1_MM);
+    }
+    else if (average <= SONAR_DV1_ADC && average > SONAR_DV2_ADC) {
+      //this->polar_value.r = map(this->polar_value.r, SONAR_DV1_ADC, SONAR_DV2_ADC, SONAR_DV1_MM, SONAR_DV2_MM);
+    }
+    else if (average <= SONAR_DV2_ADC && average >= SONAR_MAX_ADC) {
+      //this->polar_value.r = map(this->polar_value.r, SONAR_DV2_ADC, SONAR_MAX_ADC, SONAR_DV2_MM, SONAR_MAX_MM);
+    } else {
+      this->polar_value.r = NOT_VALID;
+    }
+  }
+  return this->polar_value;
+}
+
+CartVec SonarSensor::cart_read(void) {
+  if (this->cart_value.x == NOT_READ) {  // Only converts value once
+    if (polar_read().r == NOT_VALID) {
+      this->cart_value.x = NOT_VALID;
+      this->cart_value.y = NOT_VALID;
+    } else {
+    this->cart_value = this->polar_value + this->offset;
+    }
+  }
+  return this->cart_value;
+}
+
+bool SonarSensor::is_valid(void) {
+  return polar_read().r != NOT_VALID;
+}
+
 
 ///////////////////////////////////////
 /// DIGIATAL SENSOR CLASS FUNCTIONS ///

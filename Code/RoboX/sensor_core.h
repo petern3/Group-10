@@ -122,6 +122,22 @@ class UltrasonicSensor {
     bool is_valid(void);
 };
 
+class SonarSensor {
+  private:
+    uint8_t pin;
+    
+    CartVec offset;
+    PolarVec polar_value;
+    CartVec cart_value;
+    CircBuf_t raw_value;  //int32_t raw_value;
+  public:
+    void initialize(uint8_t init_pin, int8_t init_offset[2], float init_angle);
+    void update(void);
+    CartVec cart_read(void);
+    PolarVec polar_read(void);
+    bool is_valid(void);
+};
+
 class DigitalSensor {
   private:
     uint8_t pin;
@@ -162,6 +178,7 @@ extern InfraredSensor IR_LNG1;
 extern InfraredSensor IR_LNG2;
 extern UltrasonicSensor USONIC1;
 extern UltrasonicSensor USONIC2;
+extern SonarSensor SONAR1;
 extern DigitalSensor IR_VAR1;
 extern DigitalSensor IR_VAR2;
 extern DigitalSensor IR_VAR3;

@@ -72,7 +72,7 @@ static void debug_sensors(void) {
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
     PRINT(IR_MED1.polar_read().r); PRINT("  ");
     PRINT(IR_MED2.polar_read().r); PRINT("  ");
-    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
+    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     PRINT(USONIC1.polar_read().r); PRINT("  ");
     PRINT(USONIC2.polar_read().r); PRINT("  ");
@@ -174,26 +174,27 @@ static CartVec get_local_target(void) {
   CartVec centre_wall = IR_LNG1.cart_read();
   
   // x value
-  if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) {
+  if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) { // left wall found, not right wall
     target.x = left_wall.x + ROBOT_RADIUS;
   }
-  else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) {
+  else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) { // right wall found, not left wall
     target.x = right_wall.x - ROBOT_RADIUS;
-  } else {
+  } else { // If both walls found (or no walls)
     target.x = (left_wall.x + right_wall.x) / 2;
   }
   
   // y value
-  if (left_wall.y != NOT_VALID && right_wall.y == NOT_VALID) {
+  if (left_wall.y != NOT_VALID && right_wall.y == NOT_VALID) { // left wall found, not right wall
     target.y = (left_wall.y) - ROBOT_RADIUS;
   }
-  else if (left_wall.y == NOT_VALID && right_wall.y != NOT_VALID) {
+  else if (left_wall.y == NOT_VALID && right_wall.y != NOT_VALID) { // right wall found, not left wall
     target.y = (right_wall.y) - ROBOT_RADIUS;
   }
-  else  if (left_wall.y == NOT_VALID && right_wall.y == NOT_VALID) {
+  else  if (left_wall.y == NOT_VALID && right_wall.y == NOT_VALID) { // No walls found
     target.y = ROBOT_RADIUS;
-  } else {
-    target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_RADIUS;
+  }
+  else {
+    target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_RADIUS; // Both walls found
   }
   //target.x = -100;
   //target.y = 0;

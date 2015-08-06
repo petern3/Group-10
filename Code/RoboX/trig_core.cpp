@@ -96,12 +96,7 @@ PolarVec CartVec::polar(void) {
   }
   return polar;
 }
-/*
-void CartVec::set(float set_x, float set_y) {
-  this->x = set_x;
-  this->y = set_y;
-}
-*/
+
 
 /////////////////////////////////////
 /// POLAR 2VECTOR CLASS FUNCTIONS ///
@@ -179,13 +174,8 @@ CartVec PolarVec::cart(void) {
 PolarVec PolarVec::polar(void) {
   return *this;
 }
-/*
-void PolarVec::set(float set_r, float set_theta) {
-  this->r = set_r;
-  this->theta = set_theta;
-}
-*/
 
+/*
 PolarVec cart_to_polar(CartVec cart) {
   // Converts it to a bearing from -pi to pi where 0 is North
   return cart.polar();
@@ -195,5 +185,5 @@ CartVec polar_to_cart(PolarVec polar) {
   // Converts it from a bearing (from -pi to pi where 0 is North) to cartesian
   return polar.cart();
 }
-
+*/
 

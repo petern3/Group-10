@@ -58,7 +58,6 @@ class CartVec {
     
     CartVec cart(void);
     PolarVec polar(void);
-    //void set(float x, float y);
 };
 
 class PolarVec {
@@ -78,14 +77,13 @@ class PolarVec {
     
     CartVec cart(void);
     PolarVec polar(void);
-    //void set(float r, float theta);
 };
 
 
 /////////////////
 /// FUNCTIONS ///
 /////////////////
-PolarVec cart_to_polar(CartVec cart);
-CartVec polar_to_cart(PolarVec polar);
+//PolarVec cart_to_polar(CartVec cart);
+//CartVec polar_to_cart(PolarVec polar);
 
 #endif
