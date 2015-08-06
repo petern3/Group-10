@@ -44,7 +44,6 @@ void setup() {
   
   init_actuator_core();
   init_audio_core();
-  //init_exception_core();
   init_map_core();
   init_sensor_core();
   init_tactics_core();
