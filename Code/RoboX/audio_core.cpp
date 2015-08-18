@@ -243,7 +243,7 @@ void init_audio_core(void) {
   PRINT("\tSpeakers...");
   #ifdef ENABLE_SOUNDS
     SOUNDS_ON = true;
-    play_rtttl(SPEAKER_PIN, song);
+    //play_rtttl(SPEAKER_PIN, song);
   #else
     SOUNDS_ON = false;
   #endif
