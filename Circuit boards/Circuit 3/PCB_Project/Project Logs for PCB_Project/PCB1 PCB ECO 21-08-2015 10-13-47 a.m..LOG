@@ -1,0 +1,57 @@
+Added Component: Designator=D1(3.2X1.6X1.1)
+Added Component: Designator=D2(3.2X1.6X1.1)
+Added Component: Designator=D3(3.2X1.6X1.1)
+Added Component: Designator=D4(3.2X1.6X1.1)
+Added Component: Designator=D5(3.2X1.6X1.1)
+Added Component: Designator=D6(3.2X1.6X1.1)
+Added Component: Designator=P1(HDR1X2)
+Added Component: Designator=R1(AXIAL-0.3)
+Added Component: Designator=R2(AXIAL-0.3)
+Added Component: Designator=R3(AXIAL-0.3)
+Added Component: Designator=R4(AXIAL-0.3)
+Added Component: Designator=R5(AXIAL-0.3)
+Added Component: Designator=R6(AXIAL-0.3)
+Added Component: Designator=S1(TL36WW15050)
+Added Pin To Net: NetName=NetD1_1 Pin=D1-1
+Added Pin To Net: NetName=NetD1_2 Pin=D1-2
+Added Pin To Net: NetName=NetD2_1 Pin=D2-1
+Added Pin To Net: NetName=NetD1_2 Pin=D2-2
+Added Pin To Net: NetName=NetD3_1 Pin=D3-1
+Added Pin To Net: NetName=NetD1_2 Pin=D3-2
+Added Pin To Net: NetName=NetD4_1 Pin=D4-1
+Added Pin To Net: NetName=NetD1_2 Pin=D4-2
+Added Pin To Net: NetName=NetD5_1 Pin=D5-1
+Added Pin To Net: NetName=NetD1_2 Pin=D5-2
+Added Pin To Net: NetName=NetD6_1 Pin=D6-1
+Added Pin To Net: NetName=NetD1_2 Pin=D6-2
+Added Pin To Net: NetName=NetD1_2 Pin=P1-1
+Added Pin To Net: NetName=NetP1_2 Pin=P1-2
+Added Pin To Net: NetName=NetD1_1 Pin=R1-1
+Added Pin To Net: NetName=NetR1_2 Pin=R1-2
+Added Pin To Net: NetName=NetD2_1 Pin=R2-1
+Added Pin To Net: NetName=NetR1_2 Pin=R2-2
+Added Pin To Net: NetName=NetD3_1 Pin=R3-1
+Added Pin To Net: NetName=NetR1_2 Pin=R3-2
+Added Pin To Net: NetName=NetD4_1 Pin=R4-1
+Added Pin To Net: NetName=NetR1_2 Pin=R4-2
+Added Pin To Net: NetName=NetD5_1 Pin=R5-1
+Added Pin To Net: NetName=NetR1_2 Pin=R5-2
+Added Pin To Net: NetName=NetD6_1 Pin=R6-1
+Added Pin To Net: NetName=NetR1_2 Pin=R6-2
+Added Pin To Net: NetName=NetP1_2 Pin=S1-2
+Added Pin To Net: NetName=NetR1_2 Pin=S1-3
+Added Member To Class: ClassName=Sheet1 Member=Component D1 LED2
+Added Member To Class: ClassName=Sheet1 Member=Component D2 LED2
+Added Member To Class: ClassName=Sheet1 Member=Component D3 LED2
+Added Member To Class: ClassName=Sheet1 Member=Component D4 LED2
+Added Member To Class: ClassName=Sheet1 Member=Component D5 LED2
+Added Member To Class: ClassName=Sheet1 Member=Component D6 LED2
+Added Member To Class: ClassName=Sheet1 Member=Component P1 Header 2
+Added Member To Class: ClassName=Sheet1 Member=Component R1 Res1
+Added Member To Class: ClassName=Sheet1 Member=Component R2 Res1
+Added Member To Class: ClassName=Sheet1 Member=Component R3 Res1
+Added Member To Class: ClassName=Sheet1 Member=Component R4 Res1
+Added Member To Class: ClassName=Sheet1 Member=Component R5 Res1
+Added Member To Class: ClassName=Sheet1 Member=Component R6 Res1
+Added Member To Class: ClassName=Sheet1 Member=Component S1 SW-SPDT
+Added Room: Name=Sheet1

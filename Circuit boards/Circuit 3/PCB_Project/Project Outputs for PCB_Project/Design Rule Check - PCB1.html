@@ -1,0 +1,480 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html">
+<style type="text/css">
+		h1, h2, h3, h4, h5, h6 {
+			font-family : sans-serif;
+			color : white;
+			background-color : #21489e;
+			padding: 0.3em;
+		}
+		body {
+			font-family : verdana;
+		}
+		td, th {
+			padding: 0.5em;
+			text-align : center;
+			width : 18%;
+		}
+		th {
+			background-color : #A6CAF0;
+
+		}
+		th.column1, td.column1 {
+			text-align: left;
+			width : auto;
+		}
+		table {
+			width : 100%;
+		}
+		
+		.DRC_summary_header {							
+			padding-bottom : 0.1em;
+			border : 0px solid black;							
+			width: 100%;
+                        align: right;
+                        
+		}
+
+		.DRC_summary_header_col1, 
+		.DRC_summary_header_col2, 
+		.DRC_summary_header_col3
+		{
+			color : black;
+			font-size:150%;
+                        padding : 0em;
+			padding-top : 0.2em;
+			padding-bottom 0.2: 0em;
+			border : 0px solid black;
+			width : auto;
+			vertical-align: top;
+			font-weight: bold;				
+		}
+		
+		.DRC_summary_header_col1 	
+		{		                       
+			text-align: right;
+                        width: auto;	
+		}
+
+		.DRC_summary_header_col2 	
+		{		
+			text-align: center;	
+		}
+
+		.DRC_summary_header_col3 	
+		{		
+			text-align: left;	
+		}
+
+
+		
+		.header_holder
+		{
+		Width = 100%;
+		border = 0px solid green;
+		padding = 0;
+		}
+		
+		
+		
+		.front_matter, .front_matter_column1, .front_matter_column2, .front_matter_column3
+                {
+			left:0;
+			top:0;
+			padding-top : 0.1em;			
+			border : 0px solid black;
+			width : 100%;
+			vertical-align: top
+
+		}
+		.front_matter {	
+			
+			margin-top: 5px;
+ 			margin-left: 0px;					 			
+ 			horizontal-align: left;
+		}
+				
+		
+		.front_matter_column1 {
+			width : 10em;	
+			text-align  : right;
+			padding-right:0.1em;
+			
+		}
+		
+		.front_matter_column2 {
+                        width: 0.1em;
+			align: center;
+			text-align : center;
+			margin-right  : 0.1em;	
+			margin-left   : 0.1em;
+		}
+		.front_matter_column3 {
+			width         : auto;  
+			text-align    : left;	
+			margin-right  : 0.5em;				
+		}
+		
+		.total_column1, .total_column {
+			font-weight : bold;
+		}
+		.total_column1 {
+			text-align : right;
+		}
+		.warning, .error {
+			color : red;
+			font-weight : bold;
+		}
+		tr.onmouseout_odd {
+			background-color : #EEEEE0 
+		}
+		tr.onmouseout_even { 
+			background-color : #F3F3E3   
+		}
+		tr.onmouseover_odd, tr.onmouseover_even { 
+			background-color : lightYellow
+		} 
+		a:link, a:visited, .q a:link,.q a:active,.q {
+			color: #21489e; 
+		}
+		a:link.callback, a:visited.callback { 
+			color: #008000 
+		}
+		a:link.customize, a:visited.customize {
+			color: #C0C0C0;
+			position: absolute; 
+			right: 10px;
+		}	
+		p.contents_level1 {
+			font-weight : bold;
+			font-size : 110%;
+			margin : 0.5em;
+		}
+		p.contents_level2 {
+			position : relative;
+			left : 20px;
+			margin : 0.5em;
+		}
+	</style><script type="text/javascript">
+		function coordToMils(coord) {
+			var number = coord / 10000;
+			
+			if (number != number.toFixed(3))
+				number = number.toFixed(3);
+
+			return number + 'mil'
+		}
+
+		function coordToMM(coord) {
+			var number = 0.0254 * coord / 10000;
+			
+			if (number != number.toFixed(4))
+				number = number.toFixed(4);
+			
+			return number + 'mm'
+		}
+	
+		function convertCoord(coordNode, units) {
+			for (var i = 0; i < coordNode.childNodes.length; i++) {
+				coordNode.removeChild(coordNode.childNodes[i]);
+			}
+
+			var coord = coordNode.getAttribute('value');
+			if (coord != null) {
+				if (units == 'mm') {
+					textNode = document.createTextNode(coordToMM(coord));
+					coordNode.appendChild(textNode);
+				} else if (units == 'mil') {
+					textNode = document.createTextNode(coordToMils(coord));		
+					coordNode.appendChild(textNode);	
+				}
+			}
+		}
+	
+		function convertUnits(unitNode, units) {
+			for (var i = 0; i < unitNode.childNodes.length; i++) {
+				unitNode.removeChild(unitNode.childNodes[i]);		
+			}
+		
+			textNode = document.createTextNode(units); 
+			unitNode.appendChild(textNode);
+		}
+	
+		function changeUnits(radio_input, units) {
+			if (radio_input.checked) {
+			
+				var elements = document.getElementsByName('coordinate');
+				if (elements) {
+					for (var i = 0; i < elements.length; i++) {
+						convertCoord(elements[i], units);
+					}
+				}
+	
+				var elements = document.getElementsByName('units');
+				if (elements) {
+					for (var i = 0; i < elements.length; i++) {
+						convertUnits(elements[i], units);
+					}
+				}
+			}
+		}
+	</script><title>Design Rule Verification Report</title>
+</head>
+<body onload=""><img ALT="Altium" src="
+			file://C:\Users\Public\Documents\Altium\AD15\Templates\AD-rgb_logo_223x64.gif
+		"><a href="dxpprocess://Client:SetupPreferences?Server=PCB|PageName=Reports" class="customize"><acronym title="dxpprocess://Client:SetupPreferences?Server=PCB|PageName=Reports">customize</acronym></a><h1>Design Rule Verification Report</h1>
+<table class="header_holder">
+<td Style="width:70%">
+<table class="front_matter">
+<tr class="front_matter">
+<td class="front_matter_column1">Date</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3">21/08/2015</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Time</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3">10:42:04 a.m.</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Elapsed Time</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3">00:00:01</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Filename</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3"><a href="file:///\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc" class="file"><acronym title="\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc">\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc</acronym></a></td>
+</tr>
+</table>
+</td>
+<td Style="Width:30%">
+<table class="DRC_summary_header">
+<tr>
+<td class="DRC_summary_header_col1">Warnings</td>
+<td class="DRC_summary_header_col2">:</td>
+<td class="DRC_summary_header_col3">0</td></tr>
+<tr>
+<td class="DRC_summary_header_col1">Rule Violations</td>
+<td class="DRC_summary_header_col2">:</td>
+<td class="DRC_summary_header_col3" style="color : red">32</td></tr>
+</table>
+</td>
+</table>
+<hr><a name="IDASAMRB"><h2>Summary</h2></a><table>
+<tr>
+<th class="column1">Warnings</th>
+<th class="column2">Count</th>
+</tr>
+<tr>
+<td style="font-weight : bold; text-align : right" class="column1">Total</td>
+<td style="font-weight : bold" class="column2">0</td>
+</tr>
+</table><br><table>
+<tr>
+<th class="column1">Rule Violations</th>
+<th class="column2">Count</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAEBMRB">Room Sheet1 (Bounding Region = (35mm, 35mm, 115mm, 115mm) (InComponentClass('Sheet1'))</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDAKBMRB">Modified Polygon (Allow modified: No), (Allow shelved: No)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAQBMRB">Net Antennae (Tolerance=0mm) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDAWBMRB">Silk primitive without silk layer</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDA2BMRB">Silk to Silk (Clearance=0.254mm) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDACCMRB">Silk To Solder Mask (Clearance=0.254mm) (IsPad),(All)</a></td>
+<td class="column2">28</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAHSMRB">Minimum Solder Mask Sliver (Gap=0.254mm) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDANSMRB">Hole To Hole Clearance (Gap=0.254mm) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDATSMRB">Hole Size Constraint (Min=0.025mm) (Max=2.54mm) (All)</a></td>
+<td class="column2">3</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDALTMRB">Height Constraint (Min=0mm) (Max=25.4mm) (Prefered=12.7mm) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDARTMRB">Width Constraint (Min=0.254mm) (Max=0.254mm) (Preferred=0.254mm) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDAXTMRB">Power Plane Connect Rule(Relief Connect )(Expansion=0.508mm) (Conductor Width=0.254mm) (Air Gap=0.254mm) (Entries=4) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDA3TMRB">Clearance Constraint (Gap=0.254mm) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDADUMRB">Un-Routed Net Constraint ( (All) )</a></td>
+<td class="column2">1</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAPUMRB">Short-Circuit Constraint (Allowed=No) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr>
+<td style="font-weight : bold; text-align : right" class="column1">Total</td>
+<td style="font-weight : bold" class="column2">32</td>
+</tr>
+</table><br><hr><a name="IDACCMRB"><table>
+<tr>
+<th style="text-align : left" colspan="2" class="rule">Silk To Solder Mask (Clearance=0.254mm) (IsPad),(All)</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3106.299mil|Location2.X=3114.173mil|Location1.Y=2261.417mil|Location2.Y=2278.291mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3106.299mil|Location2.X=3114.173mil|Location1.Y=2261.417mil|Location2.Y=2278.291mil|Absolute=True">Track (79mm,57.54mm)(79mm,57.769mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3078.677mil|Location2.X=3141.795mil|Location1.Y=2283.795mil|Location2.Y=2346.913mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3078.677mil|Location2.X=3141.795mil|Location1.Y=2283.795mil|Location2.Y=2346.913mil|Absolute=True">Pad D6-2(79mm,58.81mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3060.736mil|Location2.X=3180.704mil|Location1.Y=2314.854mil|Location2.Y=2394.835mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3060.736mil|Location2.X=3180.704mil|Location1.Y=2314.854mil|Location2.Y=2394.835mil|Absolute=True">Text "D6" (77.997mm,59.051mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3078.677mil|Location2.X=3141.795mil|Location1.Y=2283.795mil|Location2.Y=2346.913mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3078.677mil|Location2.X=3141.795mil|Location1.Y=2283.795mil|Location2.Y=2346.913mil|Absolute=True">Pad D6-2(79mm,58.81mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3106.299mil|Location2.X=3114.173mil|Location1.Y=2052.417mil|Location2.Y=2069.291mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3106.299mil|Location2.X=3114.173mil|Location1.Y=2052.417mil|Location2.Y=2069.291mil|Absolute=True">Track (79mm,52.231mm)(79mm,52.46mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3078.677mil|Location2.X=3141.795mil|Location1.Y=1983.795mil|Location2.Y=2046.913mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3078.677mil|Location2.X=3141.795mil|Location1.Y=1983.795mil|Location2.Y=2046.913mil|Absolute=True">Pad D6-1(79mm,51.19mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3580.405mil|Location2.X=3594.643mil|Location1.Y=2547.089mil|Location2.Y=2561.327mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3580.405mil|Location2.X=3594.643mil|Location1.Y=2547.089mil|Location2.Y=2561.327mil|Absolute=True">Track (91.042mm,64.958mm)(91.204mm,64.796mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3510.721mil|Location2.X=3599.983mil|Location1.Y=2541.751mil|Location2.Y=2631.013mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3510.721mil|Location2.X=3599.983mil|Location1.Y=2541.751mil|Location2.Y=2631.013mil|Absolute=True">Pad D5-2(90.306mm,65.694mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3728.191mil|Location2.X=3742.429mil|Location1.Y=2399.303mil|Location2.Y=2413.541mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3728.191mil|Location2.X=3742.429mil|Location1.Y=2399.303mil|Location2.Y=2413.541mil|Absolute=True">Track (94.796mm,61.204mm)(94.958mm,61.042mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3722.853mil|Location2.X=3812.115mil|Location1.Y=2329.619mil|Location2.Y=2418.881mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3722.853mil|Location2.X=3812.115mil|Location1.Y=2329.619mil|Location2.Y=2418.881mil|Absolute=True">Pad D5-1(95.694mm,60.306mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3516.221mil|Location2.X=3529.257mil|Location1.Y=3253.233mil|Location2.Y=3268.479mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3516.221mil|Location2.X=3529.257mil|Location1.Y=3253.233mil|Location2.Y=3268.479mil|Absolute=True">Track (89.412mm,82.732mm)(89.543mm,82.919mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3452.687mil|Location2.X=3540.593mil|Location1.Y=3179.631mil|Location2.Y=3267.537mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3452.687mil|Location2.X=3540.593mil|Location1.Y=3179.631mil|Location2.Y=3267.537mil|Absolute=True">Pad D4-2(88.815mm,81.879mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3636.097mil|Location2.X=3649.135mil|Location1.Y=3424.435mil|Location2.Y=3439.681mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3636.097mil|Location2.X=3649.135mil|Location1.Y=3424.435mil|Location2.Y=3439.681mil|Absolute=True">Track (92.457mm,87.081mm)(92.588mm,87.268mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3624.761mil|Location2.X=3712.667mil|Location1.Y=3425.377mil|Location2.Y=3513.283mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3624.761mil|Location2.X=3712.667mil|Location1.Y=3425.377mil|Location2.Y=3513.283mil|Absolute=True">Pad D4-1(93.185mm,88.121mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=3587.851mil|Location2.Y=3604.725mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=3587.851mil|Location2.Y=3604.725mil|Absolute=True">Track (74mm,91.231mm)(74mm,91.46mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3519.229mil|Location2.Y=3582.347mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3519.229mil|Location2.Y=3582.347mil|Absolute=True">Pad D3-2(74mm,90.19mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=3796.851mil|Location2.Y=3813.725mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=3796.851mil|Location2.Y=3813.725mil|Absolute=True">Track (74mm,96.54mm)(74mm,96.769mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3819.229mil|Location2.Y=3882.347mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3819.229mil|Location2.Y=3882.347mil|Absolute=True">Pad D3-1(74mm,97.81mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2271.499mil|Location2.X=2285.737mil|Location1.Y=3029.225mil|Location2.Y=3043.463mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2271.499mil|Location2.X=2285.737mil|Location1.Y=3029.225mil|Location2.Y=3043.463mil|Absolute=True">Track (57.796mm,77.204mm)(57.958mm,77.042mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2266.159mil|Location2.X=2355.421mil|Location1.Y=2959.539mil|Location2.Y=3048.801mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2266.159mil|Location2.X=2355.421mil|Location1.Y=2959.539mil|Location2.Y=3048.801mil|Absolute=True">Pad D2-2(58.694mm,76.306mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2123.713mil|Location2.X=2137.951mil|Location1.Y=3177.009mil|Location2.Y=3191.247mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2123.713mil|Location2.X=2137.951mil|Location1.Y=3177.009mil|Location2.Y=3191.247mil|Absolute=True">Track (54.042mm,80.958mm)(54.204mm,80.796mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2054.027mil|Location2.X=2143.289mil|Location1.Y=3171.671mil|Location2.Y=3260.933mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2054.027mil|Location2.X=2143.289mil|Location1.Y=3171.671mil|Location2.Y=3260.933mil|Absolute=True">Pad D2-1(53.306mm,81.694mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2458.267mil|Location2.X=2475.141mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2458.267mil|Location2.X=2475.141mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True">Track (62.54mm,61mm)(62.769mm,61mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2480.645mil|Location2.X=2543.763mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2480.645mil|Location2.X=2543.763mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True">Pad D1-2(63.81mm,61mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2249.267mil|Location2.X=2266.141mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2249.267mil|Location2.X=2266.141mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True">Track (57.231mm,61mm)(57.46mm,61mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2180.645mil|Location2.X=2243.763mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2180.645mil|Location2.X=2243.763mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True">Pad D1-1(56.19mm,61mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1841.507mil|Location2.X=1892.683mil|Location1.Y=3936.063mil|Location2.Y=3968.937mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1841.507mil|Location2.X=1892.683mil|Location1.Y=3936.063mil|Location2.Y=3968.937mil|Absolute=True">Track (46.874mm,100.076mm)(47.974mm,100.711mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1872.803mil|Location2.X=1991.293mil|Location1.Y=3930.755mil|Location2.Y=4049.245mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1872.803mil|Location2.X=1991.293mil|Location1.Y=3930.755mil|Location2.Y=4049.245mil|Absolute=True">Pad S1-1(49.074mm,101.346mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1971.411mil|Location2.X=2022.587mil|Location1.Y=4011.063mil|Location2.Y=4043.937mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1971.411mil|Location2.X=2022.587mil|Location1.Y=4011.063mil|Location2.Y=4043.937mil|Absolute=True">Track (50.174mm,101.981mm)(51.274mm,102.616mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1872.803mil|Location2.X=1991.293mil|Location1.Y=3930.755mil|Location2.Y=4049.245mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1872.803mil|Location2.X=1991.293mil|Location1.Y=3930.755mil|Location2.Y=4049.245mil|Absolute=True">Pad S1-1(49.074mm,101.346mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2839.819mil|Location2.X=2856.693mil|Location1.Y=1846.457mil|Location2.Y=1854.331mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2839.819mil|Location2.X=2856.693mil|Location1.Y=1846.457mil|Location2.Y=1854.331mil|Absolute=True">Track (72.231mm,47mm)(72.46mm,47mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2771.197mil|Location2.X=2834.315mil|Location1.Y=1818.835mil|Location2.Y=1881.953mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2771.197mil|Location2.X=2834.315mil|Location1.Y=1818.835mil|Location2.Y=1881.953mil|Absolute=True">Pad R6-2(71.19mm,47mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3048.819mil|Location2.X=3065.693mil|Location1.Y=1846.457mil|Location2.Y=1854.331mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3048.819mil|Location2.X=3065.693mil|Location1.Y=1846.457mil|Location2.Y=1854.331mil|Absolute=True">Track (77.54mm,47mm)(77.769mm,47mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3071.197mil|Location2.X=3134.315mil|Location1.Y=1818.835mil|Location2.Y=1881.953mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3071.197mil|Location2.X=3134.315mil|Location1.Y=1818.835mil|Location2.Y=1881.953mil|Absolute=True">Pad R6-1(78.81mm,47mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4090.551mil|Location2.X=4098.425mil|Location1.Y=2615.749mil|Location2.Y=2632.623mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4090.551mil|Location2.X=4098.425mil|Location1.Y=2615.749mil|Location2.Y=2632.623mil|Absolute=True">Track (104mm,66.54mm)(104mm,66.769mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4062.929mil|Location2.X=4126.047mil|Location1.Y=2638.127mil|Location2.Y=2701.245mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4062.929mil|Location2.X=4126.047mil|Location1.Y=2638.127mil|Location2.Y=2701.245mil|Absolute=True">Pad R5-2(104mm,67.81mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4090.551mil|Location2.X=4098.425mil|Location1.Y=2406.749mil|Location2.Y=2423.623mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4090.551mil|Location2.X=4098.425mil|Location1.Y=2406.749mil|Location2.Y=2423.623mil|Absolute=True">Track (104mm,61.231mm)(104mm,61.46mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4062.929mil|Location2.X=4126.047mil|Location1.Y=2338.127mil|Location2.Y=2401.245mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4062.929mil|Location2.X=4126.047mil|Location1.Y=2338.127mil|Location2.Y=2401.245mil|Absolute=True">Pad R5-1(104mm,60.19mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4033.071mil|Location2.X=4049.945mil|Location1.Y=3460.629mil|Location2.Y=3468.503mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4033.071mil|Location2.X=4049.945mil|Location1.Y=3460.629mil|Location2.Y=3468.503mil|Absolute=True">Track (102.54mm,88mm)(102.769mm,88mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4055.449mil|Location2.X=4118.567mil|Location1.Y=3433.007mil|Location2.Y=3496.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=4055.449mil|Location2.X=4118.567mil|Location1.Y=3433.007mil|Location2.Y=3496.125mil|Absolute=True">Pad R4-2(103.81mm,88mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3824.071mil|Location2.X=3840.945mil|Location1.Y=3460.629mil|Location2.Y=3468.503mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3824.071mil|Location2.X=3840.945mil|Location1.Y=3460.629mil|Location2.Y=3468.503mil|Absolute=True">Track (97.231mm,88mm)(97.46mm,88mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3755.449mil|Location2.X=3818.567mil|Location1.Y=3433.007mil|Location2.Y=3496.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3755.449mil|Location2.X=3818.567mil|Location1.Y=3433.007mil|Location2.Y=3496.125mil|Absolute=True">Pad R4-1(96.19mm,88mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=4229.921mil|Location2.Y=4246.795mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=4229.921mil|Location2.Y=4246.795mil|Absolute=True">Track (74mm,107.54mm)(74mm,107.769mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=4252.299mil|Location2.Y=4315.417mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=4252.299mil|Location2.Y=4315.417mil|Absolute=True">Pad R3-2(74mm,108.81mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=4020.921mil|Location2.Y=4037.795mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2909.449mil|Location2.X=2917.323mil|Location1.Y=4020.921mil|Location2.Y=4037.795mil|Absolute=True">Track (74mm,102.231mm)(74mm,102.46mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3952.299mil|Location2.Y=4015.417mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3952.299mil|Location2.Y=4015.417mil|Absolute=True">Pad R3-1(74mm,101.19mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2879.386mil|Location2.X=2999.354mil|Location1.Y=3902.787mil|Location2.Y=3982.768mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2879.386mil|Location2.X=2999.354mil|Location1.Y=3902.787mil|Location2.Y=3982.768mil|Absolute=True">Text "D3" (73.39mm,99.385mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3952.299mil|Location2.Y=4015.417mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2881.827mil|Location2.X=2944.945mil|Location1.Y=3952.299mil|Location2.Y=4015.417mil|Absolute=True">Pad R3-1(74mm,101.19mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1759.111mil|Location2.X=1775.985mil|Location1.Y=3256.063mil|Location2.Y=3263.937mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1759.111mil|Location2.X=1775.985mil|Location1.Y=3256.063mil|Location2.Y=3263.937mil|Absolute=True">Track (44.781mm,82.804mm)(45.01mm,82.804mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1690.489mil|Location2.X=1753.607mil|Location1.Y=3228.441mil|Location2.Y=3291.559mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1690.489mil|Location2.X=1753.607mil|Location1.Y=3228.441mil|Location2.Y=3291.559mil|Absolute=True">Pad R2-2(43.74mm,82.804mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1968.111mil|Location2.X=1984.985mil|Location1.Y=3256.063mil|Location2.Y=3263.937mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1968.111mil|Location2.X=1984.985mil|Location1.Y=3256.063mil|Location2.Y=3263.937mil|Absolute=True">Track (50.09mm,82.804mm)(50.319mm,82.804mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1990.489mil|Location2.X=2053.607mil|Location1.Y=3228.441mil|Location2.Y=3291.559mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1990.489mil|Location2.X=2053.607mil|Location1.Y=3228.441mil|Location2.Y=3291.559mil|Absolute=True">Pad R2-1(51.36mm,82.804mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1816.197mil|Location2.X=1833.071mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1816.197mil|Location2.X=1833.071mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True">Track (46.231mm,61mm)(46.46mm,61mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1747.575mil|Location2.X=1810.693mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1747.575mil|Location2.X=1810.693mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True">Pad R1-2(45.19mm,61mm)  Multi-Layer</acronym></a></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td style="width:50%; text-align:left" class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2025.197mil|Location2.X=2042.071mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2025.197mil|Location2.X=2042.071mil|Location1.Y=2397.637mil|Location2.Y=2405.511mil|Absolute=True">Track (51.54mm,61mm)(51.769mm,61mm)  Top Overlay</acronym></a></td>
+<td style="width:50%; text-align:left" class="column2"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2047.575mil|Location2.X=2110.693mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2047.575mil|Location2.X=2110.693mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True">Pad R1-1(52.81mm,61mm)  Multi-Layer</acronym></a></td>
+</tr>
+</table></a><a href="#top">Back to top</a><br><br><a name="IDATSMRB"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Hole Size Constraint (Min=0.025mm) (Max=2.54mm) (All)</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2597.8mil|Location2.X=3307.712mil|Location1.Y=2597.8mil|Location2.Y=3307.712mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2597.8mil|Location2.X=3307.712mil|Location1.Y=2597.8mil|Location2.Y=3307.712mil|Absolute=True">Hole Size Constraint (18mm &gt; 2.54mm) : Via (75mm,75mm) Top Layer to Bottom Layer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1889.139mil|Location2.X=2047.869mil|Location1.Y=1889.139mil|Location2.Y=2047.869mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1889.139mil|Location2.X=2047.869mil|Location1.Y=1889.139mil|Location2.Y=2047.869mil|Absolute=True">Hole Size Constraint (4mm &gt; 2.54mm) : Via (50mm,50mm) Top Layer to Bottom Layer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3857.643mil|Location2.X=4016.373mil|Location1.Y=3857.643mil|Location2.Y=4016.373mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=3857.643mil|Location2.X=4016.373mil|Location1.Y=3857.643mil|Location2.Y=4016.373mil|Absolute=True">Hole Size Constraint (4mm &gt; 2.54mm) : Via (100mm,100mm) Top Layer to Bottom Layer</acronym></a><br></td>
+</tr>
+</table></a><a href="#top">Back to top</a><br><br><a name="IDADUMRB"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Un-Routed Net Constraint ( (All) )</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2047.575mil|Location2.X=2243.763mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=\\file\UsersR$\rct47\Home\Desktop\GitHub\Group-10\Circuit boards\Circuit 3\PCB_Project\PCB1.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2047.575mil|Location2.X=2243.763mil|Location1.Y=2370.015mil|Location2.Y=2433.133mil|Absolute=True">Un-Routed Net Constraint: Net NetD1_1 Between Pad R1-1 (52.81,61mm) And Pad D1-1 (56.19,61mm)</acronym></a><br></td>
+</tr>
+</table></a><a href="#top">Back to top</a><br><br></body>
+</html>
