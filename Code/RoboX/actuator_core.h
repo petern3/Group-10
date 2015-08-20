@@ -27,8 +27,8 @@
 ///////////////
 /// DEFINES ///
 ///////////////
-#define STEPPER_1 1
-#define STEPPER_2 2
+//#define STEPPER_1 1
+//#define STEPPER_2 2
 //#define STEPPER_3 3
 //#define STEPPER_4 4
 
@@ -53,7 +53,7 @@ class StepperMotor {
     uint8_t step_pin;
     uint8_t dir_pin;
     void initialize(uint8_t init_step_pin, uint8_t init_dir_pin, int16_t init_steps_per_rev);
-    void rotate(int16_t num_degrees);  // absolute position
+    void rotate(int16_t num_degrees);  // relative position
 };
 
 class ServoMotor {
@@ -61,7 +61,7 @@ class ServoMotor {
     Servo servo;
   public:
     void initialize(uint8_t init_port);
-    void rotate(int16_t servo_position);  // relative position
+    void rotate(int16_t servo_position);  // absolute position
 };
 
 ///////////////
