@@ -13,7 +13,6 @@ http://www.societyofrobots.com/sensors_sharpirrange.shtml
 *Todo*
 Mechanical:
 - [ ] Tilt Mechanism
-- [ ] fix rods
 - [ ] Reliable weight removal (may come with tilt)
 - [ ] Front brace
 - [ ] Track support
