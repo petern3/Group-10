@@ -414,12 +414,13 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
         
-    debug_sensors();
+    //debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
     //PRINTLN();
-    //COLOUR.read();
+    COLOUR.update();
+    COLOUR.read();
     //delay(200);
     
   }
