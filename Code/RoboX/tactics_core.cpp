@@ -94,7 +94,7 @@ void toggle_magnets(void) {
 void raise_magnets(void) {
   if (is_lowered) {
     SERVO1.rotate(MAX_TRAVEL);
-    SERVO2.rotate(MAX_TRAVEL);
+    SERVO2.rotate(0);
     is_lowered = false;
   }
 }
@@ -102,7 +102,7 @@ void raise_magnets(void) {
 void lower_magnets(void) {
   if (!is_lowered) {
     SERVO1.rotate(0);
-    SERVO2.rotate(0);
+    SERVO2.rotate(MAX_TRAVEL);
     is_lowered = true;
   }
 }
