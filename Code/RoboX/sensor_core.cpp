@@ -36,8 +36,6 @@ DigitalSensor IR_VAR3;
 IMUSensor IMU;
 ColourSensor COLOUR;
 
-int8_t NO_WEIGHT[2] = {-1, -1};
-CartVec weight_location = {-1, -1};
 
 //uint32_t USONIC_TIMEOUT_VALUE = USONIC_TIMEOUT;
 
@@ -118,35 +116,8 @@ void update_sensors(void) {
   IR_VAR2.update();
   IR_VAR3.update();
   
-  //IMU.update();
-  //COLOUR.update();
 }
 
-bool weight_detect(void) {
-
-  // Check right. No need for abs as the lower one (USONIC) should always be less.
-  if (USONIC1.is_valid()) { 
-    if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
-        IR_MED1.polar_read().r == NOT_VALID) {
-       if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
-        weight_location = USONIC1.cart_read();
-        return true;
-       }
-    }
-  }
-  // Check left
-  if (USONIC2.is_valid()) { 
-    if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
-        IR_MED1.polar_read().r == NOT_VALID) {
-      if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
-        weight_location = USONIC2.cart_read();
-        return true;
-       }
-    }
-  }
-  weight_location = NO_WEIGHT;
-  return false;
-}
 
 static void buffer_initialize(CircBuf_t* buffer, uint8_t size) {
   buffer->windex = 0;
@@ -319,17 +290,7 @@ void UltrasonicSensor::initialize(uint8_t init_trig_pin, uint8_t init_echo_pin, 
 }
 
 void UltrasonicSensor::update(void) {
-  /*int32_t sum = 0;
-  for (uint8_t i=0; i < SENSOR_BUFFER_SIZE; i++) {
-    digitalWrite(this->trig_pin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(this->trig_pin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(this->trig_pin, LOW);
   
-    sum += pulseIn(this->echo_pin, HIGH, USONIC_TIMEOUT_VALUE);
-  }
-  this->raw_value = sum / SENSOR_BUFFER_SIZE;*/
   digitalWrite(this->trig_pin, LOW);
   delayMicroseconds(2);
   digitalWrite(this->trig_pin, HIGH);
@@ -379,11 +340,7 @@ void SonarSensor::initialize(uint8_t init_pin, int8_t init_offset[2], float init
 }
 
 void SonarSensor::update(void) {
-  /*int32_t sum = 0;
-  for (uint8_t i=0; i < SENSOR_BUFFER_SIZE; i++) {
-    sum += analogRead(this->pin);
-  }
-  this->raw_value = sum / SENSOR_BUFFER_SIZE;*/
+
   buffer_store(&this->raw_value, analogRead(this->pin));
   this->polar_value.r = NOT_READ;
   this->cart_value.x = NOT_READ;
@@ -452,7 +409,7 @@ void IMUSensor::initialize(void) {
   // Configure gyroscope range
   I2CwriteByte(MPU9250_ADDRESS, MPU9250_ACC_CONFIG_REG, GYRO_FULL_SCALE_2000_DPS);
   // Configure accelerometers range
-  I2CwriteByte(MPU9250_ADDRESS, MPU9250_GYR_CONFIG_REG, ACC_FULL_SCALE_16_G);
+  I2CwriteByte(MPU9250_ADDRESS, MPU9250_GYR_CONFIG_REG, ACC_FULL_SCALE);
   // Set by pass mode for the magnetometers
   I2CwriteByte(MPU9250_ADDRESS, MPU9250_INT_CONFIG_REG ,0x02);
   // Request first magnetometer single measurement
@@ -461,42 +418,52 @@ void IMUSensor::initialize(void) {
 }
 
 void IMUSensor::update(void) {
-  //PRINTLN("1");
+  
   uint8_t ACC_GYR_BUFFER[ACC_GYR_BUFFER_SIZE];  //The IMU reads in 8 bit data
-  uint8_t MAG_BUFFER[MAG_BUFFER_SIZE];
-  //PRINTLN("2");
-  //I2Cread(MPU9250_ADDRESS, 0x3B, ACC_GYR_BUFFER_SIZE, ACC_GYR_BUFFER);
-  //PRINTLN("3");
+  //uint8_t MAG_BUFFER[MAG_BUFFER_SIZE];
+  
+  I2Cread(MPU9250_ADDRESS, 0x3B, ACC_GYR_BUFFER_SIZE, ACC_GYR_BUFFER);
+  
   // Accelerometer
-  /*IMU_BUFFER[0] = ACC_GYR_BUFFER[0]<<8 | ACC_GYR_BUFFER[1]; // Create 16 bits values from 8 bits data
-  IMU_BUFFER[1] = ACC_GYR_BUFFER[2]<<8 | ACC_GYR_BUFFER[3];
-  IMU_BUFFER[2] = ACC_GYR_BUFFER[4]<<8 | ACC_GYR_BUFFER[5];
-  PRINTLN("4");
+  this->raw_values[0] = ACC_GYR_BUFFER[0]<<8 | ACC_GYR_BUFFER[1]; // Create 16 bits values from 8 bits data
+  this->raw_values[1] = ACC_GYR_BUFFER[2]<<8 | ACC_GYR_BUFFER[3];
+  this->raw_values[2] = ACC_GYR_BUFFER[4]<<8 | ACC_GYR_BUFFER[5];
+
   // Temperature
   //IMU_BUFFER[3] = ACC_GYR_BUFFER[7]<<8 | ACC_GYR_BUFFER[6];
-  /*
+  
   // Gyroscope
-  IMU_BUFFER[4] = ACC_GYR_BUFFER[8]<<8 | ACC_GYR_BUFFER[9];
-  IMU_BUFFER[5] = ACC_GYR_BUFFER[10]<<8 | ACC_GYR_BUFFER[11];
-  IMU_BUFFER[6] = ACC_GYR_BUFFER[12]<<8 | ACC_GYR_BUFFER[13];
-  PRINTLN("5");
+  this->raw_values[4] = ACC_GYR_BUFFER[8]<<8 | ACC_GYR_BUFFER[9];
+  this->raw_values[5] = ACC_GYR_BUFFER[10]<<8 | ACC_GYR_BUFFER[11];
+  this->raw_values[6] = ACC_GYR_BUFFER[12]<<8 | ACC_GYR_BUFFER[13];
+  
   // Magnetometer
-  uint8_t ST1;
+  /*uint8_t ST1;
   while (!(ST1&0x01)) {
     I2Cread(MAG_ADDRESS,0x02,1,&ST1);
   }
-  
+  PRINTLN("6");
   // Read magnetometer data
   I2Cread(MAG_ADDRESS, 0x03, MAG_BUFFER_SIZE, MAG_BUFFER);
-  
+  PRINTLN("7");
   // Request next magnetometer single measurement
   I2CwriteByte(MAG_ADDRESS,0x0A,0x01);
   
-  IMU_BUFFER[7] = MAG_BUFFER[1]<<8 | MAG_BUFFER[0];
-  IMU_BUFFER[8] = MAG_BUFFER[3]<<8 | MAG_BUFFER[2];
-  IMU_BUFFER[9] = MAG_BUFFER[5]<<8 | MAG_BUFFER[4];*/
-  
-  //print_buffer(IMU_BUFFER, IMU_BUFFER_SIZE);
+  this->raw_values[7] = MAG_BUFFER[1]<<8 | MAG_BUFFER[0];
+  this->raw_values[8] = MAG_BUFFER[3]<<8 | MAG_BUFFER[2];
+  this->raw_values[9] = MAG_BUFFER[5]<<8 | MAG_BUFFER[4];
+  PRINTLN("8");*/
+
+  this->values[0] = NOT_READ;
+}
+
+int16_t* IMUSensor::read(void) {
+  if (this->values[0] == NOT_READ) {
+    for (uint8_t i=0; i < IMU_BUFFER_SIZE; i++) {
+      this->values[i] = this->raw_values[i];
+    }
+  }
+  return this->values;
 }
 
 /////////////////////////////////////
@@ -520,18 +487,26 @@ void ColourSensor::update(void) {
     tcs.getRawData(&this->raw_values[0], &this->raw_values[1], &this->raw_values[2], &this->raw_values[3]);
     tcs.setInterrupt(true);  // turn off LED
     tcs.setInterrupt(false);      // turn on LED
+    this->values[0] = NOT_READ;
   }
 }
 
 uint16_t* ColourSensor::read(void) {
   if (!COLOUR_SENSOR_ERROR.is_active) {
-    Serial.print("C:\t"); Serial.print(this->raw_values[3]);
-    Serial.print("\tR:\t"); Serial.print(this->raw_values[0]);
-    Serial.print("\tG:\t"); Serial.print(this->raw_values[1]);
-    Serial.print("\tB:\t"); Serial.print(this->raw_values[2]);
-    PRINTLN();
+    if (this->values[0] == NOT_READ) {
+      this->values[0] = this->raw_values[0];
+      for (uint8_t i=1; i < COLOUR_BUFFER_SIZE; i++) {
+        this->values[i] = uint16_t((float(this->raw_values[i]) / this->raw_values[0])*256);
+      }
+      
+      Serial.print("C:\t"); Serial.print(this->values[3]);
+      Serial.print("\tR:\t"); Serial.print(this->values[0]);
+      Serial.print("\tG:\t"); Serial.print(this->values[1]);
+      Serial.print("\tB:\t"); Serial.print(this->values[2]);
+      PRINTLN();
+    }
   }
-  return this->raw_values;
+  return this->values;
 }
 
 

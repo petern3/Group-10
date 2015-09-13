@@ -78,8 +78,5 @@ extern StepperMotor STEPPER2;
 /// FUNCTIONS ///
 /////////////////
 void init_actuator_core(void);
-void extend_magnets(void);
-void retract_magnets(void);
-void toggle_magnets(void);
 
 #endif

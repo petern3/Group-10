@@ -60,6 +60,7 @@
 #define ACC_FULL_SCALE_8_G 0x10
 #define ACC_FULL_SCALE_16_G 0x18
 
+#define ACC_FULL_SCALE ACC_FULL_SCALE_16_G
 #define IMU_BUFFER_SIZE 10
 #define ACC_GYR_BUFFER_SIZE 14
 #define MAG_BUFFER_SIZE 6
@@ -150,6 +151,7 @@ class DigitalSensor {
 
 class IMUSensor {
   private:
+    int16_t raw_values[IMU_BUFFER_SIZE];
     int16_t values[IMU_BUFFER_SIZE];
   public:
   	void initialize(void);
@@ -161,6 +163,7 @@ class ColourSensor {
   private:
     Adafruit_TCS34725 tcs;
     uint16_t raw_values[COLOUR_BUFFER_SIZE];
+    uint16_t values[COLOUR_BUFFER_SIZE];
     
   public:
     void initialize(void);
@@ -192,7 +195,6 @@ extern CartVec weight_location;
 /////////////////
 void init_sensor_core(void);
 void update_sensors(void);
-bool weight_detect(void);
 
 
 

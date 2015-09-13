@@ -30,9 +30,6 @@ StepperMotor STEPPER2;
 
 uint8_t SERVO_COLOUR = LED_WHITE;
 
-bool is_extended = true;
-bool is_lowered = false;
-
 
 /////////////////
 /// FUNCTIONS ///
@@ -221,52 +218,6 @@ void StepperMotor::rotate(int16_t num_degrees) {
     delayMicroseconds(2);
     digitalWrite(this->step_pin, HIGH);
     delay(1);
-  }
-}
-
-
-void extend_magnets(void) {
-  if (!is_extended) {
-    uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
-    digitalWrite(STEPPER1.dir_pin, LOW);
-    digitalWrite(STEPPER2.dir_pin, HIGH);
-    
-    for (steps_left; steps_left > 0; steps_left--) {
-      digitalWrite(STEPPER1.step_pin, LOW);
-      digitalWrite(STEPPER2.step_pin, LOW);
-      delayMicroseconds(2);
-      digitalWrite(STEPPER1.step_pin, HIGH);
-      digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(1);
-    }
-    is_extended = true;
-  }
-}
-
-void retract_magnets(void) {
-  if (is_extended) {
-    uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
-    digitalWrite(STEPPER1.dir_pin, LOW);
-    digitalWrite(STEPPER2.dir_pin, HIGH);
-    
-    for (steps_left; steps_left > 0; steps_left--) {
-      digitalWrite(STEPPER1.step_pin, LOW);
-      digitalWrite(STEPPER2.step_pin, LOW);
-      delayMicroseconds(2);
-      digitalWrite(STEPPER1.step_pin, HIGH);
-      digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(1);
-    }
-    is_extended = false;
-  }
-}
-
-
-void toggle_magnets(void) {
-  if (is_extended) {
-    retract_magnets();
-  } else {
-    extend_magnets();
   }
 }
 

@@ -26,6 +26,13 @@
 /// GLOBALS ///
 ///////////////
 uint8_t OPERATION_MODE = IDLE_MODE;
+
+//CartVec weight_location = {-1, -1};
+int8_t NO_WEIGHT[2] = {-1, -1};
+
+bool is_extended = true;
+bool is_lowered = false;
+
 int wall = 0;
 
 /////////////////
@@ -36,6 +43,70 @@ void init_tactics_core(void) {
   Timer3.initialize();  // in microseconds, 1 second by default
   PRINTLN("done");
 }
+
+
+/// ACTUATORS ///
+
+void extend_magnets(void) {
+  if (!is_extended) {
+    uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
+    digitalWrite(STEPPER1.dir_pin, LOW);
+    digitalWrite(STEPPER2.dir_pin, HIGH);
+    
+    for (steps_left; steps_left > 0; steps_left--) {
+      digitalWrite(STEPPER1.step_pin, LOW);
+      digitalWrite(STEPPER2.step_pin, LOW);
+      delayMicroseconds(2);
+      digitalWrite(STEPPER1.step_pin, HIGH);
+      digitalWrite(STEPPER2.step_pin, HIGH);
+      delay(1);
+    }
+    is_extended = true;
+  }
+}
+
+void retract_magnets(void) {
+  if (is_extended) {
+    uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
+    digitalWrite(STEPPER1.dir_pin, LOW);
+    digitalWrite(STEPPER2.dir_pin, HIGH);
+    
+    for (steps_left; steps_left > 0; steps_left--) {
+      digitalWrite(STEPPER1.step_pin, LOW);
+      digitalWrite(STEPPER2.step_pin, LOW);
+      delayMicroseconds(2);
+      digitalWrite(STEPPER1.step_pin, HIGH);
+      digitalWrite(STEPPER2.step_pin, HIGH);
+      delay(1);
+    }
+    is_extended = false;
+  }
+}
+
+void toggle_magnets(void) {
+  if (is_extended) {
+    retract_magnets();
+  } else {
+    extend_magnets();
+  }
+}
+
+void raise_magnets(void) {
+  if (is_lowered) {
+    SERVO1.rotate(MAX_TRAVEL);
+    SERVO2.rotate(MAX_TRAVEL);
+    is_lowered = false;
+  }
+}
+
+void lower_magnets(void) {
+  if (!is_lowered) {
+    SERVO1.rotate(0);
+    SERVO2.rotate(0);
+    is_lowered = true;
+  }
+}
+
 
 static void move_towards_target(PolarVec target) {
   int16_t angle = radians_to_degrees(target.theta);
@@ -69,6 +140,47 @@ static void point_towards_target(PolarVec target) {
   }
   else {
     Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, angle, 200, SERVO_COLOUR);
+  }
+}
+
+
+/// SENSORS ///
+
+bool* weight_detect(void) {
+  bool found[2] = {false, false};
+  
+  // Check right. No need for abs as the lower one (USONIC) should always be less.
+  if (USONIC1.is_valid()) { 
+    if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+        IR_MED1.polar_read().r == NOT_VALID) {
+       if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
+        found[0] = true;
+       }
+    }
+  }
+  // Check left
+  if (USONIC2.is_valid()) { 
+    if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+        IR_MED1.polar_read().r == NOT_VALID) {
+      if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
+        found[1] = true;
+       }
+    }
+  }
+  return found;
+}
+
+uint8_t colour_detect(void) {
+  
+  COLOUR.update();
+  if (COLOUR.read()[1] > GREEN_THRESHOLD) {  // Green
+    return GREEN_BASE;
+  }
+  else if (COLOUR.read()[2] > BLUE_THRESHOLD) {  // Blue
+    return BLUE_BASE;
+  }
+  else {
+    return NO_BASE;
   }
 }
 
@@ -253,7 +365,7 @@ void secondary_tactic(void) {
     
     switch (operation_state) {
       case SEARCHING:
-        if (weight_detect() == true) {
+        if (weight_detect()[0] == true || weight_detect()[1] == true) {
           operation_state = COLLECTING;
           SERVO_COLOUR = LED_GREEN;
         } 
@@ -263,12 +375,12 @@ void secondary_tactic(void) {
         break;
       case COLLECTING:
         
-        if (weight_detect() == false) {
+        if (weight_detect()[0] == false && weight_detect()[1] == false) {
           operation_state = SEARCHING;
           SERVO_COLOUR = LED_BLUE;
         } 
         else {
-          cart_target = weight_location;
+          //cart_target = weight_location;
         }
         break;
       case RETURNING:
@@ -375,6 +487,15 @@ void manual_mode(void) {
         toggle_magnets();
         PRINTLN("\tToggling magnets");
       }
+
+      else if (serial_byte == RAISE) {
+        raise_magnets();
+        PRINTLN("\tRaising magnets");
+      }
+      else if (serial_byte == LOWER) {
+        lower_magnets();
+        PRINTLN("\tLowering magnets");
+      }
       
       else if (serial_byte == PRIMARY_MODE) {
         OPERATION_MODE = PRIMARY_MODE;
@@ -406,9 +527,9 @@ void manual_mode(void) {
     
     DC.drive(FORWARD, TURNING);
 
-    if (weight_detect() == true) {
+    if (weight_detect()[0] == true || weight_detect()[1] == true) {
       SERVO_COLOUR = LED_GREEN;
-      point_towards_target(weight_location.polar());
+      //point_towards_target(weight_location.polar());
     } else {
       SERVO_COLOUR = LED_BLUE;
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
@@ -420,6 +541,8 @@ void manual_mode(void) {
     //PRINTLN(RIGHT_ROTATION*0.104719755);
     //PRINTLN();
     COLOUR.update();
+    IMU.update();
+    //print_buffer(IMU.read(), IMU_BUFFER_SIZE); PRINT('\r');
     COLOUR.read();
     //delay(200);
     

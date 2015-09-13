@@ -32,6 +32,10 @@
 #define MANUAL_MODE '3'
 //#define DEFAULT_MODE IDLE_MODE  // can change to any of the previous modes
 
+#define NO_BASE 0
+#define BLUE_BASE 1
+#define GREEN_BASE 2
+
 #define SEARCHING 0
 #define COLLECTING 1
 #define RETURNING 2

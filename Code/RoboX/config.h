@@ -83,9 +83,11 @@
 #define LFT 'a'
 #define RHT 'd'
 #define STP 'x'
-#define EXTEND 'r'
-#define RETRACT 'f'
+#define EXTEND 'h'
+#define RETRACT 'g'
 #define TOGGLE 't'
+#define RAISE 'r'
+#define LOWER 'f'
 
 ///////////////////////
 /// ACTUATOR CONFIG ///
@@ -106,6 +108,9 @@
 #define STEPPER2_SPR 1036 // Geared
 //#define STEPPER3_SPR 200  // to calibrate
 //#define STEPPER4_SPR 200  // to calibrate
+
+/// SERVO CONFIG ///
+#define MAX_TRAVEL 180
 
 /////////////////////
 /// SENSOR CONFIG ///
@@ -168,6 +173,9 @@
 #define SENSOR_BUFFER_SIZE 10
 
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
+
+#define GREEN_THRESHOLD 0
+#define BLUE_THRESHOLD 0
 
 //////////////////
 /// MAP CONFIG ///
