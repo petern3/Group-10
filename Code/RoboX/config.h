@@ -54,9 +54,9 @@
 #define USONIC1_ECHO_PIN 8
 #define SONAR1_PIN A3
 
-#define IR_VAR1_PIN 37
-#define IR_VAR2_PIN 36
-#define IR_VAR3_PIN 35
+#define IR_VAR1_PIN 30  // left
+#define IR_VAR2_PIN 32  // middle
+#define IR_VAR3_PIN 34  // right (not confirmed)
 
 #define CHIP_SELECT_PIN 53
 
@@ -111,6 +111,16 @@
 
 /// SERVO CONFIG ///
 #define MAX_TRAVEL 180
+
+/*
+  LED_GREEN
+  LED_BLUE
+  LED_CYAN
+  LED_RED
+  LED_GREEN2
+  LED_PINK
+  LED_WHITE
+*/
 
 /////////////////////
 /// SENSOR CONFIG ///
@@ -173,6 +183,7 @@
 #define SENSOR_BUFFER_SIZE 10
 
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
+#define WEIGHT_LOST_TOLERANCE 1000  // milliseconds
 
 #define GREEN_THRESHOLD 0
 #define BLUE_THRESHOLD 0

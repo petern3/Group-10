@@ -53,6 +53,10 @@ class CartVec {
     bool operator==(float obj[2]);
     bool operator==(int8_t obj[2]);
     bool operator==(int16_t obj[2]);
+    bool operator!=(CartVec obj);
+    bool operator!=(float obj[2]);
+    bool operator!=(int8_t obj[2]);
+    bool operator!=(int16_t obj[2]);
     CartVec operator+(CartVec obj);
     CartVec operator+(PolarVec obj);
     
@@ -72,6 +76,10 @@ class PolarVec {
     bool operator==(float obj[2]);
     bool operator==(int8_t obj[2]);
     bool operator==(int16_t obj[2]);
+    bool operator!=(PolarVec obj);
+    bool operator!=(float obj[2]);
+    bool operator!=(int8_t obj[2]);
+    bool operator!=(int16_t obj[2]);
     CartVec operator+(PolarVec obj);
     CartVec operator+(CartVec obj);
     

@@ -59,7 +59,7 @@ void extend_magnets(void) {
       delayMicroseconds(2);
       digitalWrite(STEPPER1.step_pin, HIGH);
       digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(1);
+      delay(4);
     }
     is_extended = true;
   }
@@ -77,7 +77,7 @@ void retract_magnets(void) {
       delayMicroseconds(2);
       digitalWrite(STEPPER1.step_pin, HIGH);
       digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(1);
+      delay(4);
     }
     is_extended = false;
   }
@@ -146,15 +146,15 @@ static void point_towards_target(PolarVec target) {
 
 /// SENSORS ///
 
-bool* weight_detect(void) {
-  bool found[2] = {false, false};
+CartVec* weight_detect(void) {
+  CartVec found[2] = {{-1, -1}, {-1, -1}};
   
   // Check right. No need for abs as the lower one (USONIC) should always be less.
   if (USONIC1.is_valid()) { 
     if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
         IR_MED1.polar_read().r == NOT_VALID) {
        if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
-        found[0] = true;
+        found[0] = USONIC1.cart_read();
        }
     }
   }
@@ -163,7 +163,7 @@ bool* weight_detect(void) {
     if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
         IR_MED1.polar_read().r == NOT_VALID) {
       if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 400) {
-        found[1] = true;
+        found[1] = USONIC1.cart_read();
        }
     }
   }
@@ -182,6 +182,13 @@ uint8_t colour_detect(void) {
   else {
     return NO_BASE;
   }
+}
+
+bool is_full(void) {
+  if (IR_VAR1.is_active() && IR_VAR2.is_active() && IR_VAR3.is_active()) {
+    return true;
+  }
+  return false;
 }
 
 static void debug_sensors(void) {
@@ -219,7 +226,8 @@ static void print_buffer(int16_t* to_print, uint16_t len) {
 void idle_mode(void) {
   PRINTLN("Idling\n");
   char serial_byte = '\0';
-  uint32_t initial_time = millis();
+  //uint32_t initial_time = millis();
+  OPERATION_MODE = MANUAL_MODE;
   
   while (OPERATION_MODE == IDLE_MODE) {
     
@@ -238,9 +246,9 @@ void idle_mode(void) {
       }
     }
     #endif
-    if (millis() - initial_time > IDLE_TIMEOUT) {
-      OPERATION_MODE = PRIMARY_MODE;
-    }
+    //if (millis() - initial_time > IDLE_TIMEOUT) {
+    //  OPERATION_MODE = PRIMARY_MODE;
+    //}
   }
 }
 
@@ -355,39 +363,58 @@ void secondary_tactic(void) {
   Timer3.attachInterrupt(secondary_tactic_ISR);
   
   uint8_t operation_state = SEARCHING;
+  int16_t last_weight_time = 0;
+  CartVec weight_locations[2] = {{-1, -1}, {-1, -1}};
+  
   CartVec cart_target = {0, 0};
   PolarVec polar_target = {0, 0};
+  
   char serial_byte = '\0';
   
   SERVO_COLOUR = LED_BLUE;
   
   while(OPERATION_MODE == SECONDARY_MODE) {
     
+    weight_locations[0] = weight_detect()[0];
+    weight_locations[1] = weight_detect()[1];
+    
     switch (operation_state) {
       case SEARCHING:
-        if (weight_detect()[0] == true || weight_detect()[1] == true) {
+        if (weight_locations[0] != NO_WEIGHT || weight_locations[1] != NO_WEIGHT) {
           operation_state = COLLECTING;
           SERVO_COLOUR = LED_GREEN;
-        } 
+          last_weight_time = millis();
+        }
         else {
           cart_target = get_local_target();
         }
         break;
       case COLLECTING:
         
-        if (weight_detect()[0] == false && weight_detect()[1] == false) {
+        if (weight_locations[0] != NO_WEIGHT || weight_locations[1] != NO_WEIGHT) {
+          last_weight_time = millis();
+          if (weight_locations[0].polar().r < weight_locations[1].polar().r) {
+            cart_target = weight_locations[0];
+          } else {
+            cart_target = weight_locations[1];
+          }
+          
+        }
+        else if ((millis() - last_weight_time) > WEIGHT_LOST_TOLERANCE) {
           operation_state = SEARCHING;
           SERVO_COLOUR = LED_BLUE;
-        } 
-        else {
-          //cart_target = weight_location;
         }
+        
         break;
       case RETURNING:
         cart_target = get_local_target();
         break;
-      
     }
+    if (is_full()) {
+      operation_state = RETURNING;
+      SERVO_COLOUR = LED_GREEN2;
+    }
+    
     
     polar_target = cart_target.polar();
     move_towards_target(polar_target);
@@ -431,6 +458,8 @@ void manual_mode(void) {
   int8_t FORWARD = 0;
   int8_t TURNING = 0;
   char serial_byte = '\0';
+
+  CartVec weight_locations[2] = {{-1, -1}, {-1, -1}};
   
   while(OPERATION_MODE == MANUAL_MODE) {
     #ifdef ENABLE_SERIAL
@@ -526,10 +555,16 @@ void manual_mode(void) {
     #endif
     
     DC.drive(FORWARD, TURNING);
-
-    if (weight_detect()[0] == true || weight_detect()[1] == true) {
+    
+    weight_locations[0] = weight_detect()[0];
+    weight_locations[1] = weight_detect()[1];  // TO CONFIRM
+    if (weight_locations[0] != NO_WEIGHT || weight_locations[1] != NO_WEIGHT) {
       SERVO_COLOUR = LED_GREEN;
-      //point_towards_target(weight_location.polar());
+      if (weight_locations[0].polar().r < weight_locations[1].polar().r) {
+        point_towards_target(weight_locations[0].polar());
+      } else {
+        point_towards_target(weight_locations[1].polar());
+      }
     } else {
       SERVO_COLOUR = LED_BLUE;
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
@@ -542,8 +577,9 @@ void manual_mode(void) {
     //PRINTLN();
     COLOUR.update();
     IMU.update();
+    PRINT(IR_VAR1.is_active()); PRINT(IR_VAR2.is_active()); PRINT(IR_VAR3.is_active()); PRINT('\r');
     //print_buffer(IMU.read(), IMU_BUFFER_SIZE); PRINT('\r');
-    COLOUR.read();
+    //COLOUR.read();
     //delay(200);
     
   }

@@ -68,6 +68,34 @@ bool CartVec::operator==(int16_t obj[2]) {
   return false;
 }
 
+bool CartVec::operator!=(CartVec obj) {
+  if (this->x != obj.x || this->y != obj.y) {
+    return true;
+  }
+  return false;
+}
+
+bool CartVec::operator!=(float obj[2]) {
+  if (this->x != obj[0] || this->y != obj[1]) {
+    return true;
+  }
+  return false;
+}
+
+bool CartVec::operator!=(int8_t obj[2]) {
+  if (this->x != obj[0] || this->y != obj[1]) {
+    return true;
+  }
+  return false;
+}
+
+bool CartVec::operator!=(int16_t obj[2]) {
+  if (this->x != obj[0] || this->y != obj[1]) {
+    return true;
+  }
+  return false;
+}
+
 CartVec CartVec::operator+(CartVec obj) {
   CartVec sum = {this->x + obj.x, this->y + obj.y};
   return sum;
@@ -144,6 +172,34 @@ bool PolarVec::operator==(int8_t obj[2]) {
 
 bool PolarVec::operator==(int16_t obj[2]) {
   if (this->r == obj[0] && this->theta == obj[1]) {
+    return true;
+  }
+  return false;
+}
+
+bool PolarVec::operator!=(PolarVec obj) {
+  if (this->r != obj.r || this->theta != obj.theta) {
+    return true;
+  }
+  return false;
+}
+
+bool PolarVec::operator!=(float obj[2]) {
+  if (this->r != obj[0] || this->theta != obj[1]) {
+    return true;
+  }
+  return false;
+}
+
+bool PolarVec::operator!=(int8_t obj[2]) {
+  if (this->r != obj[0] || this->theta != obj[1]) {
+    return true;
+  }
+  return false;
+}
+
+bool PolarVec::operator!=(int16_t obj[2]) {
+  if (this->r != obj[0] || this->theta != obj[1]) {
     return true;
   }
   return false;

@@ -92,9 +92,9 @@ void init_sensor_core(void) {
   USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC2_OFFSET_TEMP, degrees_to_radians(USONIC2_ANGLE));
   SONAR1.initialize(SONAR1_PIN, SONAR1_OFFSET_TEMP, degrees_to_radians(SONAR1_ANGLE));
   
-  IR_VAR1.initialize(IR_VAR1_PIN);
-  IR_VAR2.initialize(IR_VAR2_PIN);
-  IR_VAR3.initialize(IR_VAR3_PIN);
+  IR_VAR1.initialize(IR_VAR1_PIN, LOW);
+  IR_VAR2.initialize(IR_VAR2_PIN, LOW);
+  IR_VAR3.initialize(IR_VAR3_PIN, LOW);
   
   IMU.initialize();
   COLOUR.initialize();
@@ -111,10 +111,6 @@ void update_sensors(void) {
   
   USONIC1.update();
   USONIC2.update();
-  
-  IR_VAR1.update();
-  IR_VAR2.update();
-  IR_VAR3.update();
   
 }
 
@@ -387,8 +383,9 @@ bool SonarSensor::is_valid(void) {
 ///////////////////////////////////////
 /// DIGIATAL SENSOR CLASS FUNCTIONS ///
 ///////////////////////////////////////
-void DigitalSensor::initialize(uint8_t init_pin) {
+void DigitalSensor::initialize(uint8_t init_pin, bool init_active_state) {
   this->pin = init_pin;
+  this->active_state = init_active_state;
 }
 
 void DigitalSensor::update(void) {
@@ -397,7 +394,19 @@ void DigitalSensor::update(void) {
 
 bool DigitalSensor::read(void) {
  return this->value;
+}
+
+bool DigitalSensor::is_active(void) {
   
+  bool is_active_var = false;
+  this->update();
+  if (this->active_state == HIGH && this->value == true) {
+    is_active_var = true;
+  }
+  else if (this->active_state == LOW && this->value == false){
+    is_active_var = true;
+  }
+  return is_active_var;
 }
 
 ///////////////////////////

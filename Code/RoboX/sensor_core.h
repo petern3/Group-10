@@ -143,10 +143,12 @@ class DigitalSensor {
   private:
     uint8_t pin;
     bool value;
+    bool active_state;
   public:
-  	void initialize(uint8_t init_pin);
+  	void initialize(uint8_t init_pin, bool init_active_state);
     void update(void);
     bool read(void);
+    bool is_active(void);
 };
 
 class IMUSensor {
