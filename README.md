@@ -12,9 +12,9 @@ http://www.societyofrobots.com/sensors_sharpirrange.shtml
 
 *Todo*
 Mechanical:
-- [ ] Front brace
 - [ ] Track support
 - [ ] Tilt Mechanism wire reliance
+- [ ] Front brace
 - [ ] Reliable weight removal (may come with tilt) stepper driver
 - [ ] General tidying up
 
