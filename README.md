@@ -12,8 +12,8 @@ http://www.societyofrobots.com/sensors_sharpirrange.shtml
 
 *Todo*
 Mechanical:
-- [ ] Track support
-- [ ] Tilt Mechanism wire reliance
+- [ ] Track support bring dampers
+- [ ] Tilt Mechanism wire test
 - [ ] Front brace
 - [ ] Reliable weight removal (may come with tilt) stepper driver
 - [ ] General tidying up
@@ -27,13 +27,10 @@ Electrical:
 - [ ] Tidy cables
 
 Software:
-- [ ] Get colour sensor working
-- [ ] Get IMU working
 - [ ] Redo secondary tactic - wall avoiding, weight detecting, etc with as few 'if' statements as possible
-- [ ] Calibrate
+- [ ] Extensive testing and calibrate
 - [ ] State estimate
 - [ ] State correct
 - [ ] Place landmarks (first place that needs map)
 - [ ] D*
-- [ ] Extensive testing
 - [ ] Audio to play off SD
