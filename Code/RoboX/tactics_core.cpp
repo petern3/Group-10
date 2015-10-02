@@ -32,8 +32,8 @@ int8_t NO_WEIGHT[2] = {-1, -1};
 
 bool is_extended = true;
 bool is_lowered = false;
+uint8_t home_base = NO_BASE;
 
-int wall = 0;
 
 /////////////////
 /// FUNCTIONS ///
@@ -110,22 +110,27 @@ void lower_magnets(void) {
 
 static void move_towards_target(PolarVec target) {
   int16_t angle = radians_to_degrees(target.theta);
+  int8_t motor_speed = 0;
+  int8_t motor_rotation = 0;
   
   if (target.r > 255) {
     target.r = 255;
   }
-  if (angle > 180) {
+  /*if (angle > 180) {
     angle = -angle + 180;
-  }
-  /*
-  if (angle > 90) {
-    if (!IR_LNG1.is_valid() || IR_LNG1.polar_read().r > 30) {
-      weight_location = USONIC1.cart_read();
-      return true;
-    }
   }*/
-  int8_t motor_speed = SPEED_P * target.r;
-  int8_t motor_rotation = ROTATE_P * angle;
+  if (angle > BACKING_ANGLE) {
+    motor_speed = SPEED_P * -target.r;
+    motor_rotation = ROTATE_P * (angle - 180);
+  }
+  else if (angle < -BACKING_ANGLE) {
+    motor_speed = SPEED_P * -target.r;
+    motor_rotation = ROTATE_P * (angle + 180);
+  }
+  else {
+    motor_speed = SPEED_P * target.r;
+    motor_rotation = ROTATE_P * angle;
+  }
   
   DC.drive(motor_speed, motor_rotation);
 }
@@ -227,9 +232,12 @@ void idle_mode(void) {
   PRINTLN("Idling\n");
   char serial_byte = '\0';
   //uint32_t initial_time = millis();
-  OPERATION_MODE = MANUAL_MODE;
+  raise_magnets();
   
   while (OPERATION_MODE == IDLE_MODE) {
+    
+    OPERATION_MODE = MANUAL_MODE;
+    home_base = colour_detect();
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
@@ -246,6 +254,8 @@ void idle_mode(void) {
       }
     }
     #endif
+
+    
     //if (millis() - initial_time > IDLE_TIMEOUT) {
     //  OPERATION_MODE = PRIMARY_MODE;
     //}
@@ -303,55 +313,29 @@ static CartVec get_local_target(void) {
   CartVec left_wall = IR_MED2.cart_read();
   CartVec right_wall = IR_MED1.cart_read();
   CartVec centre_wall = IR_LNG1.cart_read();
-  // left wall == 1, right wall == 2
   
   // x value WIDTH
   if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) { // left wall found, not right wall
     target.x = left_wall.x + ROBOT_DIAMETER;
-    wall = 1;
   }
   else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) { // right wall found, not left wall
     target.x = right_wall.x - ROBOT_DIAMETER;
-    wall = 2;
   } 
   else if (left_wall.x == NOT_VALID && right_wall.x == NOT_VALID) { // no wall found
     target.x = 0 ;
   }
   else { // If both walls found
-    if (wall == 1){ //left wall
-      target.x = 100;  //(left_wall.x + right_wall.x) / 2;
-    }
-    else if (wall == 2){ //right wall
-      target.x = -100;
-    }
-    //wall = 0;
+    target.x = (left_wall.x + right_wall.x)/2;
   }
   
   // y value LENGTH
-  if (left_wall.y != NOT_VALID && right_wall.y == NOT_VALID) { // left wall found, not right wall
-    target.y = (left_wall.y) - ROBOT_RADIUS;
+  if (centre_wall.y == NOT_VALID) {
+    target.y = ROBOT_DIAMETER;
   }
-  else if (left_wall.y == NOT_VALID && right_wall.y != NOT_VALID) { // right wall found, not left wall
-    target.y = (right_wall.y) - ROBOT_RADIUS;
+  else {
+    target.y = centre_wall.y - ROBOT_RADIUS;
   }
-  else  if (left_wall.y == NOT_VALID && right_wall.y == NOT_VALID) { // No walls found move fall
-    target.y = ROBOT_RADIUS;
-  }
-  else { // Both walls found / corner
-    target.y = 0;
-    /*if (centre_wall.y != NOT_VALID) { // Corner found
-      target.x = 400;
-      target.y = -300;
-    }
-    else {*/
-      //target.y = ((left_wall.y + right_wall.y) / 2) - ROBOT_RADIUS; // Gap found
-    //}
-  }
-  /*if (IR_LNG1.is_valid() && IR_LNG1 < 100) {
-    target.
-  }*/
-  //target.x = -100;
-  //target.y = 0;
+  
   return target;
 }
 
@@ -364,7 +348,10 @@ void secondary_tactic(void) {
   
   uint8_t operation_state = SEARCHING;
   int16_t last_weight_time = 0;
+  uint16_t weight_timeout = 0;
+  
   CartVec weight_locations[2] = {{-1, -1}, {-1, -1}};
+  uint8_t curr_base = home_base;
   
   CartVec cart_target = {0, 0};
   PolarVec polar_target = {0, 0};
@@ -376,39 +363,61 @@ void secondary_tactic(void) {
   while(OPERATION_MODE == SECONDARY_MODE) {
     
     weight_locations[0] = weight_detect()[0];
-    weight_locations[1] = weight_detect()[1];
+    weight_locations[1] = weight_detect()[1]; //not checked
     
-    switch (operation_state) {
-      case SEARCHING:
-        if (weight_locations[0] != NO_WEIGHT || weight_locations[1] != NO_WEIGHT) {
-          operation_state = COLLECTING;
-          SERVO_COLOUR = LED_GREEN;
-          last_weight_time = millis();
-        }
-        else {
-          cart_target = get_local_target();
-        }
-        break;
-      case COLLECTING:
-        
-        if (weight_locations[0] != NO_WEIGHT || weight_locations[1] != NO_WEIGHT) {
-          last_weight_time = millis();
-          if (weight_locations[0].polar().r < weight_locations[1].polar().r) {
-            cart_target = weight_locations[0];
-          } else {
-            cart_target = weight_locations[1];
+    curr_base = colour_detect();
+
+    if (curr_base == home_base) {  // In home base
+      raise_magnets();
+      retract_magnets();
+      // Something else?
+      operation_state = SEARCHING;
+    }
+    else if (curr_base == NO_BASE) {  // In arena
+      extend_magnets();
+      switch (operation_state) {
+        case SEARCHING:
+          
+          if (weight_locations[0] != NO_WEIGHT || weight_locations[1] != NO_WEIGHT) {
+            operation_state = COLLECTING;
+            SERVO_COLOUR = LED_GREEN;
+            last_weight_time = millis();
+          }
+          else {
+            cart_target = get_local_target();
+          }
+          break;
+        case COLLECTING:
+          lower_magnets();
+          
+          if (weight_locations[0] != NO_WEIGHT || weight_locations[1] != NO_WEIGHT) {
+            last_weight_time = millis();
+            weight_timeout += WEIGHT_TIMEOUT_INC;
+            if (weight_timeout > WEIGHT_TIMEOUT_MAX) {
+              weight_timeout = WEIGHT_TIMEOUT_MAX;
+            }
+            if (weight_locations[0].polar().r < weight_locations[1].polar().r) {
+              cart_target = weight_locations[0];
+            } else {
+              cart_target = weight_locations[1];
+            }
+            
+          }
+          else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
+            raise_magnets();
+            weight_timeout = 0;
+            operation_state = SEARCHING;
+            SERVO_COLOUR = LED_BLUE;
           }
           
-        }
-        else if ((millis() - last_weight_time) > WEIGHT_LOST_TOLERANCE) {
-          operation_state = SEARCHING;
-          SERVO_COLOUR = LED_BLUE;
-        }
-        
-        break;
-      case RETURNING:
-        cart_target = get_local_target();
-        break;
+          break;
+        case RETURNING:
+          cart_target = get_local_target();
+          break;
+      }
+    }
+    else {  // In opposition_base
+      cart_target = get_local_target();
     }
     if (is_full()) {
       operation_state = RETURNING;

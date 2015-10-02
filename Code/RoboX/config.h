@@ -66,9 +66,9 @@
 /// SCHEDULER CONFIG ///
 ////////////////////////
 //#define TIMERTHREE_PERIOD 1000  // microseconds
-#define PRIMARY_TACTIC_PERIOD 1000000  // microseconds
-#define SECONDARY_TACTIC_PERIOD 100000  // microseconds
-#define MANUAL_CONTROL_PERIOD 200000  // microseconds
+#define PRIMARY_TACTIC_PERIOD 1000000  // microseconds  // 1Hz
+#define SECONDARY_TACTIC_PERIOD 50000  // microseconds  // 20Hz
+#define MANUAL_CONTROL_PERIOD 200000  // microseconds   // 5Hz
 
 #define IDLE_TIMEOUT 10000  // milliseconds
 
@@ -182,18 +182,26 @@
 #define USONIC_TIMEOUT 4060ul //5.8*700mm, microseconds
 #define SENSOR_BUFFER_SIZE 10
 
+//////////////////////
+/// TACTICS CONFIG ///
+//////////////////////
+
+#define BACKING_ANGLE 120  // degrees
+
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
-#define WEIGHT_LOST_TOLERANCE 1000  // milliseconds
 
 #define GREEN_THRESHOLD 0
 #define BLUE_THRESHOLD 0
+
+#define WEIGHT_TIMEOUT_MAX 5000  // milliseconds
+#define WEIGHT_TIMEOUT_INC 50   // milliseconds
 
 //////////////////
 /// MAP CONFIG ///
 //////////////////
 #define MAP_SIZE_X 4900 //4900  // mm  Wider than is long
 #define MAP_SIZE_Y 2400 //2400  // mm
-#define MAP_SPACING 200 //20  // mm
+#define MAP_SPACING 250 //20  // mm
 
 #define ROBOT_RADIUS 240  // mm
 #define ROBOT_DIAMETER 480  // mm
