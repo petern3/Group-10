@@ -32,6 +32,7 @@ SonarSensor SONAR1;
 DigitalSensor IR_VAR1;
 DigitalSensor IR_VAR2;
 DigitalSensor IR_VAR3;
+DigitalSensor LIMIT_O;
 
 IMUSensor IMU;
 ColourSensor COLOUR;
@@ -92,9 +93,11 @@ void init_sensor_core(void) {
   USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC2_OFFSET_TEMP, degrees_to_radians(USONIC2_ANGLE));
   SONAR1.initialize(SONAR1_PIN, SONAR1_OFFSET_TEMP, degrees_to_radians(SONAR1_ANGLE));
   
-  IR_VAR1.initialize(IR_VAR1_PIN, LOW);
-  IR_VAR2.initialize(IR_VAR2_PIN, LOW);
-  IR_VAR3.initialize(IR_VAR3_PIN, LOW);
+  IR_VAR1.initialize(IR_VAR1_PIN, LOW, INPUT);
+  IR_VAR2.initialize(IR_VAR2_PIN, LOW, INPUT);
+  IR_VAR3.initialize(IR_VAR3_PIN, LOW, INPUT);
+  
+  LIMIT_O.initialize(LIMIT_O_PIN, HIGH, INPUT_PULLUP);
   
   IMU.initialize();
   COLOUR.initialize();
@@ -384,9 +387,10 @@ bool SonarSensor::is_valid(void) {
 ///////////////////////////////////////
 /// DIGIATAL SENSOR CLASS FUNCTIONS ///
 ///////////////////////////////////////
-void DigitalSensor::initialize(uint8_t init_pin, bool init_active_state) {
+void DigitalSensor::initialize(uint8_t init_pin, bool init_active_state, uint8_t init_pinmode) {
   this->pin = init_pin;
   this->active_state = init_active_state;
+  pinMode(init_pin, init_pinmode);
 }
 
 void DigitalSensor::update(void) {
@@ -509,11 +513,11 @@ uint16_t* ColourSensor::read(void) {
         this->values[i] = uint16_t((float(this->raw_values[i]) / this->raw_values[0])*256);
       }
       
-      Serial.print("C:\t"); Serial.print(this->values[3]);
+      /*Serial.print("C:\t"); Serial.print(this->values[3]);
       Serial.print("\tR:\t"); Serial.print(this->values[0]);
       Serial.print("\tG:\t"); Serial.print(this->values[1]);
       Serial.print("\tB:\t"); Serial.print(this->values[2]);
-      PRINTLN();
+      PRINTLN();*/
     }
   }
   return this->values;

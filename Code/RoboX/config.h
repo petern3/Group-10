@@ -56,9 +56,9 @@
 
 #define IR_VAR1_PIN 30  // left
 #define IR_VAR2_PIN 32  // middle
-#define IR_VAR3_PIN 34  // right (not confirmed)
+#define IR_VAR3_PIN 34  // right
 
-#define EXTENDED_PIN
+#define LIMIT_O_PIN 36
 
 #define CHIP_SELECT_PIN 53
 #define SPEAKER_PIN 6
@@ -128,18 +128,18 @@
 /////////////////////
 #define IR_SHT1_OFFSET {0, 0}
 #define IR_SHT1_ANGLE 0
-#define IR_MED1_OFFSET {100, 100}
-#define IR_MED1_ANGLE -35
-#define IR_MED2_OFFSET {-100, 100}
-#define IR_MED2_ANGLE 35
+#define IR_MED1_OFFSET {-100, 100}
+#define IR_MED1_ANGLE 35
+#define IR_MED2_OFFSET {100, 100}
+#define IR_MED2_ANGLE -35
 #define IR_LNG1_OFFSET {0, 60}
 #define IR_LNG1_ANGLE 0
 #define IR_LNG2_OFFSET {0, 0}
 #define IR_LNG2_ANGLE 0
-#define USONIC1_OFFSET {-135, -150}
-#define USONIC1_ANGLE -50
-#define USONIC2_OFFSET {135, -150}
-#define USONIC2_ANGLE 50
+#define USONIC1_OFFSET {135, -150}
+#define USONIC1_ANGLE 50
+#define USONIC2_OFFSET {-135, -150}
+#define USONIC2_ANGLE -50
 #define SONAR1_OFFSET {0, 50}
 #define SONAR1_ANGLE 0
 
@@ -187,15 +187,15 @@
 /// TACTICS CONFIG ///
 //////////////////////
 
-#define BACKING_ANGLE 120  // degrees
+#define BACKING_ANGLE 181 //120  // degrees, set to 181 to disable
 
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
 
 #define GREEN_THRESHOLD 200
 #define BLUE_THRESHOLD 150
 
-#define WEIGHT_TIMEOUT_MAX 10000  // milliseconds
-#define WEIGHT_TIMEOUT_INC 1000   // milliseconds
+#define WEIGHT_TIMEOUT_MAX 5000  // milliseconds
+#define WEIGHT_TIMEOUT_INC 200   // milliseconds
 
 //////////////////
 /// MAP CONFIG ///

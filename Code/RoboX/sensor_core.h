@@ -145,7 +145,7 @@ class DigitalSensor {
     bool value;
     bool active_state;
   public:
-  	void initialize(uint8_t init_pin, bool init_active_state);
+  	void initialize(uint8_t init_pin, bool init_active_state, uint8_t init_pinmode);
     void update(void);
     bool read(void);
     bool is_active(void);
@@ -187,6 +187,7 @@ extern SonarSensor SONAR1;
 extern DigitalSensor IR_VAR1;
 extern DigitalSensor IR_VAR2;
 extern DigitalSensor IR_VAR3;
+extern DigitalSensor LIMIT_O;
 extern IMUSensor IMU;
 extern ColourSensor COLOUR;
 
