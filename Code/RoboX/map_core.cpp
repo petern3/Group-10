@@ -161,100 +161,100 @@ static void increment_terrain(Position_t coord, int8_t increment, bool is_hard=f
 }
 
 
-void set_wall(Position_t coord, bool set_true=true, bool set_edge=false) { //set_true=false means it is removing the wall
-  /*
-                    [][][]12[][][]
-                [][]              [][]
-            [][]                      [][]
-          []                              []
-        []                                  []
-      []                                      []
-      []                                      []
-    []                                          []
-    []                                          []
-  []                                              []
-  []                                              []
-  []                                              []
-  12                      []                      12
-  []                                              []
-  []                                              []
-  []                                              []
-    []                                          []
-    []                                          []
-      []                                      []
-      []                                      []
-        []                                  []
-          []                              []
-            [][]                      [][]
-                [][]              [][]
-                    [][][]12[][][]
-  
-  The middle one is set to a 'hard' wall
-  The rest (outer ones) are set to a 'soft' wall
-  
-  This is calibrated for a robot width of 480mm!
-  */
-  int8_t edge_fill[17][2] = {
-    { 1,12},{ 2,12},{ 3,12},
-                          { 4,11},{ 5,11},
-                                        { 6,10},{ 7,10},
-                                                      { 8, 9},
-                                                            { 9, 8},
-                                                                  {10, 7},
-                                                                  {10, 6},
-                                                                        {11, 5},
-                                                                        {11, 4},
-                                                                              {12, 3},
-                                                                              {12, 2},
-                                                                              {12, 1}};
-  int8_t edge_array_length = 16;
-  Position_t edge_position = {0, 0};
-  int8_t increment = WALL_INCR;
-  if (set_edge == true) {
-    increment = WALL_MAX;
-  }
-  else if (set_true == false) {
-    increment = -WALL_INCR;
-  }
-  increment_terrain(coord, increment, true);
-  
-  // Change each corner of the circle
-  for (uint8_t i=0; i<=edge_array_length; i++) {
-    edge_position.x = coord.x - edge_fill[i][0];
-    edge_position.y = coord.y - edge_fill[i][1];
-    increment_terrain(edge_position, increment);
-    edge_position.x = coord.x - edge_fill[i][0];
-    edge_position.y = coord.y + edge_fill[i][1];
-    increment_terrain(edge_position, increment);
-    edge_position.x = coord.x + edge_fill[i][0];
-    edge_position.y = coord.y - edge_fill[i][1];
-    increment_terrain(edge_position, increment);
-    edge_position.x = coord.x + edge_fill[i][0];
-    edge_position.y = coord.y + edge_fill[i][1];
-    increment_terrain(edge_position, increment);
-  }
-  // Change the four edges in line with the centre
-  edge_position.x = coord.x - 12;
-  edge_position.y = coord.y;
-  increment_terrain(edge_position, increment);
-  edge_position.x = coord.x + 12;
-  edge_position.y = coord.y;
-  increment_terrain(edge_position, increment);
-  edge_position.x = coord.x;
-  edge_position.y = coord.y - 12;
-  increment_terrain(edge_position, increment);
-  edge_position.x = coord.x;
-  edge_position.y = coord.y + 12;
-  increment_terrain(edge_position, increment);
-  
-}
+//void set_wall(Position_t coord, bool set_true=true, bool set_edge=false) { //set_true=false means it is removing the wall
+//  /*
+//                    [][][]12[][][]
+//                [][]              [][]
+//            [][]                      [][]
+//          []                              []
+//        []                                  []
+//      []                                      []
+//      []                                      []
+//    []                                          []
+//    []                                          []
+//  []                                              []
+//  []                                              []
+//  []                                              []
+//  12                      []                      12
+//  []                                              []
+//  []                                              []
+//  []                                              []
+//    []                                          []
+//    []                                          []
+//      []                                      []
+//      []                                      []
+//        []                                  []
+//          []                              []
+//            [][]                      [][]
+//                [][]              [][]
+//                    [][][]12[][][]
+//  
+//  The middle one is set to a 'hard' wall
+//  The rest (outer ones) are set to a 'soft' wall
+//  
+//  This is calibrated for a robot width of 480mm!
+//  */
+//  int8_t edge_fill[17][2] = {
+//    { 1,12},{ 2,12},{ 3,12},
+//                          { 4,11},{ 5,11},
+//                                        { 6,10},{ 7,10},
+//                                                      { 8, 9},
+//                                                            { 9, 8},
+//                                                                  {10, 7},
+//                                                                  {10, 6},
+//                                                                        {11, 5},
+//                                                                        {11, 4},
+//                                                                              {12, 3},
+//                                                                              {12, 2},
+//                                                                              {12, 1}};
+//  int8_t edge_array_length = 16;
+//  Position_t edge_position = {0, 0};
+//  int8_t increment = WALL_INCR;
+//  if (set_edge == true) {
+//    increment = WALL_MAX;
+//  }
+//  else if (set_true == false) {
+//    increment = -WALL_INCR;
+//  }
+//  increment_terrain(coord, increment, true);
+//  
+//  // Change each corner of the circle
+//  for (uint8_t i=0; i<=edge_array_length; i++) {
+//    edge_position.x = coord.x - edge_fill[i][0];
+//    edge_position.y = coord.y - edge_fill[i][1];
+//    increment_terrain(edge_position, increment);
+//    edge_position.x = coord.x - edge_fill[i][0];
+//    edge_position.y = coord.y + edge_fill[i][1];
+//    increment_terrain(edge_position, increment);
+//    edge_position.x = coord.x + edge_fill[i][0];
+//    edge_position.y = coord.y - edge_fill[i][1];
+//    increment_terrain(edge_position, increment);
+//    edge_position.x = coord.x + edge_fill[i][0];
+//    edge_position.y = coord.y + edge_fill[i][1];
+//    increment_terrain(edge_position, increment);
+//  }
+//  // Change the four edges in line with the centre
+//  edge_position.x = coord.x - 12;
+//  edge_position.y = coord.y;
+//  increment_terrain(edge_position, increment);
+//  edge_position.x = coord.x + 12;
+//  edge_position.y = coord.y;
+//  increment_terrain(edge_position, increment);
+//  edge_position.x = coord.x;
+//  edge_position.y = coord.y - 12;
+//  increment_terrain(edge_position, increment);
+//  edge_position.x = coord.x;
+//  edge_position.y = coord.y + 12;
+//  increment_terrain(edge_position, increment);
+//  
+//}
 
 
 static void init_edges(void) {
   Position_t curr = {0,0};
   
   // Set top and bottom hard edges
-  for (int16_t x = X_START; x <= X_END; x++) {
+  for (int16_t x = X_START-1; x <= X_END+1; x++) {  // The +/-1 are so that the wall is 'outside' the map
     curr.x = x;
     curr.y = Y_START;
     set_terrain(curr, 0xFF); //set_hard_bit(WALL_MAX, HARD_WALL));
@@ -262,7 +262,7 @@ static void init_edges(void) {
     set_terrain(curr, 0xFF); //set_hard_bit(WALL_MAX, HARD_WALL));
   }
   // Set left and right hard edges
-  for (int16_t y = Y_START; y <= Y_END; y++) {
+  for (int16_t y = Y_START-1; y <= Y_END+1; y++) {
     curr.x = X_START;
     curr.y = y;
     set_terrain(curr, 0xFF); //set_hard_bit(WALL_MAX, HARD_WALL));

@@ -52,14 +52,15 @@
 #define USONIC2_ECHO_PIN 10
 #define USONIC1_TRIG_PIN 9
 #define USONIC1_ECHO_PIN 8
-#define SONAR1_PIN A3
+#define SONAR1_PIN A6
 
 #define IR_VAR1_PIN 30  // left
 #define IR_VAR2_PIN 32  // middle
 #define IR_VAR3_PIN 34  // right (not confirmed)
 
-#define CHIP_SELECT_PIN 53
+#define EXTENDED_PIN
 
+#define CHIP_SELECT_PIN 53
 #define SPEAKER_PIN 6
 
 ////////////////////////
@@ -68,7 +69,7 @@
 //#define TIMERTHREE_PERIOD 1000  // microseconds
 #define PRIMARY_TACTIC_PERIOD 1000000  // microseconds  // 1Hz
 #define SECONDARY_TACTIC_PERIOD 50000  // microseconds  // 20Hz
-#define MANUAL_CONTROL_PERIOD 200000  // microseconds   // 5Hz
+#define MANUAL_CONTROL_PERIOD 100000  // microseconds   // 10Hz
 
 #define IDLE_TIMEOUT 10000  // milliseconds
 
@@ -127,18 +128,18 @@
 /////////////////////
 #define IR_SHT1_OFFSET {0, 0}
 #define IR_SHT1_ANGLE 0
-#define IR_MED1_OFFSET {-85, 50}
-#define IR_MED1_ANGLE 35
-#define IR_MED2_OFFSET {85, 50}
-#define IR_MED2_ANGLE -35
+#define IR_MED1_OFFSET {100, 100}
+#define IR_MED1_ANGLE -35
+#define IR_MED2_OFFSET {-100, 100}
+#define IR_MED2_ANGLE 35
 #define IR_LNG1_OFFSET {0, 60}
 #define IR_LNG1_ANGLE 0
 #define IR_LNG2_OFFSET {0, 0}
 #define IR_LNG2_ANGLE 0
-#define USONIC1_OFFSET {135, -150}
-#define USONIC1_ANGLE 50
-#define USONIC2_OFFSET {-135, -150}
-#define USONIC2_ANGLE -50
+#define USONIC1_OFFSET {-135, -150}
+#define USONIC1_ANGLE -50
+#define USONIC2_OFFSET {135, -150}
+#define USONIC2_ANGLE 50
 #define SONAR1_OFFSET {0, 50}
 #define SONAR1_ANGLE 0
 
@@ -170,11 +171,11 @@
 #define IR_LNG_DV2_MM 1000
 #define IR_LNG_MAX_MM 1500
 
-#define SONAR_MIN_ADC 0   // To measure
-#define SONAR_DV1_ADC 200   // to measure
-#define SONAR_DV2_ADC 400   // to measure
-#define SONAR_MAX_ADC 1023  // To measure
-#define SONAR_MIN_MM 200
+#define SONAR_MIN_ADC 114   // To measure
+#define SONAR_DV1_ADC 237   // to measure
+#define SONAR_DV2_ADC 396   // to measure
+#define SONAR_MAX_ADC 577  // To measure
+#define SONAR_MIN_MM 100
 #define SONAR_DV1_MM 600
 #define SONAR_DV2_MM 1000
 #define SONAR_MAX_MM 1500
@@ -190,17 +191,17 @@
 
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
 
-#define GREEN_THRESHOLD 0
-#define BLUE_THRESHOLD 0
+#define GREEN_THRESHOLD 200
+#define BLUE_THRESHOLD 150
 
-#define WEIGHT_TIMEOUT_MAX 5000  // milliseconds
-#define WEIGHT_TIMEOUT_INC 50   // milliseconds
+#define WEIGHT_TIMEOUT_MAX 10000  // milliseconds
+#define WEIGHT_TIMEOUT_INC 1000   // milliseconds
 
 //////////////////
 /// MAP CONFIG ///
 //////////////////
-#define MAP_SIZE_X 4900 //4900  // mm  Wider than is long
-#define MAP_SIZE_Y 2400 //2400  // mm
+#define MAP_SIZE_X 5000 //4900  // mm  Wider than is long
+#define MAP_SIZE_Y 2500 //2400  // mm
 #define MAP_SPACING 250 //20  // mm
 
 #define ROBOT_RADIUS 240  // mm

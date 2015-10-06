@@ -112,6 +112,7 @@ void update_sensors(void) {
   USONIC1.update();
   USONIC2.update();
   
+  SONAR1.update();
 }
 
 
@@ -119,8 +120,7 @@ static void buffer_initialize(CircBuf_t* buffer, uint8_t size) {
   buffer->windex = 0;
   buffer->rindex = 0;
   buffer->size = size;
-  buffer->data =
-  (uint32_t *) calloc (size, sizeof(uint32_t));
+  buffer->data = (uint32_t *) calloc (size, sizeof(uint32_t));
   // Note use of calloc() to clear contents.
 }
 
@@ -336,7 +336,7 @@ void SonarSensor::initialize(uint8_t init_pin, int8_t init_offset[2], float init
 }
 
 void SonarSensor::update(void) {
-
+  
   buffer_store(&this->raw_value, analogRead(this->pin));
   this->polar_value.r = NOT_READ;
   this->cart_value.x = NOT_READ;
@@ -347,16 +347,17 @@ PolarVec SonarSensor::polar_read(void) {
     uint32_t average = buffer_average(this->raw_value);
     this->polar_value.r = average;
     
-    // Minimum range, largest ADC
-    if (average <= SONAR_MIN_ADC && average > SONAR_DV1_ADC) {
-      //this->polar_value.r = map(this->polar_value.r, SONAR_MIN_ADC, SONAR_DV1_ADC, SONAR_MIN_MM, SONAR_DV1_MM);
+    // Minimum range, minimum ADC
+    if (average >= SONAR_MIN_ADC && average < SONAR_DV1_ADC) {
+      this->polar_value.r = map(this->polar_value.r, SONAR_MIN_ADC, SONAR_DV1_ADC, SONAR_MIN_MM, SONAR_DV1_MM);
     }
-    else if (average <= SONAR_DV1_ADC && average > SONAR_DV2_ADC) {
-      //this->polar_value.r = map(this->polar_value.r, SONAR_DV1_ADC, SONAR_DV2_ADC, SONAR_DV1_MM, SONAR_DV2_MM);
+    else if (average >= SONAR_DV1_ADC && average < SONAR_DV2_ADC) {
+      this->polar_value.r = map(this->polar_value.r, SONAR_DV1_ADC, SONAR_DV2_ADC, SONAR_DV1_MM, SONAR_DV2_MM);
     }
-    else if (average <= SONAR_DV2_ADC && average >= SONAR_MAX_ADC) {
-      //this->polar_value.r = map(this->polar_value.r, SONAR_DV2_ADC, SONAR_MAX_ADC, SONAR_DV2_MM, SONAR_MAX_MM);
-    } else {
+    else if (average >= SONAR_DV2_ADC && average <= SONAR_MAX_ADC) {
+      this->polar_value.r = map(this->polar_value.r, SONAR_DV2_ADC, SONAR_MAX_ADC, SONAR_DV2_MM, SONAR_MAX_MM);
+    }
+    else {
       this->polar_value.r = NOT_VALID;
     }
   }
