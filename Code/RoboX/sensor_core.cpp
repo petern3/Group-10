@@ -33,6 +33,16 @@ DigitalSensor IR_VAR1;
 DigitalSensor IR_VAR2;
 DigitalSensor IR_VAR3;
 DigitalSensor LIMIT_O;
+DigitalSensor TURN_ON;
+
+DigitalSensor DIP8_S1;
+DigitalSensor DIP8_S2;
+DigitalSensor DIP8_S3;
+DigitalSensor DIP8_S4;
+DigitalSensor DIP8_S5;
+DigitalSensor DIP8_S6;
+DigitalSensor DIP8_S7;
+DigitalSensor DIP8_S8;
 
 IMUSensor IMU;
 ColourSensor COLOUR;
@@ -96,8 +106,17 @@ void init_sensor_core(void) {
   IR_VAR1.initialize(IR_VAR1_PIN, LOW, INPUT);
   IR_VAR2.initialize(IR_VAR2_PIN, LOW, INPUT);
   IR_VAR3.initialize(IR_VAR3_PIN, LOW, INPUT);
-  
   LIMIT_O.initialize(LIMIT_O_PIN, HIGH, INPUT_PULLUP);
+  TURN_ON.initialize(TURN_ON_PIN, HIGH, INPUT_PULLUP);
+  
+  DIP8_S1.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S2.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S3.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S4.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S5.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S6.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S7.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S8.initialize(DIP8_S1_PIN, HIGH, INPUT);
   
   IMU.initialize();
   COLOUR.initialize();
@@ -512,13 +531,12 @@ uint16_t* ColourSensor::read(void) {
       for (uint8_t i=1; i < COLOUR_BUFFER_SIZE; i++) {
         this->values[i] = uint16_t((float(this->raw_values[i]) / this->raw_values[0])*256);
       }
-      
-      /*Serial.print("C:\t"); Serial.print(this->values[3]);
-      Serial.print("\tR:\t"); Serial.print(this->values[0]);
-      Serial.print("\tG:\t"); Serial.print(this->values[1]);
-      Serial.print("\tB:\t"); Serial.print(this->values[2]);
-      PRINTLN();*/
     }
+    /*Serial.print("C:\t"); Serial.print(this->values[3]);
+    Serial.print("\tR:\t"); Serial.print(this->values[0]);
+    Serial.print("\tG:\t"); Serial.print(this->values[1]);
+    Serial.print("\tB:\t"); Serial.print(this->values[2]);
+    PRINTLN();*/
   }
   return this->values;
 }

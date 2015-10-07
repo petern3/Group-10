@@ -187,10 +187,10 @@ Weight_Detect_t weight_detect(void) {
 uint8_t colour_detect(void) {
   
   COLOUR.update();
-  if (COLOUR.read()[1] > GREEN_THRESHOLD && COLOUR.read()[1] > COLOUR.read()[2]) {  // Green
+  if (COLOUR.read()[1] > GREEN_THRESHOLD && (COLOUR.read()[1]-GREEN_THRESHOLD) > (COLOUR.read()[2]-BLUE_THRESHOLD)) {  // Green
     return GREEN_BASE;
   }
-  else if (COLOUR.read()[2] > BLUE_THRESHOLD && COLOUR.read()[2] > COLOUR.read()[1]) {  // Blue
+  else if (COLOUR.read()[2] > BLUE_THRESHOLD && (COLOUR.read()[2]-BLUE_THRESHOLD) > (COLOUR.read()[1]-GREEN_THRESHOLD)) {  // Blue
     return BLUE_BASE;
   }
   else {
@@ -214,13 +214,13 @@ static void debug_sensors(void) {
     PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED2.polar_read().r); PRINT("  ");
+    //PRINT(IR_MED1.polar_read().r); PRINT("  ");
+    //PRINT(IR_MED2.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     //PRINT(USONIC1.polar_read().r); PRINT("  ");
     //PRINT(USONIC2.polar_read().r); PRINT("  ");
-    PRINT(SONAR1.polar_read().r); PRINT("  ");
+    //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     PRINT('\r');
   
@@ -259,7 +259,7 @@ void idle_mode(void) {
     else {
       PRINTLN("No base detected");
     }
-    delay(1000);
+    home_base = GREEN_BASE;
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
@@ -276,7 +276,7 @@ void idle_mode(void) {
       }
     }
     #endif
-
+    
     
     //if (millis() - initial_time > IDLE_TIMEOUT) {
     //  OPERATION_MODE = PRIMARY_MODE;
@@ -347,15 +347,40 @@ static CartVec get_local_target(void) {
     target.x = 0 ;
   }
   else {  // If both walls found
-    target.x = (left_wall.x + right_wall.x)/2;
+    if (centre_wall.y < 200){ // sonar picks up front wall
+      if (right_wall.polar().r < left_wall.polar().r) {
+        target.x = -ROBOT_RADIUS;
+      }
+      else {
+        target.x = ROBOT_RADIUS;
+      }
+    }
+    else { // drives though gap
+      target.x = (left_wall.x + right_wall.x)/2;
+    }
   }
   
   // y value LENGTH
   if (centre_wall.y == NOT_VALID) {
-    target.y = ROBOT_DIAMETER;
+    if (left_wall.y > ROBOT_RADIUS && right_wall.y > ROBOT_RADIUS) {
+      target.y = min(left_wall.x, right_wall.x) - ROBOT_RADIUS;
+    }
+    else {
+      target.y = ROBOT_DIAMETER;
+    }
   }
   else {
     target.y = centre_wall.y - ROBOT_RADIUS;
+  }
+  
+  // Backup if not trying to move
+  if (target.polar().r < 50) {
+    target.y = -ROBOT_DIAMETER;
+  }
+  // Backup if not actually moving
+  if ((IMU.read()[0] + IMU.read()[1]) < 50) {
+    target.x = 0;
+    target.y = -ROBOT_DIAMETER;
   }
   
   return target;
@@ -379,6 +404,7 @@ void secondary_tactic(void) {
   PolarVec polar_target = {0, 0};
   
   char serial_byte = '\0';
+  bool enable_drive = true;
   
   SERVO_COLOUR = LED_WHITE;
   
@@ -387,6 +413,7 @@ void secondary_tactic(void) {
     weight_locations = weight_detect();
     
     curr_base = colour_detect();
+    IMU.update();
     
     /// Check how many weights I've got ///
     if (is_full()) {
@@ -398,15 +425,17 @@ void secondary_tactic(void) {
       raise_magnets();
       retract_magnets();
       // Something else?
-      cart_target = get_local_target();
+      // reverse a little
+      cart_target.x =  0;
+      cart_target.y = -ROBOT_RADIUS;  // get_local_target();
       operation_state = SEARCHING;
     }
     else if (curr_base == NO_BASE) {  // In arena
       extend_magnets();
       switch (operation_state) {
         case SEARCHING:
-          SERVO_COLOUR = LED_WHITE;
-          cart_target = get_local_target();
+          SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
+          cart_target = get_local_target(); // drive around
           if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
             operation_state = COLLECTING;
             last_weight_time = millis();
@@ -443,6 +472,8 @@ void secondary_tactic(void) {
             weight_timeout = 0;
             operation_state = SEARCHING;
           }
+          // only have the magenets down for max time
+          
           
           break;
         case RETURNING:
@@ -463,8 +494,10 @@ void secondary_tactic(void) {
     
     /// Perform tasks ///
     polar_target = cart_target.polar();
-    move_towards_target(polar_target);
     point_towards_target(polar_target);
+    if (enable_drive == true) {
+      move_towards_target(polar_target);
+    }
     
     //PRINTLN(weight_timeout);
     
@@ -481,13 +514,21 @@ void secondary_tactic(void) {
       else if (serial_byte == IDLE_MODE) {
         OPERATION_MODE = IDLE_MODE;
       }
+      else if (serial_byte == STP) {
+        if (enable_drive == true) {
+          enable_drive = false;
+        } else {
+          enable_drive = true;
+        }
+        PRINTLN("\tStopping");
+      }
     }
     #endif
     
     //PRINT("P ("); PRINT(polar_target.r); PRINT(", "); PRINT(radians_to_degrees(polar_target.theta)); PRINT(") ");
     //PRINT("C ("); PRINT(cart_target.x); PRINT(", "); PRINT(cart_target.y); PRINT(") ");
     
-    //debug_sensors();
+    debug_sensors();
     
   }
   PRINTLN("\nSecondary tactic ending\n");
@@ -632,18 +673,18 @@ void manual_mode(void) {
     
     /// Weight detection ///
     weight_locations = weight_detect();
-    PRINT(weight_locations.left.x); PRINT(", "); PRINT(weight_locations.left.y); PRINT("  ");
-    PRINT(weight_locations.right.x); PRINT(", "); PRINT(weight_locations.right.y); PRINT("\n");
+    //PRINT(weight_locations.left.x); PRINT(", "); PRINT(weight_locations.left.y); PRINT("  ");
+    //PRINT(weight_locations.right.x); PRINT(", "); PRINT(weight_locations.right.y); PRINT("\n");
     
     if (weight_locations.left != NO_WEIGHT && weight_locations.right != NO_WEIGHT) {  // If I see two weights
       SERVO_COLOUR = LED_CYAN;
       if (weight_locations.left.polar().r < weight_locations.right.polar().r) {
         point_towards_target(weight_locations.left.polar());
-        PRINT("left");
+        //PRINT("left");
       }
       else {
         point_towards_target(weight_locations.right.polar());
-        PRINT("right");
+        //PRINT("right");
       }
     }
     else if (weight_locations.left != NO_WEIGHT && weight_locations.right == NO_WEIGHT) {  // If I see left weight

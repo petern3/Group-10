@@ -57,11 +57,21 @@
 #define IR_VAR1_PIN 30  // left
 #define IR_VAR2_PIN 32  // middle
 #define IR_VAR3_PIN 34  // right
-
 #define LIMIT_O_PIN 36
+#define TURN_ON_PIN A9
 
 #define CHIP_SELECT_PIN 53
 #define SPEAKER_PIN 6
+
+#define DIP8_S1_PIN 1
+#define DIP8_S2_PIN 0
+#define DIP8_S3_PIN 14
+#define DIP8_S4_PIN 15
+#define DIP8_S5_PIN 26
+#define DIP8_S6_PIN 27
+#define DIP8_S7_PIN 28
+#define DIP8_S8_PIN 29
+
 
 ////////////////////////
 /// SCHEDULER CONFIG ///
@@ -111,7 +121,7 @@
 //#define STEPPER4_SPR 200  // to calibrate
 
 /// SERVO CONFIG ///
-#define MAX_TRAVEL 180
+#define MAX_TRAVEL 170
 
 /*
   LED_GREEN
@@ -187,15 +197,15 @@
 /// TACTICS CONFIG ///
 //////////////////////
 
-#define BACKING_ANGLE 181 //120  // degrees, set to 181 to disable
+#define BACKING_ANGLE 179 //120  // degrees, set to 181 to disable
 
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
 
 #define GREEN_THRESHOLD 200
 #define BLUE_THRESHOLD 150
 
-#define WEIGHT_TIMEOUT_MAX 5000  // milliseconds
-#define WEIGHT_TIMEOUT_INC 200   // milliseconds
+#define WEIGHT_TIMEOUT_MAX 4000  // milliseconds
+#define WEIGHT_TIMEOUT_INC 400   // milliseconds
 
 //////////////////
 /// MAP CONFIG ///

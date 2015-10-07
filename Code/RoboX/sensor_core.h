@@ -188,10 +188,17 @@ extern DigitalSensor IR_VAR1;
 extern DigitalSensor IR_VAR2;
 extern DigitalSensor IR_VAR3;
 extern DigitalSensor LIMIT_O;
+extern DigitalSensor TURN_ON;
+extern DigitalSensor DIP8_S1;
+extern DigitalSensor DIP8_S2;
+extern DigitalSensor DIP8_S3;
+extern DigitalSensor DIP8_S4;
+extern DigitalSensor DIP8_S5;
+extern DigitalSensor DIP8_S6;
+extern DigitalSensor DIP8_S7;
+extern DigitalSensor DIP8_S8;
 extern IMUSensor IMU;
 extern ColourSensor COLOUR;
-
-extern CartVec weight_location;
 
 /////////////////
 /// FUNCTIONS ///
