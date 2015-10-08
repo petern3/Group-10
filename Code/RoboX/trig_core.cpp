@@ -129,7 +129,8 @@ PolarVec CartVec::polar(void) {
     polar.r = sqrt((this->x*this->x) + (this->y*this->y));
     if (this->x >= 0) {
       polar.theta = pi_2 - atan(this->y / this->x);
-    } else {
+    } 
+    else {
       polar.theta = -pi_2 - atan(this->y / this->x);
     }
   }

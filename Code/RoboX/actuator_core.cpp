@@ -129,7 +129,7 @@ void DCMotor::calibrate(void) {
   this->right_motor.write(this->zero);
 }
 
-void DCMotor::drive(int8_t motor_speed, int8_t motor_rotation=0) {
+void DCMotor::drive(int16_t motor_speed, int16_t motor_rotation) {
   // 
   
   if (motor_speed > 90) {
@@ -147,10 +147,10 @@ void DCMotor::drive(int8_t motor_speed, int8_t motor_rotation=0) {
   
   int16_t left_drive = this->zero - (motor_speed + motor_rotation);  // subtract motor speed due to upside-down chassis
   int16_t right_drive = this->zero - (motor_speed - motor_rotation);
-  
+ 
   if (left_drive < 0) {
     left_drive = 0;
-    right_drive = (2*motor_rotation);
+    right_drive = 2*motor_rotation;
   }
   else if (left_drive > 180) {
     left_drive = 180;
@@ -159,7 +159,7 @@ void DCMotor::drive(int8_t motor_speed, int8_t motor_rotation=0) {
 
   else if (right_drive < 0) {
     right_drive = 0;
-    left_drive = (2*motor_rotation);
+    left_drive = 2*motor_rotation;
   }
   else if (right_drive > 180) {
     right_drive = 180;

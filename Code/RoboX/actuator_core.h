@@ -43,7 +43,7 @@ class DCMotor {
     uint8_t zero;
     void initialize(void);
     void calibrate(void);
-    void drive(int8_t motor_speed, int8_t motor_rotation);  // absolute speed
+    void drive(int16_t motor_speed, int16_t motor_rotation);  // absolute speed
 };
 
 class StepperMotor {

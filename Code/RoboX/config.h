@@ -112,7 +112,12 @@
 #define DC_CALIBRATION_LIMIT 15 // 90 +/- n
 
 #define SPEED_P 0.1
+<<<<<<< Updated upstream
 #define ROTATE_P 0.4
+=======
+#define ROTATE_P 0.35
+#define ANGLE_LIMIT 45
+>>>>>>> Stashed changes
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 1036 // 630/1.8*5.18 Geared
@@ -215,8 +220,8 @@
 #define MAP_SIZE_Y 2500 //2400  // mm
 #define MAP_SPACING 250 //20  // mm
 
-#define ROBOT_RADIUS 240  // mm
-#define ROBOT_DIAMETER 480  // mm
+#define ROBOT_RADIUS 300  // mm
+#define ROBOT_DIAMETER 600  // mm
 
 ////////////////////
 /// DEBUG CONFIG ///

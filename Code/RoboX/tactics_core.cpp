@@ -119,13 +119,13 @@ void lower_magnets(void) {
 
 static void move_towards_target(PolarVec target) {
   int16_t angle = radians_to_degrees(target.theta);
-  int8_t motor_speed = 0;
-  int8_t motor_rotation = 0;
+  int16_t motor_speed = 0;
+  int16_t motor_rotation = 0;
   
-  if (target.r > 255) {
+  /*if (target.r > 255) {
     target.r = 255;
   }
-  /*if (angle > 180) {
+  if (angle > 180) {
     angle = -angle + 180;
   }*/
   if (angle > BACKING_ANGLE) {
@@ -139,6 +139,10 @@ static void move_towards_target(PolarVec target) {
   else {
     motor_speed = SPEED_P * target.r;
     motor_rotation = ROTATE_P * angle;
+  }
+
+  if (angle < -ANGLE_LIMIT || angle > ANGLE_LIMIT){
+  	motor_speed = 0;
   }
   
   DC.drive(motor_speed, motor_rotation);
@@ -429,7 +433,11 @@ static CartVec get_local_target(void) {
     target.y = -ROBOT_DIAMETER;
   }
   // Backup if not actually moving
+<<<<<<< Updated upstream
   /*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
+=======
+  /*if ((IMU.read()[0] + IMU.read()[1]) < 50) {
+>>>>>>> Stashed changes
     target.x = 0;
     target.y = -ROBOT_DIAMETER;
   }*/
@@ -488,11 +496,11 @@ void secondary_tactic(void) {
           SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
           cart_target = get_local_target(); // drive around
           if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
-            operation_state = COLLECTING;
+            //operation_state = COLLECTING;
             last_weight_time = millis();
           }
           break;
-        case COLLECTING:
+        /*case COLLECTING:
           SERVO_COLOUR = LED_GREEN;
           lower_magnets();
           
@@ -526,7 +534,7 @@ void secondary_tactic(void) {
           // only have the magenets down for max time
           
           
-          break;
+          break;*/
         case RETURNING:
           SERVO_COLOUR = LED_BLUE;
           raise_magnets();
