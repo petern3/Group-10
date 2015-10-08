@@ -107,6 +107,17 @@ CartVec CartVec::operator+(PolarVec obj) {
   return sum;
 }
 
+CartVec CartVec::operator-(CartVec obj) {
+  CartVec sum = {this->x - obj.x, this->y - obj.y};
+  return sum;
+}
+
+CartVec CartVec::operator-(PolarVec obj) {
+  CartVec temp = obj.cart();
+  CartVec sum = {this->x - temp.x, this->y - temp.y};
+  return sum;
+}
+
 CartVec CartVec::cart(void) {
   return *this;
 }
@@ -215,6 +226,19 @@ CartVec PolarVec::operator+(PolarVec obj) {
 CartVec PolarVec::operator+(CartVec obj) {
   CartVec temp = this->cart();
   CartVec sum = {temp.x + obj.x, temp.y + obj.y};
+  return sum;
+}
+
+CartVec PolarVec::operator-(PolarVec obj) {
+  CartVec temp1 = this->cart();
+  CartVec temp2 = obj.cart();
+  
+  return temp1 - temp2;
+}
+
+CartVec PolarVec::operator-(CartVec obj) {
+  CartVec temp = this->cart();
+  CartVec sum = {temp.x - obj.x, temp.y - obj.y};
   return sum;
 }
 

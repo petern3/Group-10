@@ -59,6 +59,8 @@ class CartVec {
     bool operator!=(int16_t obj[2]);
     CartVec operator+(CartVec obj);
     CartVec operator+(PolarVec obj);
+    CartVec operator-(CartVec obj);
+    CartVec operator-(PolarVec obj);
     
     CartVec cart(void);
     PolarVec polar(void);
@@ -82,6 +84,8 @@ class PolarVec {
     bool operator!=(int16_t obj[2]);
     CartVec operator+(PolarVec obj);
     CartVec operator+(CartVec obj);
+    CartVec operator-(PolarVec obj);
+    CartVec operator-(CartVec obj);
     
     CartVec cart(void);
     PolarVec polar(void);

@@ -112,7 +112,7 @@
 #define DC_CALIBRATION_LIMIT 15 // 90 +/- n
 
 #define SPEED_P 0.1
-#define ROTATE_P 0.25
+#define ROTATE_P 0.4
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 1036 // 630/1.8*5.18 Geared
@@ -199,7 +199,8 @@
 
 #define BACKING_ANGLE 179 //120  // degrees, set to 181 to disable
 
-#define WEIGHT_DETECT_TOLERANCE 150 // mm
+#define WEIGHT_DETECT_TOLERANCE 120 // mm
+#define CENTRE_SENSOR_TOLERANCE 500 // mm
 
 #define GREEN_THRESHOLD 200
 #define BLUE_THRESHOLD 150

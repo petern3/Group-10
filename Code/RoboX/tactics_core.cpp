@@ -332,11 +332,62 @@ void primary_tactic(void) {
 ////////////////////////
 static CartVec get_local_target(void) {
   CartVec target = {0, 0};
-  CartVec left_wall = IR_MED2.cart_read();  // Not confirmed is correct way round
-  CartVec right_wall = IR_MED1.cart_read();
+  CartVec left_wall = IR_MED1.cart_read();  // Not confirmed is correct way round
+  CartVec right_wall = IR_MED2.cart_read();
   CartVec centre_wall = SONAR1.cart_read();
+  CartVec generic_wall = {0, 0};
   
-  // x value WIDTH
+  if (left_wall.x != NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // x  x  x
+    if (left_wall.polar().r < centre_wall.polar().r && right_wall.polar().r < centre_wall.polar().r) {
+      target.x = 0;
+    }
+    else if (left_wall.polar().r > right_wall.polar().r) {
+      target.x = ROBOT_DIAMETER;
+    }
+    else {
+    target.x = -ROBOT_DIAMETER;
+    }
+    target.y = -ROBOT_DIAMETER;
+    PRINT("x x x");
+  }
+  else if (left_wall.x == NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // -  x  x
+    generic_wall.x = 0;
+    generic_wall.y = ROBOT_RADIUS;  //approximation
+    target = (centre_wall - generic_wall) + (centre_wall - right_wall);
+    PRINT("- x x");
+  }
+  else if (left_wall.x != NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // x  -  x
+    target.x = (left_wall.x + right_wall.x)/2;
+    target.y = ROBOT_RADIUS;
+    PRINT("x - x");
+  }
+  else if (left_wall.x != NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // x  x  -
+    generic_wall.x = 0;
+    generic_wall.y = ROBOT_RADIUS;  //approximation
+    target = (centre_wall - generic_wall) + (centre_wall - left_wall);
+    PRINT("x x -");
+  }
+  else if (left_wall.x != NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // x  -  -
+    target.x = left_wall.x - ROBOT_RADIUS;
+    PRINT("x - -");
+  }
+  else if (left_wall.x == NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // -  x  -
+    target.x = ROBOT_RADIUS;
+    target.y = 0;
+    PRINT("- x -");
+  }
+  else if (left_wall.x == NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // -  -  x
+    target.x = right_wall.x + ROBOT_RADIUS;
+    PRINT("- - x");
+  }
+  else if (left_wall.x == NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // -  -  -
+    target.x = 0;
+    target.y = ROBOT_DIAMETER;
+    PRINT("- - -  ");
+  }
+  PRINT(centre_wall.polar().r);
+  PRINT("\r");
+  /*// x value WIDTH
   if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) { // left wall found, not right wall
     target.x = left_wall.x + ROBOT_RADIUS;
   }
@@ -371,17 +422,17 @@ static CartVec get_local_target(void) {
   }
   else {
     target.y = centre_wall.y - ROBOT_RADIUS;
-  }
+  }*/
   
   // Backup if not trying to move
   if (target.polar().r < 50) {
     target.y = -ROBOT_DIAMETER;
   }
   // Backup if not actually moving
-  if ((IMU.read()[0] + IMU.read()[1]) < 50) {
+  /*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
     target.x = 0;
     target.y = -ROBOT_DIAMETER;
-  }
+  }*/
   
   return target;
 }
@@ -495,9 +546,11 @@ void secondary_tactic(void) {
     /// Perform tasks ///
     polar_target = cart_target.polar();
     point_towards_target(polar_target);
-    if (enable_drive == true) {
-      move_towards_target(polar_target);
+    if (enable_drive == false) {
+      polar_target.r = 0;
+      polar_target.theta = 0;
     }
+    move_towards_target(polar_target);
     
     //PRINTLN(weight_timeout);
     
@@ -517,10 +570,11 @@ void secondary_tactic(void) {
       else if (serial_byte == STP) {
         if (enable_drive == true) {
           enable_drive = false;
+          PRINTLN("\tStopping");
         } else {
           enable_drive = true;
+          PRINTLN("\tStarting");
         }
-        PRINTLN("\tStopping");
       }
     }
     #endif
@@ -528,7 +582,7 @@ void secondary_tactic(void) {
     //PRINT("P ("); PRINT(polar_target.r); PRINT(", "); PRINT(radians_to_degrees(polar_target.theta)); PRINT(") ");
     //PRINT("C ("); PRINT(cart_target.x); PRINT(", "); PRINT(cart_target.y); PRINT(") ");
     
-    debug_sensors();
+    //debug_sensors();
     
   }
   PRINTLN("\nSecondary tactic ending\n");
