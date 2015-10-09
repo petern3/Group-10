@@ -218,8 +218,8 @@ static void debug_sensors(void) {
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    //PRINT(IR_MED1.polar_read().r); PRINT("  ");
-    //PRINT(IR_MED2.polar_read().r); PRINT("  ");
+    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
     //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     //PRINT(USONIC1.polar_read().r); PRINT("  ");
@@ -336,74 +336,101 @@ void primary_tactic(void) {
 ////////////////////////
 static CartVec get_local_target(void) {
   CartVec target = {0, 0};
-  CartVec left_wall = IR_MED1.cart_read();  // Not confirmed is correct way round
-  CartVec right_wall = IR_MED2.cart_read();
-  CartVec centre_wall = SONAR1.cart_read();
+  CartVec left_IR = IR_MED1.cart_read();  // left one
+  CartVec right_IR = IR_MED2.cart_read(); // right one
+  CartVec centre_IR = IR_LNG1.cart_read();
+  CartVec centre_SONAR = SONAR1.cart_read();
   CartVec generic_wall = {0, 0};
   
-  if (left_wall.x != NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // x  x  x
-    if (left_wall.polar().r < centre_wall.polar().r && right_wall.polar().r < centre_wall.polar().r) {
+  if (left_IR.x != NOT_VALID && centre_SONAR.y < CENTRE_SENSOR_TOLERANCE && right_IR.x != NOT_VALID) {  // x  x  x
+	if (left_IR.x > right_IR.x && centre_IR.y < left_IR.y && centre_IR.y > right_IR.y){ //case 2
+	  target.x = -400;// set to random
+	  target.y = 200;
+	}
+	else if (left_IR.x < right_IR.x && centre_IR.y > left_IR.y && centre_IR.y < right_IR.y){//case 3
+	  target.x = 400;// set to random
+	  target.y = 200;
+	}
+	else if(centre_IR.y < left_IR.y && centre_IR.y < right_IR.y){
+	  target.x = -200;//this turns left may need to turn right
+	  target.y = ;
+	}
+
+
+
+
+
+  	
+    if (left_IR.polar().r < centre_SONAR.polar().r && right_IR.polar().r < centre_SONAR.polar().r) {
       target.x = 0;
     }
-    else if (left_wall.polar().r > right_wall.polar().r) {
+    else if (left_IR.polar().r < right_IR.polar().r) {
       target.x = ROBOT_DIAMETER;
     }
     else {
     target.x = -ROBOT_DIAMETER;
     }
-    target.y = -ROBOT_DIAMETER;
+    target.y = -100;//set to random
     PRINT("x x x");
   }
-  else if (left_wall.x == NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // -  x  x
-    generic_wall.x = 0;
-    generic_wall.y = ROBOT_RADIUS;  //approximation
-    target = (centre_wall - generic_wall) + (centre_wall - right_wall);
-    PRINT("- x x");
+  else if (left_IR.x == NOT_VALID && centre_SONAR.y < CENTRE_SENSOR_TOLERANCE && right_IR.x != NOT_VALID) {  // x  x  - these are objects on left and centre
+    //generic_wall.x = 0;
+    //generic_wall.y = ROBOT_RADIUS;  //approximation
+    //target = (centre_SONAR - generic_wall) + (centre_SONAR - right_IR);
+    target.x = ROBOT_RADIUS;
+    target.y = 100;
+    PRINT("x x -");
   }
-  else if (left_wall.x != NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // x  -  x
-    target.x = (left_wall.x + right_wall.x)/2;
+  else if (left_IR.x != NOT_VALID && centre_SONAR.y > CENTRE_SENSOR_TOLERANCE && right_IR.x != NOT_VALID) {  // x  -  x
+    target.x = (left_IR.x + right_IR.x)/2;
     target.y = ROBOT_RADIUS;
     PRINT("x - x");
   }
-  else if (left_wall.x != NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // x  x  -
-    generic_wall.x = 0;
-    generic_wall.y = ROBOT_RADIUS;  //approximation
-    target = (centre_wall - generic_wall) + (centre_wall - left_wall);
-    PRINT("x x -");
+  else if (left_IR.x != NOT_VALID && centre_SONAR.y < CENTRE_SENSOR_TOLERANCE && right_IR.x == NOT_VALID) {  // -  x  x
+    //generic_wall.x = 0;
+    //generic_wall.y = ROBOT_RADIUS;  //approximation
+    //target = (centre_SONAR - generic_wall) + (centre_SONAR - left_IR);
+    target.x = -ROBOT_RADIUS;
+    target.y = 100;
+    PRINT("- x x");
   }
-  else if (left_wall.x != NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // x  -  -
-    target.x = left_wall.x - ROBOT_RADIUS;
-    PRINT("x - -");
+  else if (left_IR.x != NOT_VALID && centre_SONAR.y > CENTRE_SENSOR_TOLERANCE && right_IR.x == NOT_VALID) {  // -  -  x
+    target.x = - 100; //set to random
+    target.y = ROBOT_RADIUS;
+    PRINT("- - x");
   }
-  else if (left_wall.x == NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // -  x  -
+  else if (left_IR.x == NOT_VALID && centre_SONAR.y < CENTRE_SENSOR_TOLERANCE && right_IR.x == NOT_VALID) {  // -  x  -
     target.x = ROBOT_RADIUS;
     target.y = 0;
     PRINT("- x -");
   }
-  else if (left_wall.x == NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // -  -  x
-    target.x = right_wall.x + ROBOT_RADIUS;
-    PRINT("- - x");
+  else if (left_IR.x == NOT_VALID && centre_SONAR.y > CENTRE_SENSOR_TOLERANCE && right_IR.x != NOT_VALID) {  // x  -  -
+    target.x = 100; //set to random
+    target.y = ROBOT_RADIUS;
+    PRINT("x - -");
   }
-  else if (left_wall.x == NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // -  -  -
+  else if (left_IR.x == NOT_VALID && centre_SONAR.y > CENTRE_SENSOR_TOLERANCE && right_IR.x == NOT_VALID) {  // -  -  -
     target.x = 0;
-    target.y = ROBOT_DIAMETER;
-    PRINT("- - -  ");
+    target.y = ROBOT_RADIUS;
+    PRINT("- - -");
   }
-  PRINT(centre_wall.polar().r);
+  PRINT(centre_SONAR.polar().r);
+  PRINT("   ");
+  PRINT(centre_SONAR.polar().theta);
   PRINT("\r");
   /*// x value WIDTH
-  if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) { // left wall found, not right wall
-    target.x = left_wall.x + ROBOT_RADIUS;
+  if (left_IR.x != NOT_VALID && right_IR.x == NOT_VALID) { // left wall found, not right wall
+    target.x = left_IR.x + ROBOT_RADIUS;
   }
-  else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) { // right wall found, not left wall
-    target.x = right_wall.x - ROBOT_RADIUS;
+  else if (left_IR.x == NOT_VALID && right_IR.x != NOT_VALID) { // right wall found, not left wall
+    target.x = right_IR.x - ROBOT_RADIUS;
   } 
-  else if (left_wall.x == NOT_VALID && right_wall.x == NOT_VALID) { // no wall found
+  else if (left_IR.x == NOT_VALID && right_IR.x == NOT_VALID) { // no wall found
     target.x = 0 ;
   }
   else {  // If both walls found
-    if (centre_wall.y < 200){ // sonar picks up front wall
-      if (right_wall.polar().r < left_wall.polar().r) {
+    if (centre_SONAR.y < 200){ // sonar picks up front wall
+      if (right_IR.polar().r < left_IR.polar().r) {
         target.x = -ROBOT_RADIUS;
       }
       else {
@@ -411,21 +438,21 @@ static CartVec get_local_target(void) {
       }
     }
     else { // drives though gap
-      target.x = (left_wall.x + right_wall.x)/2;
+      target.x = (left_IR.x + right_IR.x)/2;
     }
   }
   
   // y value LENGTH
-  if (centre_wall.y == NOT_VALID) {
-    if (left_wall.y > ROBOT_RADIUS && right_wall.y > ROBOT_RADIUS) {
-      target.y = min(left_wall.x, right_wall.x) - ROBOT_RADIUS;
+  if (centre_SONAR.y == NOT_VALID) {
+    if (left_IR.y > ROBOT_RADIUS && right_IR.y > ROBOT_RADIUS) {
+      target.y = min(left_IR.x, right_IR.x) - ROBOT_RADIUS;
     }
     else {
       target.y = ROBOT_DIAMETER;
     }
   }
   else {
-    target.y = centre_wall.y - ROBOT_RADIUS;
+    target.y = centre_SONAR.y - ROBOT_RADIUS;
   }*/
   
   // Backup if not trying to move

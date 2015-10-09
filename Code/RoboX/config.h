@@ -201,7 +201,7 @@
 #define BACKING_ANGLE 179 //120  // degrees, set to 181 to disable
 
 #define WEIGHT_DETECT_TOLERANCE 120 // mm
-#define CENTRE_SENSOR_TOLERANCE 500 // mm
+#define CENTRE_SENSOR_TOLERANCE 200 // mm
 
 #define GREEN_THRESHOLD 200
 #define BLUE_THRESHOLD 150
