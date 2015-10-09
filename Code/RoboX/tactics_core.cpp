@@ -214,8 +214,8 @@ static void debug_sensors(void) {
     //PRINT("L ("); PRINT(USONIC1.polar_read().cart().x); PRINT(", "); PRINT(USONIC1.polar_read().cart().y); PRINT(") ");
     //PRINT("R ("); PRINT(USONIC2.polar_read().cart().x); PRINT(", "); PRINT(USONIC2.polar_read().cart().y); PRINT(") ");
     
-    PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
-    PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
+    //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
+    //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
     //PRINT(IR_MED1.polar_read().r); PRINT("  ");
@@ -433,11 +433,8 @@ static CartVec get_local_target(void) {
     target.y = -ROBOT_DIAMETER;
   }
   // Backup if not actually moving
-<<<<<<< Updated upstream
   /*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
-=======
   /*if ((IMU.read()[0] + IMU.read()[1]) < 50) {
->>>>>>> Stashed changes
     target.x = 0;
     target.y = -ROBOT_DIAMETER;
   }*/
@@ -761,7 +758,7 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
     
-    //debug_sensors();
+    debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);

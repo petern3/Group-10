@@ -368,7 +368,9 @@ PolarVec SonarSensor::polar_read(void) {
   if (this->polar_value.r == NOT_READ) {  // Only converts value once
     uint32_t average = buffer_average(this->raw_value);
     this->polar_value.r = average;
-    
+
+    PRINT(average); PRINT("  ");
+    //PRINT('\r');
     // Minimum range, minimum ADC
     if (average >= SONAR_MIN_ADC && average < SONAR_DV1_ADC) {
       this->polar_value.r = map(this->polar_value.r, SONAR_MIN_ADC, SONAR_DV1_ADC, SONAR_MIN_MM, SONAR_DV1_MM);
@@ -382,6 +384,8 @@ PolarVec SonarSensor::polar_read(void) {
     else {
       this->polar_value.r = NOT_VALID;
     }
+    PRINT(polar_value.r); PRINT("  ");
+    PRINT('\r');
   }
   return this->polar_value;
 }
