@@ -209,6 +209,8 @@
 #define WEIGHT_TIMEOUT_MAX 4000  // milliseconds
 #define WEIGHT_TIMEOUT_INC 400   // milliseconds
 
+
+
 //////////////////
 /// MAP CONFIG ///
 //////////////////
@@ -216,8 +218,8 @@
 #define MAP_SIZE_Y 2500 //2400  // mm
 #define MAP_SPACING 250 //20  // mm
 
-#define ROBOT_RADIUS 300  // mm
-#define ROBOT_DIAMETER 600  // mm
+#define ROBOT_RADIUS 270  // mm
+#define ROBOT_DIAMETER 540  // mm
 
 ////////////////////
 /// DEBUG CONFIG ///

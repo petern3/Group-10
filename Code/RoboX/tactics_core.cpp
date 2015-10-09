@@ -345,11 +345,11 @@ static CartVec get_local_target(void) {
   
   if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
 	if (left_IR.x > right_IR.x && right_IR.y < centre_IR.y < left_IR.y){ //case 3 wall on right
-	  target.x = -500;// set to random
+	  target.x = -400;// set to random
 	  target.y = 200;
 	}
 	else if (left_IR.x < right_IR.x && right_IR.y > centre_IR.y > left_IR.y){//case 4 wall on left
-	  target.x = 500;// set to random
+	  target.x = 400;// set to random
 	  target.y = 200;
 	}
 	else if(centre_IR.y > left_IR.y || centre_IR.y > right_IR.y){//case 1 in corner
@@ -415,6 +415,10 @@ static CartVec get_local_target(void) {
     target.y = ROBOT_RADIUS;
     PRINT("- - -");
   }
+  else {
+  	target.x = 0;
+  	target.y = -300;
+  }
   
   PRINT("\r");
   /*// x value WIDTH
@@ -460,7 +464,6 @@ static CartVec get_local_target(void) {
   }
   // Backup if not actually moving
   /*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
-  /*if ((IMU.read()[0] + IMU.read()[1]) < 50) {
     target.x = 0;
     target.y = -ROBOT_DIAMETER;
   }*/
@@ -477,7 +480,9 @@ void secondary_tactic(void) {
   
   uint8_t operation_state = SEARCHING;
   int16_t last_weight_time = 0;
+  int16_t target_time = 0;
   uint16_t weight_timeout = 0;
+  int searching = 0;
   
   Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
   uint8_t curr_base = home_base;
@@ -511,49 +516,62 @@ void secondary_tactic(void) {
       cart_target.x =  0;
       cart_target.y = -ROBOT_RADIUS;  // get_local_target();
       operation_state = SEARCHING;
+      searching = 0;
     }
     else if (curr_base == NO_BASE) {  // In arena
       extend_magnets();
-      switch (operation_state) {
+      switch (operation_state) { 
         case SEARCHING:
           SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
-          cart_target = get_local_target(); // drive around
-          if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
-            //operation_state = COLLECTING;
-            last_weight_time = millis();
+          //target_time = millis();
+          /*target_timeout += TARGET_TIMEOUT_INC;
+		  if (target_timeout > WEIGHT_TIMEOUT_MAX) {
+              	target_timeout = WEIGHT_TIMEOUT_MAX;
+            }*/
+          
+          if(millis() - target_time > 300 || searching == 0){
+          	target_time = millis();
+          	searching = 1; 
+          	cart_target = get_local_target(); // drive around
           }
+          /*if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
+            operation_state = COLLECTING;
+            last_weight_time = millis();
+          }*/
+          
           break;
         /*case COLLECTING:
-          SERVO_COLOUR = LED_GREEN;
-          lower_magnets();
+        	SERVO_COLOUR = LED_GREEN;
+          	lower_magnets();
           
-          if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
-            last_weight_time = millis();
-            weight_timeout += WEIGHT_TIMEOUT_INC;
-            if (weight_timeout > WEIGHT_TIMEOUT_MAX) {
-              weight_timeout = WEIGHT_TIMEOUT_MAX;
-            }
-            if (weight_locations.right.polar() == NO_WEIGHT) {  // If I see left weight
-              cart_target = weight_locations.left;
-            }
-            else if (weight_locations.left.polar() == NO_WEIGHT) {  // If I see right weight
-              cart_target = weight_locations.right;
-            }
-            else {
-              if (weight_locations.left.polar().r > weight_locations.right.polar().r) {  // If I see both, choose closest
-                cart_target = weight_locations.left;
-              }
-              else {
-                cart_target = weight_locations.right;
-              }
-            }
+          	if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
+            	last_weight_time = millis();
+            	weight_timeout += WEIGHT_TIMEOUT_INC;
+            	if (weight_timeout > WEIGHT_TIMEOUT_MAX) {
+              		weight_timeout = WEIGHT_TIMEOUT_MAX;
+            	}
+            	if (weight_locations.right.polar() == NO_WEIGHT) {  // If I see left weight
+              		cart_target = weight_locations.left;
+            	}
+            	else if (weight_locations.left.polar() == NO_WEIGHT) {  // If I see right weight
+              		cart_target = weight_locations.right;
+            	}
+            	else {
+              		if (weight_locations.left.polar().r > weight_locations.right.polar().r) {  // If I see both, choose closest
+                		cart_target = weight_locations.left;
+              		}
+              		else {
+                		cart_target = weight_locations.right;
+              		}
+            	}
             
-          }
-          else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
-            raise_magnets();
-            weight_timeout = 0;
-            operation_state = SEARCHING;
-          }
+          	}
+          	else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
+            	raise_magnets();
+            	weight_timeout = 0;
+            	operation_state = SEARCHING;
+            	searching = 0;
+          	}
           // only have the magenets down for max time
           
           
@@ -564,6 +582,7 @@ void secondary_tactic(void) {
           cart_target = get_local_target();
           if (!is_full()) {
             operation_state = SEARCHING;
+            searching = 0;
           }
           break;
       }
