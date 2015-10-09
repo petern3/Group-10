@@ -255,6 +255,9 @@ void InfraredSensor::read_med(void) {
   //  +    *      100
   
   uint32_t average = buffer_average(this->raw_value);
+  /*if(average > 500){
+  	average = 500;
+  }*/
   this->polar_value.r = average;
 
   // Minimum range, largest ADC
@@ -274,8 +277,14 @@ void InfraredSensor::read_med(void) {
 
 void InfraredSensor::read_lng(void) {
   uint32_t average = buffer_average(this->raw_value);
+  if(average < 380){//adc value
+  	average = NOT_VALID;
+  }
+  
   this->polar_value.r = average;
   
+  //PRINT(average);PRINT("   ");
+  //PRINT('\r');
   if (average <= IR_LNG_MIN_ADC && average > IR_LNG_DV1_ADC) {
     this->polar_value.r = map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
   }
@@ -369,7 +378,7 @@ PolarVec SonarSensor::polar_read(void) {
     uint32_t average = buffer_average(this->raw_value);
     this->polar_value.r = average;
 
-    PRINT(average); PRINT("  ");
+    //PRINT(average); PRINT("  ");
     //PRINT('\r');
     // Minimum range, minimum ADC
     if (average >= SONAR_MIN_ADC && average < SONAR_DV1_ADC) {
@@ -384,8 +393,8 @@ PolarVec SonarSensor::polar_read(void) {
     else {
       this->polar_value.r = NOT_VALID;
     }
-    PRINT(polar_value.r); PRINT("  ");
-    PRINT('\r');
+    //PRINT(polar_value.r); PRINT("  ");
+    //PRINT('\r');
   }
   return this->polar_value;
 }

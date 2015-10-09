@@ -173,14 +173,14 @@
 #define IR_MED_DV2_MM 500
 #define IR_MED_MAX_MM 800
 
-#define IR_LNG_MIN_ADC 1000   // To measure
-#define IR_LNG_DV1_ADC 370   // to measure
-#define IR_LNG_DV2_ADC 212   // to measure
-#define IR_LNG_MAX_ADC 135  // To measure
+#define IR_LNG_MIN_ADC 930   // To measure
+#define IR_LNG_DV1_ADC 575   // to measure
+#define IR_LNG_DV2_ADC 375   // to measure 
+#define IR_LNG_MAX_ADC 240  // To measure
 #define IR_LNG_MIN_MM 200
-#define IR_LNG_DV1_MM 600
-#define IR_LNG_DV2_MM 1000
-#define IR_LNG_MAX_MM 1500
+#define IR_LNG_DV1_MM 400
+#define IR_LNG_DV2_MM 600
+#define IR_LNG_MAX_MM 1000
 
 #define SONAR_MIN_ADC 115   // To measure
 #define SONAR_DV1_ADC 141   // to measure
