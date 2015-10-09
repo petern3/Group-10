@@ -226,7 +226,7 @@ static void debug_sensors(void) {
     //PRINT(USONIC2.polar_read().r); PRINT("  ");
     PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
-    //PRINT(analogRead(A4));PRINT("   ");
+    //PRINT(analogRead(A6));PRINT("   ");
     PRINT('\r');
   
 }
@@ -336,26 +336,39 @@ void primary_tactic(void) {
 /// SECONDARY TACTIC ///
 ////////////////////////
 static CartVec get_local_target(void) {
-  CartVec target = {0, 0};
-  CartVec left_IR = IR_MED1.cart_read();  // left one
-  CartVec right_IR = IR_MED2.cart_read(); // right one
-  CartVec centre_IR = IR_LNG1.cart_read();
-  CartVec centre_SONAR = SONAR1.cart_read();
-  CartVec generic_wall = {0, 0};
+  	CartVec target = {0, 0};
+  	CartVec left_IR = IR_MED1.cart_read();  // left one
+  	CartVec right_IR = IR_MED2.cart_read(); // right one
+  	CartVec centre_IR = IR_LNG1.cart_read();
+  	CartVec centre_SONAR = SONAR1.cart_read();
+  	CartVec generic_wall = {0, 0};
   
-  if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
-	if (left_IR.x > right_IR.x && right_IR.y < centre_IR.y < left_IR.y){ //case 3 wall on right
-	  target.x = -400;// set to random
-	  target.y = 200;
-	}
-	else if (left_IR.x < right_IR.x && right_IR.y > centre_IR.y > left_IR.y){//case 4 wall on left
-	  target.x = 400;// set to random
-	  target.y = 200;
-	}
-	else if(centre_IR.y > left_IR.y || centre_IR.y > right_IR.y){//case 1 in corner
-	  target.x = 400;//this turns left may need to turn right
-	  target.y = 0;
-	}
+  	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
+      	if (left_IR.x < 150 && right_IR.x < 150){
+			if (left_IR.x > right_IR.x && right_IR.y < centre_IR.y < left_IR.y){ //case 3 wall on right
+	  			target.x = -400;// set to random
+	  			target.y = 200;
+			}
+			else if (left_IR.x < right_IR.x && right_IR.y > centre_IR.y > left_IR.y){//case 4 wall on left
+	  			target.x = 400;// set to random
+	  			target.y = 200;
+			}
+			else if(centre_IR.y > left_IR.y || centre_IR.y > right_IR.y){//case 1 in corner
+	  			target.x = 400;//this turns left may need to turn right
+	  			target.y = 0;
+			}
+			else{
+				target.x = 0;
+				target.y = -300;
+			}
+      	}
+		else {
+    		target.x = 0;
+			target.y = 130;
+    	}
+			
+    	
+    	
 	/*else if (centre_SONAR.y < left_IR.y && centre_SONAR.y < right_IR.y){// case 5 detects a poll near the wall
 	  target.x = 300;
 	  target.y = -50;
@@ -396,15 +409,15 @@ static CartVec get_local_target(void) {
     PRINT("- x x");
   }
   else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
-    target.x = - 100; //set to random
+    target.x = - 100; //set to ra   ndom
     target.y = ROBOT_RADIUS;
     PRINT("- - x");
   }
-  /*else if (left_IR.x == NOT_VALID && centre_SONAR.y < CENTRE_SENSOR_TOLERANCE && right_IR.x == NOT_VALID) {  // -  x  -
+  /*else if (left_IR.x == NOT_VALID && 300 < centre_SONAR.y < 400  && right_IR.x == NOT_VALID) {  // -  x  - DONT USE SONAR PETER ITS SHIT 300mm to 500mm read data sheet
     target.x = ROBOT_RADIUS;
     target.y = 0;
-    PRINT("- x -");
-  }*/
+    PRINT("- x -");*/
+  }
   else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
     target.x = 100; //set to random
     target.y = ROBOT_RADIUS;
@@ -416,8 +429,9 @@ static CartVec get_local_target(void) {
     PRINT("- - -");
   }
   else {
-  	target.x = 0;
+  	target.x = -50;
   	target.y = -300;
+  	PRINT("NO STATE     ");
   }
   
   PRINT("\r");

@@ -111,7 +111,7 @@
 #define AUTO_CALIBRATE_DC
 #define DC_CALIBRATION_LIMIT 15 // 90 +/- n
 
-#define SPEED_P 0.1
+#define SPEED_P 0.2
 #define ROTATE_P 0.35
 #define ANGLE_LIMIT 45
 
@@ -182,14 +182,14 @@
 #define IR_LNG_DV2_MM 600
 #define IR_LNG_MAX_MM 1000
 
-#define SONAR_MIN_ADC 115   // To measure
-#define SONAR_DV1_ADC 141   // to measure
-#define SONAR_DV2_ADC 225   // to measure
-#define SONAR_MAX_ADC 288  // To measure
-#define SONAR_MIN_MM 100
-#define SONAR_DV1_MM 340
-#define SONAR_DV2_MM 570
-#define SONAR_MAX_MM 740
+#define SONAR_MIN_ADC 132   // To measure
+#define SONAR_DV1_ADC 153   // to measure
+#define SONAR_DV2_ADC 170   // to measure
+#define SONAR_MAX_ADC 200  // To measure
+#define SONAR_MIN_MM 300
+#define SONAR_DV1_MM 375
+#define SONAR_DV2_MM 425
+#define SONAR_MAX_MM 500
 
 #define USONIC_TIMEOUT 4060ul //5.8*700mm, microseconds
 #define SENSOR_BUFFER_SIZE 10
