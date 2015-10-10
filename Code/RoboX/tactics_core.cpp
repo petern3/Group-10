@@ -169,36 +169,35 @@ static void point_towards_target(PolarVec target) {
 /// SENSORS ///
 
 Weight_Detect_t weight_detect(void) {
-  Weight_Detect_t found = {{-1, -1}, {-1, -1}};
+  	Weight_Detect_t found = {{-1, -1}, {-1, -1}};
+  	// USONIC 1 is left
+  	// USONIC 2 is right
+  	// USONIC 3 is upper centre
+
+  	// IR_MED1 left one
+  	// IR_MED2 right one
   
-  // Check left sensors (NOT LEFT SIDE). No need for abs as the lower one (USONIC) should always be less.
-  if (USONIC1.is_valid()) { 
-    if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
-        IR_MED1.polar_read().r == NOT_VALID) {
-      if (!SONAR1.is_valid() || SONAR1.polar_read().r > 200) {
-        found.left = USONIC1.cart_read();
-      }
-    }
-  }
-  // Check right sensors
-  if (USONIC2.is_valid()) { 
-    if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+  	// Check left sensors (NOT LEFT SIDE). No need for abs as the lower one (USONIC) should always be less.
+  	if (USONIC1.is_valid()) { 
+    	if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+        IR_MED1.polar_read().r == NOT_VALID) { //weight next to wall, WEIGHT_DETECT_TOLERANCE should be the distance the our 
+        	//robot can pick a weight up next to a way... not the mesurement of a weight...
+      		if (!USONIC3.is_valid() || USONIC3.polar_read().r > 200) { // checks to see a poll, this 200 may need ajusting
+        		found.left = USONIC1.cart_read();
+      		}
+    	}
+  	}
+  	// Check right sensors
+  	if (USONIC2.is_valid()) { 
+    	if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
         IR_MED2.polar_read().r == NOT_VALID) {
-      if (!SONAR1.is_valid() || SONAR1.polar_read().r > 200) {
-        found.right = USONIC2.cart_read();
-      }
-    }
-  }
-  /*// Check right sensors
-  if (USONIC3.is_valid()) { 
-    if (IR_MED2.polar_read().r - USONIC3.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
-        IR_MED2.polar_read().r == NOT_VALID) {
-      if (!SONAR1.is_valid() || SONAR1.polar_read().r > 200) {
-        found.right = USONIC3.cart_read();
-      }
-    } I DONT THINK THIS SHOULD BE HERE
-  }*/
-  return found;
+      		if (!USONIC3.is_valid() || USONIC3.polar_read().r > 200) {
+        		found.right = USONIC2.cart_read();
+      		}
+    	}
+  	}
+
+  	return found;
 }
 
 uint8_t colour_detect(void) {
@@ -237,13 +236,13 @@ static void debug_sensors(void) {
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
-    PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
-    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
+    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
+    PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    //PRINT(USONIC1.polar_read().r); PRINT("  ");
-    //PRINT(USONIC2.polar_read().r); PRINT("  ");
-    //PRINT(USONIC3.polar_read().r); PRINT("  ");
+    //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
+    //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
+    PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
@@ -369,7 +368,7 @@ static CartVec get_local_target(void) {
   	CartVec left_IR = IR_MED1.cart_read();  // left one
   	CartVec right_IR = IR_MED2.cart_read(); // right one
   	CartVec centre_IR = IR_LNG1.cart_read();
-  	CartVec centre_ULTRA = USONIC3.cart_read(); // middle sensor
+  	CartVec centre_ULTRA = USONIC3.cart_read(); // middle ultrasonic sensor
   
   	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
       	if (left_IR.x < 150 && right_IR.x < 150){
@@ -569,7 +568,7 @@ void secondary_tactic(void) {
           }*/
           
           break;
-        /*case COLLECTING:
+        case COLLECTING:
         	SERVO_COLOUR = LED_GREEN;
           	lower_magnets();
           
@@ -604,7 +603,7 @@ void secondary_tactic(void) {
           // only have the magenets down for max time
           
           
-          break;*/
+          break;
         case RETURNING:
           SERVO_COLOUR = LED_BLUE;
           raise_magnets();
@@ -632,8 +631,10 @@ void secondary_tactic(void) {
       if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
           abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50) {
         PRINTLN("stuck!");
-        DC.drive(-SPEED_P * ROBOT_RADIUS, 0);
+        DC.drive(-45, 0);
         delay(2000);
+        // need to reset buffer as now it just drives backwards
+        // This only happens when in corner ie not very often
       }
       last_millis = millis();
     }
@@ -848,7 +849,7 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
     
-    //debug_sensors();
+    debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
