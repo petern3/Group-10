@@ -632,10 +632,8 @@ void secondary_tactic(void) {
       if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
           abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50) {
         PRINTLN("stuck!");
-        is_stuck = true;
-        countdown = 500;
-        cart_target.x = 0;
-        cart_target.y = -ROBOT_RADIUS;
+        DC.drive(-SPEED_P * ROBOT_RADIUS, 0);
+        delay(2000);
       }
       last_millis = millis();
     }
@@ -643,13 +641,6 @@ void secondary_tactic(void) {
     /// Perform tasks ///
     polar_target = cart_target.polar();
     point_towards_target(polar_target);
-    if (is_stuck == true) {
-      while (countdown > 0) {
-        move_towards_target(polar_target);
-        PRINTLN(countdown);
-        countdown--;
-      }
-    }
     if (enable_drive == false || !DIP8_S3.is_active()) {
       polar_target.r = 0;
       polar_target.theta = 0;
