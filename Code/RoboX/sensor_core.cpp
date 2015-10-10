@@ -27,6 +27,7 @@ InfraredSensor IR_LNG1;
 InfraredSensor IR_LNG2;
 UltrasonicSensor USONIC1;
 UltrasonicSensor USONIC2;
+UltrasonicSensor USONIC3;
 SonarSensor SONAR1;
 
 DigitalSensor IR_VAR1;
@@ -92,6 +93,7 @@ void init_sensor_core(void) {
   int8_t IR_LNG2_OFFSET_TEMP[2] = IR_LNG2_OFFSET;
   int8_t USONIC1_OFFSET_TEMP[2] = USONIC1_OFFSET;
   int8_t USONIC2_OFFSET_TEMP[2] = USONIC2_OFFSET;
+  int8_t USONIC3_OFFSET_TEMP[2] = USONIC3_OFFSET;
   int8_t SONAR1_OFFSET_TEMP[2] = SONAR1_OFFSET;
 
   IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE, IR_SHT1_OFFSET_TEMP, degrees_to_radians(IR_SHT1_ANGLE));
@@ -101,6 +103,7 @@ void init_sensor_core(void) {
   IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE, IR_LNG2_OFFSET_TEMP, degrees_to_radians(IR_LNG2_ANGLE));
   USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN, USONIC1_OFFSET_TEMP, degrees_to_radians(USONIC1_ANGLE));
   USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC2_OFFSET_TEMP, degrees_to_radians(USONIC2_ANGLE));
+  USONIC3.initialize(USONIC3_TRIG_PIN, USONIC3_ECHO_PIN, USONIC3_OFFSET_TEMP, degrees_to_radians(USONIC3_ANGLE));
   SONAR1.initialize(SONAR1_PIN, SONAR1_OFFSET_TEMP, degrees_to_radians(SONAR1_ANGLE));
   
   IR_VAR1.initialize(IR_VAR1_PIN, LOW, INPUT);
@@ -125,16 +128,17 @@ void init_sensor_core(void) {
 }
 
 void update_sensors(void) {
-  IR_SHT1.update();
+  //IR_SHT1.update();
   IR_MED1.update();
   IR_MED2.update();
   IR_LNG1.update();
-  IR_LNG2.update();
+  //IR_LNG2.update();
   
   USONIC1.update();
   USONIC2.update();
+  USONIC3.update();
   
-  SONAR1.update();
+  //SONAR1.update();
 }
 
 
@@ -255,6 +259,9 @@ void InfraredSensor::read_med(void) {
   //  +    *      100
   
   uint32_t average = buffer_average(this->raw_value);
+  /*if(average > 500){
+  	average = 500;
+  }*/
   this->polar_value.r = average;
 
   // Minimum range, largest ADC
@@ -274,8 +281,14 @@ void InfraredSensor::read_med(void) {
 
 void InfraredSensor::read_lng(void) {
   uint32_t average = buffer_average(this->raw_value);
+  if(average < 380){//adc value
+  	average = NOT_VALID;
+  }
+  
   this->polar_value.r = average;
   
+  //PRINT(average);PRINT("   ");
+  //PRINT('\r');
   if (average <= IR_LNG_MIN_ADC && average > IR_LNG_DV1_ADC) {
     this->polar_value.r = map(this->polar_value.r, IR_LNG_MIN_ADC, IR_LNG_DV1_ADC, IR_LNG_MIN_MM, IR_LNG_DV1_MM);
   }
@@ -368,7 +381,9 @@ PolarVec SonarSensor::polar_read(void) {
   if (this->polar_value.r == NOT_READ) {  // Only converts value once
     uint32_t average = buffer_average(this->raw_value);
     this->polar_value.r = average;
-    
+
+    //PRINT(average); PRINT("  ");
+    //PRINT('\r');
     // Minimum range, minimum ADC
     if (average >= SONAR_MIN_ADC && average < SONAR_DV1_ADC) {
       this->polar_value.r = map(this->polar_value.r, SONAR_MIN_ADC, SONAR_DV1_ADC, SONAR_MIN_MM, SONAR_DV1_MM);
@@ -382,6 +397,8 @@ PolarVec SonarSensor::polar_read(void) {
     else {
       this->polar_value.r = NOT_VALID;
     }
+    //PRINT(polar_value.r); PRINT("  ");
+    //PRINT('\r');
   }
   return this->polar_value;
 }

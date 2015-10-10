@@ -26,6 +26,8 @@
 /// GLOBALS ///
 ///////////////
 uint8_t OPERATION_MODE = IDLE_MODE;
+int IMU_time = 0;
+int car = 0;
 
 //CartVec weight_location = {-1, -1};
 int8_t NO_WEIGHT[2] = {-1, -1};
@@ -119,13 +121,13 @@ void lower_magnets(void) {
 
 static void move_towards_target(PolarVec target) {
   int16_t angle = radians_to_degrees(target.theta);
-  int8_t motor_speed = 0;
-  int8_t motor_rotation = 0;
+  int16_t motor_speed = 0;
+  int16_t motor_rotation = 0;
   
-  if (target.r > 255) {
+  /*if (target.r > 255) {
     target.r = 255;
   }
-  /*if (angle > 180) {
+  if (angle > 180) {
     angle = -angle + 180;
   }*/
   if (angle > BACKING_ANGLE) {
@@ -139,6 +141,10 @@ static void move_towards_target(PolarVec target) {
   else {
     motor_speed = SPEED_P * target.r;
     motor_rotation = ROTATE_P * angle;
+  }
+
+  if (angle < -ANGLE_LIMIT || angle > ANGLE_LIMIT){
+  	motor_speed = 0;
   }
   
   DC.drive(motor_speed, motor_rotation);
@@ -181,6 +187,15 @@ Weight_Detect_t weight_detect(void) {
       }
     }
   }
+  /*// Check right sensors
+  if (USONIC3.is_valid()) { 
+    if (IR_MED2.polar_read().r - USONIC3.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+        IR_MED2.polar_read().r == NOT_VALID) {
+      if (!SONAR1.is_valid() || SONAR1.polar_read().r > 200) {
+        found.right = USONIC3.cart_read();
+      }
+    } I DONT THINK THIS SHOULD BE HERE
+  }*/
   return found;
 }
 
@@ -210,18 +225,20 @@ static void debug_sensors(void) {
     //PRINT("L ("); PRINT(USONIC1.polar_read().cart().x); PRINT(", "); PRINT(USONIC1.polar_read().cart().y); PRINT(") ");
     //PRINT("R ("); PRINT(USONIC2.polar_read().cart().x); PRINT(", "); PRINT(USONIC2.polar_read().cart().y); PRINT(") ");
     
-    PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
-    PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
+    //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
+    //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    //PRINT(IR_MED1.polar_read().r); PRINT("  ");
-    //PRINT(IR_MED2.polar_read().r); PRINT("  ");
+    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
     //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    //PRINT(USONIC1.polar_read().r); PRINT("  ");
-    //PRINT(USONIC2.polar_read().r); PRINT("  ");
+    PRINT(USONIC1.polar_read().r); PRINT("  ");
+    PRINT(USONIC2.polar_read().r); PRINT("  ");
+    PRINT(USONIC3.polar_read().r); PRINT("  ");
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
+    //PRINT(analogRead(A6));PRINT("   ");
     PRINT('\r');
   
 }
@@ -339,110 +356,116 @@ void primary_tactic(void) {
 /// SECONDARY TACTIC ///
 ////////////////////////
 static CartVec get_local_target(void) {
-  CartVec target = {0, 0};
-  CartVec left_wall = IR_MED1.cart_read();  // Not confirmed is correct way round
-  CartVec right_wall = IR_MED2.cart_read();
-  CartVec centre_wall = SONAR1.cart_read();
-  CartVec generic_wall = {0, 0};
+  	CartVec target = {0, 0};
+  	CartVec left_IR = IR_MED1.cart_read();  // left one
+  	CartVec right_IR = IR_MED2.cart_read(); // right one
+  	CartVec centre_IR = IR_LNG1.cart_read();
+  	CartVec centre_ULTRA = USONIC3.cart_read(); // middle sensor
+  	//CartVec generic_wall = {0, 0};
   
-  if (left_wall.x != NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // x  x  x
-    if (left_wall.polar().r < centre_wall.polar().r && right_wall.polar().r < centre_wall.polar().r) {
-      target.x = 0;
-    }
-    else if (left_wall.polar().r > right_wall.polar().r) {
-      target.x = ROBOT_DIAMETER;
-    }
-    else {
-    target.x = -ROBOT_DIAMETER;
-    }
-    target.y = -ROBOT_DIAMETER;
-    PRINT("x x x");
-  }
-  else if (left_wall.x == NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // -  x  x
-    generic_wall.x = 0;
-    generic_wall.y = ROBOT_RADIUS;  //approximation
-    target = (centre_wall - generic_wall) + (centre_wall - right_wall);
-    PRINT("- x x");
-  }
-  else if (left_wall.x != NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // x  -  x
-    target.x = (left_wall.x + right_wall.x)/2;
-    target.y = ROBOT_RADIUS;
-    PRINT("x - x");
-  }
-  else if (left_wall.x != NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // x  x  -
-    generic_wall.x = 0;
-    generic_wall.y = ROBOT_RADIUS;  //approximation
-    target = (centre_wall - generic_wall) + (centre_wall - left_wall);
-    PRINT("x x -");
-  }
-  else if (left_wall.x != NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // x  -  -
-    target.x = left_wall.x - ROBOT_RADIUS;
-    PRINT("x - -");
-  }
-  else if (left_wall.x == NOT_VALID && centre_wall.y < CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // -  x  -
-    target.x = ROBOT_RADIUS;
-    target.y = 0;
-    PRINT("- x -");
-  }
-  else if (left_wall.x == NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x != NOT_VALID) {  // -  -  x
-    target.x = right_wall.x + ROBOT_RADIUS;
-    PRINT("- - x");
-  }
-  else if (left_wall.x == NOT_VALID && centre_wall.y > CENTRE_SENSOR_TOLERANCE && right_wall.x == NOT_VALID) {  // -  -  -
-    target.x = 0;
-    target.y = ROBOT_DIAMETER;
-    PRINT("- - -  ");
-  }
-  PRINT(centre_wall.polar().r);
-  PRINT("\r");
-  /*// x value WIDTH
-  if (left_wall.x != NOT_VALID && right_wall.x == NOT_VALID) { // left wall found, not right wall
-    target.x = left_wall.x + ROBOT_RADIUS;
-  }
-  else if (left_wall.x == NOT_VALID && right_wall.x != NOT_VALID) { // right wall found, not left wall
-    target.x = right_wall.x - ROBOT_RADIUS;
-  } 
-  else if (left_wall.x == NOT_VALID && right_wall.x == NOT_VALID) { // no wall found
-    target.x = 0 ;
-  }
-  else {  // If both walls found
-    if (centre_wall.y < 200){ // sonar picks up front wall
-      if (right_wall.polar().r < left_wall.polar().r) {
-        target.x = -ROBOT_RADIUS;
-      }
-      else {
-        target.x = ROBOT_RADIUS;
-      }
-    }
-    else { // drives though gap
-      target.x = (left_wall.x + right_wall.x)/2;
-    }
-  }
+  	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
+      	if (left_IR.x < 150 && right_IR.x < 150){
+			if (left_IR.x > right_IR.x && right_IR.y < centre_IR.y < left_IR.y){ //case 3 wall on right
+	  			target.x = -400;// set to random
+	  			target.y = 200;
+			}
+			else if (left_IR.x < right_IR.x && right_IR.y > centre_IR.y > left_IR.y){//case 4 wall on left
+	  			target.x = 400;// set to random
+	  			target.y = 200;
+			}
+			else if(centre_IR.y > left_IR.y || centre_IR.y > right_IR.y){//case 1 in corner
+	  			target.x = 400;//this turns left may need to turn right
+	  			target.y = 0;
+			}
+			else{
+				target.x = 0;
+				target.y = -300;
+			}
+      	}
+		else {
+    		target.x = 0;
+			target.y = 130;
+    	}
+		/*else if (centre_SONAR.y < left_IR.y && centre_ULTRA.y < right_IR.y){// case 5 detects a poll near the wall
+	  		target.x = 300;
+	  		target.y = -50;
+		}*/
+    	PRINT("x x x         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  - these are objects on left and centre
+    	target.x = ROBOT_RADIUS;
+    	target.y = 100;
+    	PRINT("x x -         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall
+    	target.x = (left_IR.x + right_IR.x)/2;
+    	target.y = ROBOT_RADIUS;
+    	PRINT("x - x         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  x  x
+    	target.x = -ROBOT_RADIUS;
+    	target.y = 100;
+    	PRINT("- x x         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
+    	target.x = - 100; //set to ra   ndom
+    	target.y = ROBOT_RADIUS;
+    	PRINT("- - x         ");
+  	}
+  	else if (centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 100) {
+  		target.x = 0;
+    	target.y = -200;
+    	PRINT("0 x 0   just ultra      ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 500 && right_IR.x == NOT_VALID) {  // -  x  - 
+    	target.x = ROBOT_RADIUS;
+    	target.y = -50;
+    	PRINT("- x -         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
+    	target.x = 100; //set to random
+    	target.y = ROBOT_RADIUS;
+    	PRINT("x - -         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  -
+    	target.x = 0;
+    	target.y = ROBOT_RADIUS;
+    	PRINT("- - -         ");
+  	}
+  	else {
+  		target.x = -50;
+  		target.y = -300;
+  		PRINT("NO STATE      ");
+  	}
   
-  // y value LENGTH
-  if (centre_wall.y == NOT_VALID) {
-    if (left_wall.y > ROBOT_RADIUS && right_wall.y > ROBOT_RADIUS) {
-      target.y = min(left_wall.x, right_wall.x) - ROBOT_RADIUS;
-    }
-    else {
-      target.y = ROBOT_DIAMETER;
-    }
-  }
-  else {
-    target.y = centre_wall.y - ROBOT_RADIUS;
-  }*/
-  
-  // Backup if not trying to move
-  if (target.polar().r < 50) {
-    target.y = -ROBOT_DIAMETER;
-  }
-  // Backup if not actually moving
-  /*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
-    target.x = 0;
-    target.y = -ROBOT_DIAMETER;
-  }*/
-  
-  return target;
+  	PRINT("\r");
+  	/*
+  	if (target.polar().r < 50) {
+    	target.y = -ROBOT_DIAMETER;
+  	}*/
+
+
+
+  	
+
+  	// Backup if not actually moving
+	/*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
+		if (car == 0){
+			IMU_time = millis();
+			car = 1;
+		}
+		if(IMU_time - millis() > 3000){
+        	target.x = 0;
+    		target.y = -200; // drive backwards
+    		car = 0;
+    		PRINT("   Going backwards    ");
+    		PRINT("\r");
+    	}
+    	PRINT("   NOT MOVING    ");
+    	PRINT("\r");
+	}*/
+    
+  	return target;
 }
 
 
@@ -454,7 +477,9 @@ void secondary_tactic(void) {
   
   uint8_t operation_state = SEARCHING;
   int16_t last_weight_time = 0;
+  int16_t target_time = 0;
   uint16_t weight_timeout = 0;
+  int searching = 0;
   
   Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
   uint8_t curr_base = home_base;
@@ -488,59 +513,73 @@ void secondary_tactic(void) {
       cart_target.x =  0;
       cart_target.y = -ROBOT_RADIUS;  // get_local_target();
       operation_state = SEARCHING;
+      searching = 0;
     }
     else if (curr_base == NO_BASE) {  // In arena
       extend_magnets();
-      switch (operation_state) {
+      switch (operation_state) { 
         case SEARCHING:
           SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
-          cart_target = get_local_target(); // drive around
-          if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
+          //target_time = millis();
+          /*target_timeout += TARGET_TIMEOUT_INC;
+		  if (target_timeout > WEIGHT_TIMEOUT_MAX) {
+              	target_timeout = WEIGHT_TIMEOUT_MAX;
+            }*/
+          
+          if(millis() - target_time > 300 || searching == 0){
+          	target_time = millis();
+          	searching = 1; 
+          	cart_target = get_local_target(); // drive around
+          }
+          /*if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
             operation_state = COLLECTING;
             last_weight_time = millis();
-          }
-          break;
-        case COLLECTING:
-          SERVO_COLOUR = LED_GREEN;
-          lower_magnets();
+          }*/
           
-          if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
-            last_weight_time = millis();
-            weight_timeout += WEIGHT_TIMEOUT_INC;
-            if (weight_timeout > WEIGHT_TIMEOUT_MAX) {
-              weight_timeout = WEIGHT_TIMEOUT_MAX;
-            }
-            if (weight_locations.right.polar() == NO_WEIGHT) {  // If I see left weight
-              cart_target = weight_locations.left;
-            }
-            else if (weight_locations.left.polar() == NO_WEIGHT) {  // If I see right weight
-              cart_target = weight_locations.right;
-            }
-            else {
-              if (weight_locations.left.polar().r > weight_locations.right.polar().r) {  // If I see both, choose closest
-                cart_target = weight_locations.left;
-              }
-              else {
-                cart_target = weight_locations.right;
-              }
-            }
+          break;
+        /*case COLLECTING:
+        	SERVO_COLOUR = LED_GREEN;
+          	lower_magnets();
+          
+          	if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
+            	last_weight_time = millis();
+            	weight_timeout += WEIGHT_TIMEOUT_INC;
+            	if (weight_timeout > WEIGHT_TIMEOUT_MAX) {
+              		weight_timeout = WEIGHT_TIMEOUT_MAX;
+            	}
+            	if (weight_locations.right.polar() == NO_WEIGHT) {  // If I see left weight
+              		cart_target = weight_locations.left;
+            	}
+            	else if (weight_locations.left.polar() == NO_WEIGHT) {  // If I see right weight
+              		cart_target = weight_locations.right;
+            	}
+            	else {
+              		if (weight_locations.left.polar().r > weight_locations.right.polar().r) {  // If I see both, choose closest
+                		cart_target = weight_locations.left;
+              		}
+              		else {
+                		cart_target = weight_locations.right;
+              		}
+            	}
             
-          }
-          else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
-            raise_magnets();
-            weight_timeout = 0;
-            operation_state = SEARCHING;
-          }
+          	}
+          	else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
+            	raise_magnets();
+            	weight_timeout = 0;
+            	operation_state = SEARCHING;
+            	searching = 0;
+          	}
           // only have the magenets down for max time
           
           
-          break;
+          break;*/
         case RETURNING:
           SERVO_COLOUR = LED_BLUE;
           raise_magnets();
           cart_target = get_local_target();
           if (!is_full()) {
             operation_state = SEARCHING;
+            searching = 0;
           }
           break;
       }
@@ -761,7 +800,7 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
     
-    //debug_sensors();
+    debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);

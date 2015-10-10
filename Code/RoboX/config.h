@@ -43,6 +43,8 @@
 #define IR_MED2_PIN A3
 #define IR_LNG1_PIN A4
 #define IR_LNG2_PIN A5
+#define USONIC3_TRIG_PIN 7
+#define USONIC3_ECHO_PIN 6
 #define USONIC2_TRIG_PIN 11
 #define USONIC2_ECHO_PIN 10
 #define USONIC1_TRIG_PIN 9
@@ -106,8 +108,9 @@
 #define AUTO_CALIBRATE_DC
 #define DC_CALIBRATION_LIMIT 15 // 90 +/- n
 
-#define SPEED_P 0.1
-#define ROTATE_P 0.4
+#define SPEED_P 0.2
+#define ROTATE_P 0.35
+#define ANGLE_LIMIT 45
 
 /// STEPPER MOTOR CONFIG ///
 #define STEPPER1_SPR 1036 // 630/1.8*5.18 Geared
@@ -116,7 +119,7 @@
 //#define STEPPER4_SPR 200  // to calibrate
 
 /// SERVO CONFIG ///
-#define MAX_TRAVEL 170
+#define MAX_TRAVEL 160
 
 /*
   LED_GREEN
@@ -145,6 +148,8 @@
 #define USONIC1_ANGLE 50
 #define USONIC2_OFFSET {-135, -150}
 #define USONIC2_ANGLE -50
+#define USONIC3_OFFSET {0, 50}
+#define USONIC3_ANGLE 0
 #define SONAR1_OFFSET {0, 50}
 #define SONAR1_ANGLE 0
 
@@ -167,23 +172,23 @@
 #define IR_MED_DV2_MM 500
 #define IR_MED_MAX_MM 800
 
-#define IR_LNG_MIN_ADC 1000   // To measure
-#define IR_LNG_DV1_ADC 370   // to measure
-#define IR_LNG_DV2_ADC 212   // to measure
-#define IR_LNG_MAX_ADC 135  // To measure
+#define IR_LNG_MIN_ADC 930   // To measure
+#define IR_LNG_DV1_ADC 575   // to measure
+#define IR_LNG_DV2_ADC 375   // to measure 
+#define IR_LNG_MAX_ADC 240  // To measure
 #define IR_LNG_MIN_MM 200
-#define IR_LNG_DV1_MM 600
-#define IR_LNG_DV2_MM 1000
-#define IR_LNG_MAX_MM 1500
+#define IR_LNG_DV1_MM 400
+#define IR_LNG_DV2_MM 600
+#define IR_LNG_MAX_MM 1000
 
-#define SONAR_MIN_ADC 114   // To measure
-#define SONAR_DV1_ADC 237   // to measure
-#define SONAR_DV2_ADC 396   // to measure
-#define SONAR_MAX_ADC 577  // To measure
-#define SONAR_MIN_MM 100
-#define SONAR_DV1_MM 600
-#define SONAR_DV2_MM 1000
-#define SONAR_MAX_MM 1500
+#define SONAR_MIN_ADC 132   // To measure
+#define SONAR_DV1_ADC 153   // to measure
+#define SONAR_DV2_ADC 170   // to measure
+#define SONAR_MAX_ADC 200  // To measure
+#define SONAR_MIN_MM 300
+#define SONAR_DV1_MM 375
+#define SONAR_DV2_MM 425
+#define SONAR_MAX_MM 500
 
 #define USONIC_TIMEOUT 4060ul //5.8*700mm, microseconds
 #define SENSOR_BUFFER_SIZE 10
@@ -195,13 +200,15 @@
 #define BACKING_ANGLE 179 //120  // degrees, set to 181 to disable
 
 #define WEIGHT_DETECT_TOLERANCE 120 // mm
-#define CENTRE_SENSOR_TOLERANCE 500 // mm
+#define CENTRE_SENSOR_TOLERANCE 200 // mm
 
 #define GREEN_THRESHOLD 200
 #define BLUE_THRESHOLD 150
 
 #define WEIGHT_TIMEOUT_MAX 4000  // milliseconds
 #define WEIGHT_TIMEOUT_INC 400   // milliseconds
+
+
 
 //////////////////
 /// MAP CONFIG ///
@@ -210,8 +217,8 @@
 #define MAP_SIZE_Y 2500 //2400  // mm
 #define MAP_SPACING 250 //20  // mm
 
-#define ROBOT_RADIUS 240  // mm
-#define ROBOT_DIAMETER 480  // mm
+#define ROBOT_RADIUS 270  // mm
+#define ROBOT_DIAMETER 540  // mm
 
 ////////////////////
 /// DEBUG CONFIG ///
