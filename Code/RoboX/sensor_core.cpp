@@ -109,14 +109,14 @@ void init_sensor_core(void) {
   LIMIT_O.initialize(LIMIT_O_PIN, HIGH, INPUT_PULLUP);
   TURN_ON.initialize(TURN_ON_PIN, HIGH, INPUT_PULLUP);
   
-  DIP8_S1.initialize(DIP8_S1_PIN, HIGH, INPUT);
-  DIP8_S2.initialize(DIP8_S1_PIN, HIGH, INPUT);
-  DIP8_S3.initialize(DIP8_S1_PIN, HIGH, INPUT);
-  DIP8_S4.initialize(DIP8_S1_PIN, HIGH, INPUT);
-  DIP8_S5.initialize(DIP8_S1_PIN, HIGH, INPUT);
-  DIP8_S6.initialize(DIP8_S1_PIN, HIGH, INPUT);
-  DIP8_S7.initialize(DIP8_S1_PIN, HIGH, INPUT);
-  DIP8_S8.initialize(DIP8_S1_PIN, HIGH, INPUT);
+  DIP8_S1.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
+  DIP8_S2.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
+  DIP8_S3.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
+  DIP8_S4.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
+  DIP8_S5.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
+  DIP8_S6.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
+  DIP8_S7.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
+  DIP8_S8.initialize(DIP8_S1_PIN, HIGH, INPUT_PULLUP);
   
   IMU.initialize();
   COLOUR.initialize();

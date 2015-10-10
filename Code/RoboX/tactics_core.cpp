@@ -261,6 +261,14 @@ void idle_mode(void) {
     }
     home_base = GREEN_BASE;
     
+    /*if (DIP8_S2.is_active()) {
+      OPERATION_MODE = PRIMARY_MODE;
+    }
+    else {
+      OPERATION_MODE = MANUAL_MODE;
+    }*/
+    
+    
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
       serial_byte = Serial.read();
@@ -760,7 +768,7 @@ void manual_mode(void) {
     //PRINTLN();
     COLOUR.update();
     IMU.update();
-    //PRINT(IR_VAR1.is_active()); PRINT(IR_VAR2.is_active()); PRINT(IR_VAR3.is_active()); PRINT('\r');
+    PRINT(IR_VAR1.is_active()); PRINT(IR_VAR2.is_active()); PRINT(IR_VAR3.is_active()); PRINT('\r');
     //print_buffer(IMU.read(), IMU_BUFFER_SIZE); PRINT('\r');
     //COLOUR.read();
     //delay(200);

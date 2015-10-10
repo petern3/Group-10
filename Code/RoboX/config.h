@@ -36,11 +36,6 @@
 #define STEPPER1_DIR_PIN 43
 #define STEPPER2_STEP_PIN 44
 #define STEPPER2_DIR_PIN 45
-//#define STEPPER3_STEP_PIN 42
-//#define STEPPER3_DIR_PIN 43
-//#define STEPPER4_STEP_PIN 44
-//#define STEPPER4_DIR_PIN 45
-
 
 #define IR_SHT1_PIN A0 //10
 //#define IR_SHT2_PIN A1 //11
@@ -54,23 +49,23 @@
 #define USONIC1_ECHO_PIN 8
 #define SONAR1_PIN A6
 
-#define IR_VAR1_PIN 30  // left
-#define IR_VAR2_PIN 32  // middle
-#define IR_VAR3_PIN 34  // right
-#define LIMIT_O_PIN 36
+#define IR_VAR1_PIN 26 // 30  // left
+#define IR_VAR2_PIN 28 // 32  // middle
+#define IR_VAR3_PIN 30 // 34  // right
+#define LIMIT_O_PIN 32 // 36
 #define TURN_ON_PIN A9
 
 #define CHIP_SELECT_PIN 53
 #define SPEAKER_PIN 6
 
-#define DIP8_S1_PIN 1
-#define DIP8_S2_PIN 0
-#define DIP8_S3_PIN 14
-#define DIP8_S4_PIN 15
-#define DIP8_S5_PIN 26
-#define DIP8_S6_PIN 27
-#define DIP8_S7_PIN 28
-#define DIP8_S8_PIN 29
+#define DIP8_S1_PIN 41
+#define DIP8_S2_PIN 40
+#define DIP8_S3_PIN 39
+#define DIP8_S4_PIN 38
+#define DIP8_S5_PIN 37
+#define DIP8_S6_PIN 36
+#define DIP8_S7_PIN 35
+#define DIP8_S8_PIN 34
 
 
 ////////////////////////
