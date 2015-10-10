@@ -237,16 +237,16 @@ static void debug_sensors(void) {
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
-    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
-    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
+    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     //PRINT(USONIC1.polar_read().r); PRINT("  ");
     //PRINT(USONIC2.polar_read().r); PRINT("  ");
     //PRINT(USONIC3.polar_read().r); PRINT("  ");
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
-    PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
+    //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
     //PRINT(IMU.read()[1]); PRINT("  ");
     //PRINT(analogRead(A6));PRINT("   ");
     PRINT('\r');
@@ -420,7 +420,7 @@ static CartVec get_local_target(void) {
     	target.y = ROBOT_RADIUS;
     	PRINT("- - x         ");
   	}
-  	else if (centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 100) {
+  	else if (centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 100) { // checks for a wall close before the next one
   		target.x = 0;
     	target.y = -200;
     	PRINT("0 x 0   just ultra      ");
@@ -625,7 +625,7 @@ void secondary_tactic(void) {
     
     /// Check for stuck ///
     static uint16_t last_millis = millis();
-    if ((millis() - last_millis) > 400) {
+    if ((millis() - last_millis) > 400) { // i dont know if this if statement will work?
       buffer_store(&stop_buffer_x, cart_target.x);
       buffer_store(&stop_buffer_y, cart_target.y);
       
