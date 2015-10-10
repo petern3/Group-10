@@ -404,7 +404,12 @@ static CartVec get_local_target(void) {
     	target.y = ROBOT_RADIUS;
     	PRINT("- - x         ");
   	}
-  	else if (left_IR.x == NOT_VALID && centre_ULTRA.y < 300  && right_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID) {  // -  x  - 
+  	else if (centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 100) {
+  		target.x = 0;
+    	target.y = -200;
+    	PRINT("0 x 0   just ultra      ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 500 && right_IR.x == NOT_VALID) {  // -  x  - 
     	target.x = ROBOT_RADIUS;
     	target.y = -50;
     	PRINT("- x -         ");
@@ -430,6 +435,10 @@ static CartVec get_local_target(void) {
   	if (target.polar().r < 50) {
     	target.y = -ROBOT_DIAMETER;
   	}*/
+
+
+
+  	
 
   	// Backup if not actually moving
 	/*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
