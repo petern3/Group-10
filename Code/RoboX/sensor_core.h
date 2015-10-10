@@ -206,7 +206,9 @@ extern ColourSensor COLOUR;
 /////////////////
 void init_sensor_core(void);
 void update_sensors(void);
-
+static void buffer_initialize(CircBuf_t* buffer, uint8_t size);
+static void buffer_store(CircBuf_t* buffer, uint32_t to_store);
+static uint32_t buffer_average(CircBuf_t buffer);
 
 
 #endif

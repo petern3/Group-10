@@ -192,6 +192,7 @@
 
 #define USONIC_TIMEOUT 4060ul //5.8*700mm, microseconds
 #define SENSOR_BUFFER_SIZE 10
+#define TARGET_TIMEOUT_BUFFER_SIZE 20
 
 //////////////////////
 /// TACTICS CONFIG ///

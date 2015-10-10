@@ -26,8 +26,8 @@
 /// GLOBALS ///
 ///////////////
 uint8_t OPERATION_MODE = IDLE_MODE;
-int16_t IMU_time = 0;
-int flag = 0;
+//int16_t IMU_time = 0;
+//int flag = 0;
 
 //CartVec weight_location = {-1, -1};
 int8_t NO_WEIGHT[2] = {-1, -1};
@@ -368,7 +368,6 @@ static CartVec get_local_target(void) {
   	CartVec right_IR = IR_MED2.cart_read(); // right one
   	CartVec centre_IR = IR_LNG1.cart_read();
   	CartVec centre_ULTRA = USONIC3.cart_read(); // middle sensor
-  	//CartVec generic_wall = {0, 0};
   
   	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
       	if (left_IR.x < 150 && right_IR.x < 150){
@@ -444,19 +443,35 @@ static CartVec get_local_target(void) {
   		target.y = -300;
   		PRINT("NO STATE      ");
   	}
-  
   	PRINT("\r");
+	
+	/*
+	 * initial buffer use TARGET_TIMEOUT_BUFFER_SIZE
+	 * 
+	 * then each time this function run chech to see if buffer is in a tollerance of the newest target
+	 * 		set time the first time
+	 * 		if time - millis() > 8000
+	 * 			then back up
+	 * 			then reset buffer 
+	 * 			the reset time this will be simular to below with the imu
+	 * 
+	 * 
+	 * at the end of this function store target angle
+	 * 
+	 * 
+	 */
+	
+	
+	
+	
+	
+  	
   	/*
   	if (target.polar().r < 50) {
     	target.y = -ROBOT_DIAMETER;
   	}*/
-
-
-
-  	
-
   	// Backup if not actually moving
-	if ((abs(IMU.read()[0]) + abs(IMU.read()[1])) < 150) {
+	/*if ((abs(IMU.read()[0]) + abs(IMU.read()[1])) < 150) {
 		if (flag == 0){
 			IMU_time = millis();
 			flag = 1;
@@ -475,7 +490,7 @@ static CartVec get_local_target(void) {
 		flag = 0;
 		PRINT("   Reset flag     ");
     	PRINT("\r");
-	}
+	}*/
     
   	return target;
 }
