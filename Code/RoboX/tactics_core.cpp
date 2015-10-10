@@ -202,11 +202,17 @@ Weight_Detect_t weight_detect(void) {
 uint8_t colour_detect(void) {
   
   COLOUR.update();
-  if (COLOUR.read()[1] > GREEN_THRESHOLD && (COLOUR.read()[1]-GREEN_THRESHOLD) > (COLOUR.read()[2]-BLUE_THRESHOLD)) {  // Green
+  /*if (COLOUR.read()[1] > GREEN_THRESHOLD && (COLOUR.read()[1]-GREEN_THRESHOLD) > (COLOUR.read()[2]-BLUE_THRESHOLD)) {  // Green
     return GREEN_BASE;
   }
   else if (COLOUR.read()[2] > BLUE_THRESHOLD && (COLOUR.read()[2]-BLUE_THRESHOLD) > (COLOUR.read()[1]-GREEN_THRESHOLD)) {  // Blue
     return BLUE_BASE;
+  }*/
+  if (COLOUR.read()[2] > BLUE_THRESHOLD) {  // Blue
+    return BLUE_BASE;
+  }
+  else if (COLOUR.read()[1] > GREEN_THRESHOLD) {  // Green
+    return GREEN_BASE;
   }
   else {
     return NO_BASE;
@@ -278,7 +284,6 @@ void idle_mode(void) {
     else {
       PRINTLN("No base detected");
     }
-    home_base = GREEN_BASE;
     
     if (DIP8_S1.is_active()) {
       OPERATION_MODE = PRIMARY_MODE;
