@@ -26,6 +26,8 @@
 /// GLOBALS ///
 ///////////////
 uint8_t OPERATION_MODE = IDLE_MODE;
+int IMU_time = 0;
+int car = 0;
 
 //CartVec weight_location = {-1, -1};
 int8_t NO_WEIGHT[2] = {-1, -1};
@@ -351,7 +353,6 @@ static CartVec get_local_target(void) {
   	CartVec right_IR = IR_MED2.cart_read(); // right one
   	CartVec centre_IR = IR_LNG1.cart_read();
   	CartVec centre_ULTRA = USONIC3.cart_read(); // middle sensor
-  	int IMU_time = 0;
   	//CartVec generic_wall = {0, 0};
   
   	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
@@ -403,11 +404,11 @@ static CartVec get_local_target(void) {
     	target.y = ROBOT_RADIUS;
     	PRINT("- - x         ");
   	}
-  	/*else if (left_IR.x == NOT_VALID && 300 < centre_ULTRA.y < 400  && right_IR.x == NOT_VALID) {  // -  x  - DONT USE SONAR PETER ITS SHIT 300mm to 500mm read data sheet
+  	else if (left_IR.x == NOT_VALID && centre_ULTRA.y < 300  && right_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID) {  // -  x  - 
     	target.x = ROBOT_RADIUS;
-    	target.y = 0;
+    	target.y = -50;
     	PRINT("- x -         ");
-  	}*/
+  	}
   	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
     	target.x = 100; //set to random
     	target.y = ROBOT_RADIUS;
@@ -424,27 +425,29 @@ static CartVec get_local_target(void) {
   		PRINT("NO STATE      ");
   	}
   
-  	
+  	PRINT("\r");
   	/*
   	if (target.polar().r < 50) {
     	target.y = -ROBOT_DIAMETER;
   	}*/
 
   	// Backup if not actually moving
-
-  	
-  	//target_time = millis();
-  	
-	if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
-		IMU_time = millis();
-		if(millis() - IMU_time > 3000){ // || searching == 0){
-        	//searching = 1; 
+	/*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
+		if (car == 0){
+			IMU_time = millis();
+			car = 1;
+		}
+		if(IMU_time - millis() > 3000){
         	target.x = 0;
     		target.y = -200; // drive backwards
+    		car = 0;
+    		PRINT("   Going backwards    ");
+    		PRINT("\r");
     	}
     	PRINT("   NOT MOVING    ");
-	}
-    PRINT("\r");
+    	PRINT("\r");
+	}*/
+    
   	return target;
 }
 
