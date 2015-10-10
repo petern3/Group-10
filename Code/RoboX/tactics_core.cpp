@@ -278,12 +278,12 @@ void idle_mode(void) {
     }
     home_base = GREEN_BASE;
     
-    /*if (DIP8_S2.is_active()) {
+    if (DIP8_S1.is_active()) {
       OPERATION_MODE = PRIMARY_MODE;
     }
     else {
       OPERATION_MODE = MANUAL_MODE;
-    }*/
+    }
     
     
     #ifdef ENABLE_SERIAL
@@ -593,7 +593,7 @@ void secondary_tactic(void) {
     /// Perform tasks ///
     polar_target = cart_target.polar();
     point_towards_target(polar_target);
-    if (enable_drive == false) {
+    if (enable_drive == false || !DIP8_S3.is_active()) {
       polar_target.r = 0;
       polar_target.theta = 0;
     }
@@ -800,14 +800,23 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
     
-    debug_sensors();
+    //debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
     //PRINTLN();
     COLOUR.update();
     IMU.update();
-    PRINT(IR_VAR1.is_active()); PRINT(IR_VAR2.is_active()); PRINT(IR_VAR3.is_active()); PRINT('\r');
+    //PRINT(IR_VAR1.is_active()); PRINT(IR_VAR2.is_active()); PRINT(IR_VAR3.is_active()); PRINT('\r');
+    /*PRINT(DIP8_S1.is_active());
+    PRINT(DIP8_S2.is_active());
+    PRINT(DIP8_S3.is_active());
+    PRINT(DIP8_S4.is_active());
+    PRINT(DIP8_S5.is_active());
+    PRINT(DIP8_S6.is_active());
+    PRINT(DIP8_S7.is_active());
+    PRINT(DIP8_S8.is_active());
+    PRINT('\r');*/
     //print_buffer(IMU.read(), IMU_BUFFER_SIZE); PRINT('\r');
     //COLOUR.read();
     //delay(200);

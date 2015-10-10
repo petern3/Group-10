@@ -60,14 +60,14 @@
 #define CHIP_SELECT_PIN 53
 #define SPEAKER_PIN 6
 
-#define DIP8_S1_PIN 41
-#define DIP8_S2_PIN 40
-#define DIP8_S3_PIN 39
-#define DIP8_S4_PIN 38
-#define DIP8_S5_PIN 37
-#define DIP8_S6_PIN 36
-#define DIP8_S7_PIN 35
-#define DIP8_S8_PIN 34
+#define DIP8_S1_PIN 38 // WORKS - PRIMARY/MANUAL
+#define DIP8_S2_PIN 39 // DOESNT
+#define DIP8_S3_PIN 40 // WORKS - MOTOR ENABLE
+#define DIP8_S4_PIN 41 // WORKS
+#define DIP8_S5_PIN 34 // WORKS
+#define DIP8_S6_PIN 35 // DOESNT
+#define DIP8_S7_PIN 36 // WORKS
+#define DIP8_S8_PIN 37 // DOESNT
 
 
 ////////////////////////
