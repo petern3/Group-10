@@ -142,7 +142,7 @@ void update_sensors(void) {
 }
 
 
-static void buffer_initialize(CircBuf_t* buffer, uint8_t size) {
+void buffer_initialize(CircBuf_t* buffer, uint8_t size) {
   buffer->windex = 0;
   buffer->rindex = 0;
   buffer->size = size;
@@ -150,7 +150,7 @@ static void buffer_initialize(CircBuf_t* buffer, uint8_t size) {
   // Note use of calloc() to clear contents.
 }
 
-static void buffer_store(CircBuf_t* buffer, uint32_t to_store){
+void buffer_store(CircBuf_t* buffer, uint32_t to_store){
   buffer->data[buffer->windex] = to_store;
   buffer->windex++;
   if (buffer->windex >= buffer->size) {
@@ -158,7 +158,7 @@ static void buffer_store(CircBuf_t* buffer, uint32_t to_store){
   }
 }
 
-static uint32_t buffer_average(CircBuf_t buffer) {
+uint32_t buffer_average(CircBuf_t buffer) {
   uint32_t sum = 0;
   for (uint8_t i=0; i < buffer.size; i++) {
     sum += buffer.data[i];
@@ -166,7 +166,7 @@ static uint32_t buffer_average(CircBuf_t buffer) {
   return sum / buffer.size;
 }
 
-static uint32_t buffer_average_non_zero(CircBuf_t buffer) {
+uint32_t buffer_average_non_zero(CircBuf_t buffer) {
   uint32_t sum = 0;
   bool is_zero = false;
   for (uint8_t i=0; i < buffer.size; i++) {

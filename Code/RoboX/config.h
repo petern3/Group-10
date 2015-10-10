@@ -209,7 +209,7 @@
 #define WEIGHT_TIMEOUT_MAX 4000  // milliseconds
 #define WEIGHT_TIMEOUT_INC 400   // milliseconds
 
-
+#define STOP_BUFFER_SIZE 10
 
 //////////////////
 /// MAP CONFIG ///

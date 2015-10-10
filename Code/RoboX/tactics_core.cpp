@@ -35,6 +35,8 @@ int8_t NO_WEIGHT[2] = {-1, -1};
 bool is_extended = true;
 bool is_lowered = false;
 uint8_t home_base = NO_BASE;
+CircBuf_t stop_buffer_x;
+CircBuf_t stop_buffer_y;
 
 
 typedef struct {
@@ -56,7 +58,7 @@ void init_tactics_core(void) {
 /// ACTUATORS ///
 
 void extend_magnets(void) {
-  if (!is_extended) {
+  if (!is_extended && DIP8_S4.is_active()) {
     uint32_t steps_left = STEPPER1_SPR; // 520; // (180 * steps_per_rev) / 360)
     digitalWrite(STEPPER1.dir_pin, LOW);
     digitalWrite(STEPPER2.dir_pin, HIGH);
@@ -77,7 +79,7 @@ void extend_magnets(void) {
 }
 
 void retract_magnets(void) {
-  if (is_extended) {
+  if (is_extended && DIP8_S4.is_active()) {
     uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
     digitalWrite(STEPPER1.dir_pin, HIGH);
     digitalWrite(STEPPER2.dir_pin, LOW);
@@ -414,7 +416,7 @@ static CartVec get_local_target(void) {
     	PRINT("- x x         ");
   	}
   	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
-    	target.x = - 100; //set to ra   ndom
+    	target.x = -100; //set to random
     	target.y = ROBOT_RADIUS;
     	PRINT("- - x         ");
   	}
@@ -444,27 +446,24 @@ static CartVec get_local_target(void) {
   		PRINT("NO STATE      ");
   	}
   	PRINT("\r");
-	
-	/*
-	 * initial buffer use TARGET_TIMEOUT_BUFFER_SIZE
-	 * 
-	 * then each time this function run chech to see if buffer is in a tollerance of the newest target
-	 * 		set time the first time
-	 * 		if time - millis() > 8000
-	 * 			then back up
-	 * 			then reset buffer 
-	 * 			the reset time this will be simular to below with the imu
-	 * 
-	 * 
-	 * at the end of this function store target angle
-	 * 
-	 * 
-	 */
-	
-	
-	
-	
-	
+	  
+  	/*
+  	 * initial buffer use TARGET_TIMEOUT_BUFFER_SIZE
+  	 * 
+  	 * then each time this function run chech to see if buffer is in a tollerance of the newest target
+  	 * 		set time the first time
+  	 * 		if time - millis() > 8000
+  	 * 			then back up
+  	 * 			then reset buffer 
+  	 * 			the reset time this will be simular to below with the imu
+  	 * 
+  	 * 
+  	 * at the end of this function store target angle
+  	 * 
+  	 * 
+  	 */
+    
+    
   	
   	/*
   	if (target.polar().r < 50) {
@@ -511,8 +510,13 @@ void secondary_tactic(void) {
   Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
   uint8_t curr_base = home_base;
   
+  buffer_initialize(&stop_buffer_x, STOP_BUFFER_SIZE);
+  buffer_initialize(&stop_buffer_y, STOP_BUFFER_SIZE);
+  
   CartVec cart_target = {0, 0};
   PolarVec polar_target = {0, 0};
+  bool is_stuck = false;
+  uint16_t countdown = 0;
   
   char serial_byte = '\0';
   bool enable_drive = true;
@@ -525,6 +529,7 @@ void secondary_tactic(void) {
     
     curr_base = colour_detect();
     IMU.update();
+    
     
     /// Check how many weights I've got ///
     if (is_full()) {
@@ -617,9 +622,34 @@ void secondary_tactic(void) {
       cart_target = get_local_target();
     }
     
+    
+    /// Check for stuck ///
+    static uint16_t last_millis = millis();
+    if ((millis() - last_millis) > 400) {
+      buffer_store(&stop_buffer_x, cart_target.x);
+      buffer_store(&stop_buffer_y, cart_target.y);
+      
+      if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
+          abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50) {
+        PRINTLN("stuck!");
+        is_stuck = true;
+        countdown = 500;
+        cart_target.x = 0;
+        cart_target.y = -ROBOT_RADIUS;
+      }
+      last_millis = millis();
+    }
+    
     /// Perform tasks ///
     polar_target = cart_target.polar();
     point_towards_target(polar_target);
+    if (is_stuck == true) {
+      while (countdown > 0) {
+        move_towards_target(polar_target);
+        PRINTLN(countdown);
+        countdown--;
+      }
+    }
     if (enable_drive == false || !DIP8_S3.is_active()) {
       polar_target.r = 0;
       polar_target.theta = 0;
