@@ -48,6 +48,8 @@
 #define IR_MED2_PIN A3
 #define IR_LNG1_PIN A4
 #define IR_LNG2_PIN A5
+#define USONIC3_TRIG_PIN 7
+#define USONIC3_ECHO_PIN 6
 #define USONIC2_TRIG_PIN 11
 #define USONIC2_ECHO_PIN 10
 #define USONIC1_TRIG_PIN 9
@@ -122,7 +124,7 @@
 //#define STEPPER4_SPR 200  // to calibrate
 
 /// SERVO CONFIG ///
-#define MAX_TRAVEL 170
+#define MAX_TRAVEL 160
 
 /*
   LED_GREEN
@@ -151,6 +153,8 @@
 #define USONIC1_ANGLE 50
 #define USONIC2_OFFSET {-135, -150}
 #define USONIC2_ANGLE -50
+#define USONIC3_OFFSET {0, 50}
+#define USONIC3_ANGLE 0
 #define SONAR1_OFFSET {0, 50}
 #define SONAR1_ANGLE 0
 

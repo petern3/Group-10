@@ -183,6 +183,7 @@ extern InfraredSensor IR_LNG1;
 extern InfraredSensor IR_LNG2;
 extern UltrasonicSensor USONIC1;
 extern UltrasonicSensor USONIC2;
+extern UltrasonicSensor USONIC3;
 extern SonarSensor SONAR1;
 extern DigitalSensor IR_VAR1;
 extern DigitalSensor IR_VAR2;

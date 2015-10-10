@@ -185,6 +185,15 @@ Weight_Detect_t weight_detect(void) {
       }
     }
   }
+  /*// Check right sensors
+  if (USONIC3.is_valid()) { 
+    if (IR_MED2.polar_read().r - USONIC3.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
+        IR_MED2.polar_read().r == NOT_VALID) {
+      if (!SONAR1.is_valid() || SONAR1.polar_read().r > 200) {
+        found.right = USONIC3.cart_read();
+      }
+    } I DONT THINK THIS SHOULD BE HERE
+  }*/
   return found;
 }
 
@@ -218,13 +227,14 @@ static void debug_sensors(void) {
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
-    PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
-    PRINT(IR_LNG1.polar_read().r); PRINT("  ");
+    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
+    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    //PRINT(USONIC1.polar_read().r); PRINT("  ");
-    //PRINT(USONIC2.polar_read().r); PRINT("  ");
-    PRINT(SONAR1.polar_read().r); PRINT("  ");
+    PRINT(USONIC1.polar_read().r); PRINT("  ");
+    PRINT(USONIC2.polar_read().r); PRINT("  ");
+    PRINT(USONIC3.polar_read().r); PRINT("  ");
+    //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(analogRead(A6));PRINT("   ");
     PRINT('\r');
@@ -340,8 +350,9 @@ static CartVec get_local_target(void) {
   	CartVec left_IR = IR_MED1.cart_read();  // left one
   	CartVec right_IR = IR_MED2.cart_read(); // right one
   	CartVec centre_IR = IR_LNG1.cart_read();
-  	CartVec centre_SONAR = SONAR1.cart_read();
-  	CartVec generic_wall = {0, 0};
+  	CartVec centre_ULTRA = USONIC3.cart_read(); // middle sensor
+  	int IMU_time = 0;
+  	//CartVec generic_wall = {0, 0};
   
   	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
       	if (left_IR.x < 150 && right_IR.x < 150){
@@ -366,123 +377,75 @@ static CartVec get_local_target(void) {
     		target.x = 0;
 			target.y = 130;
     	}
-			
-    	
-    	
-	/*else if (centre_SONAR.y < left_IR.y && centre_SONAR.y < right_IR.y){// case 5 detects a poll near the wall
-	  target.x = 300;
-	  target.y = -50;
-	}*/
-	
+		/*else if (centre_SONAR.y < left_IR.y && centre_ULTRA.y < right_IR.y){// case 5 detects a poll near the wall
+	  		target.x = 300;
+	  		target.y = -50;
+		}*/
+    	PRINT("x x x         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  - these are objects on left and centre
+    	target.x = ROBOT_RADIUS;
+    	target.y = 100;
+    	PRINT("x x -         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall
+    	target.x = (left_IR.x + right_IR.x)/2;
+    	target.y = ROBOT_RADIUS;
+    	PRINT("x - x         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  x  x
+    	target.x = -ROBOT_RADIUS;
+    	target.y = 100;
+    	PRINT("- x x         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
+    	target.x = - 100; //set to ra   ndom
+    	target.y = ROBOT_RADIUS;
+    	PRINT("- - x         ");
+  	}
+  	/*else if (left_IR.x == NOT_VALID && 300 < centre_ULTRA.y < 400  && right_IR.x == NOT_VALID) {  // -  x  - DONT USE SONAR PETER ITS SHIT 300mm to 500mm read data sheet
+    	target.x = ROBOT_RADIUS;
+    	target.y = 0;
+    	PRINT("- x -         ");
+  	}*/
+  	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
+    	target.x = 100; //set to random
+    	target.y = ROBOT_RADIUS;
+    	PRINT("x - -         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  -
+    	target.x = 0;
+    	target.y = ROBOT_RADIUS;
+    	PRINT("- - -         ");
+  	}
+  	else {
+  		target.x = -50;
+  		target.y = -300;
+  		PRINT("NO STATE      ");
+  	}
+  
   	
-    /*if (left_IR.polar().r < centre_SONAR.polar().r && right_IR.polar().r < centre_SONAR.polar().r) {
-      target.x = 0;
-    }
-    else if (left_IR.polar().r < right_IR.polar().r) {
-      target.x = ROBOT_DIAMETER;
-    }
-    else {
-    target.x = -ROBOT_DIAMETER;
-    }
-    target.y = -100;//set to random*/
-    PRINT("x x x");
-  }
-  else if (left_IR.x == NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  - these are objects on left and centre
-    //generic_wall.x = 0;
-    //generic_wall.y = ROBOT_RADIUS;  //approximation
-    //target = (centre_SONAR - generic_wall) + (centre_SONAR - right_IR);
-    target.x = ROBOT_RADIUS;
-    target.y = 100;
-    PRINT("x x -");
-  }
-  else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall
-    target.x = (left_IR.x + right_IR.x)/2;
-    target.y = ROBOT_RADIUS;
-    PRINT("x - x");
-  }
-  else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  x  x
-    //generic_wall.x = 0;
-    //generic_wall.y = ROBOT_RADIUS;  //approximation
-    //target = (centre_SONAR - generic_wall) + (centre_SONAR - left_IR);
-    target.x = -ROBOT_RADIUS;
-    target.y = 100;
-    PRINT("- x x");
-  }
-  else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
-    target.x = - 100; //set to ra   ndom
-    target.y = ROBOT_RADIUS;
-    PRINT("- - x");
-  }
-  /*else if (left_IR.x == NOT_VALID && 300 < centre_SONAR.y < 400  && right_IR.x == NOT_VALID) {  // -  x  - DONT USE SONAR PETER ITS SHIT 300mm to 500mm read data sheet
-    target.x = ROBOT_RADIUS;
-    target.y = 0;
-    PRINT("- x -");*/
-  }
-  else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
-    target.x = 100; //set to random
-    target.y = ROBOT_RADIUS;
-    PRINT("x - -");
-  }
-  else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  -
-    target.x = 0;
-    target.y = ROBOT_RADIUS;
-    PRINT("- - -");
-  }
-  else {
-  	target.x = -50;
-  	target.y = -300;
-  	PRINT("NO STATE     ");
-  }
-  
-  PRINT("\r");
-  /*// x value WIDTH
-  if (left_IR.x != NOT_VALID && right_IR.x == NOT_VALID) { // left wall found, not right wall
-    target.x = left_IR.x + ROBOT_RADIUS;
-  }
-  else if (left_IR.x == NOT_VALID && right_IR.x != NOT_VALID) { // right wall found, not left wall
-    target.x = right_IR.x - ROBOT_RADIUS;
-  } 
-  else if (left_IR.x == NOT_VALID && right_IR.x == NOT_VALID) { // no wall found
-    target.x = 0 ;
-  }
-  else {  // If both walls found
-    if (centre_SONAR.y < 200){ // sonar picks up front wall
-      if (right_IR.polar().r < left_IR.polar().r) {
-        target.x = -ROBOT_RADIUS;
-      }
-      else {
-        target.x = ROBOT_RADIUS;
-      }
-    }
-    else { // drives though gap
-      target.x = (left_IR.x + right_IR.x)/2;
-    }
-  }
-  
-  // y value LENGTH
-  if (centre_SONAR.y == NOT_VALID) {
-    if (left_IR.y > ROBOT_RADIUS && right_IR.y > ROBOT_RADIUS) {
-      target.y = min(left_IR.x, right_IR.x) - ROBOT_RADIUS;
-    }
-    else {
-      target.y = ROBOT_DIAMETER;
-    }
-  }
-  else {
-    target.y = centre_SONAR.y - ROBOT_RADIUS;
-  }*/
-  
-  // Backup if not trying to move
-  if (target.polar().r < 50) {
-    target.y = -ROBOT_DIAMETER;
-  }
-  // Backup if not actually moving
-  /*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
-    target.x = 0;
-    target.y = -ROBOT_DIAMETER;
-  }*/
-  
-  return target;
+  	/*
+  	if (target.polar().r < 50) {
+    	target.y = -ROBOT_DIAMETER;
+  	}*/
+
+  	// Backup if not actually moving
+
+  	
+  	//target_time = millis();
+  	
+	if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
+		IMU_time = millis();
+		if(millis() - IMU_time > 3000){ // || searching == 0){
+        	//searching = 1; 
+        	target.x = 0;
+    		target.y = -200; // drive backwards
+    	}
+    	PRINT("   NOT MOVING    ");
+	}
+    PRINT("\r");
+  	return target;
 }
 
 

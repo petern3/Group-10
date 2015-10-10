@@ -27,6 +27,7 @@ InfraredSensor IR_LNG1;
 InfraredSensor IR_LNG2;
 UltrasonicSensor USONIC1;
 UltrasonicSensor USONIC2;
+UltrasonicSensor USONIC3;
 SonarSensor SONAR1;
 
 DigitalSensor IR_VAR1;
@@ -92,6 +93,7 @@ void init_sensor_core(void) {
   int8_t IR_LNG2_OFFSET_TEMP[2] = IR_LNG2_OFFSET;
   int8_t USONIC1_OFFSET_TEMP[2] = USONIC1_OFFSET;
   int8_t USONIC2_OFFSET_TEMP[2] = USONIC2_OFFSET;
+  int8_t USONIC3_OFFSET_TEMP[2] = USONIC3_OFFSET;
   int8_t SONAR1_OFFSET_TEMP[2] = SONAR1_OFFSET;
 
   IR_SHT1.initialize(IR_SHT1_PIN, SHT_RANGE, IR_SHT1_OFFSET_TEMP, degrees_to_radians(IR_SHT1_ANGLE));
@@ -101,6 +103,7 @@ void init_sensor_core(void) {
   IR_LNG2.initialize(IR_LNG2_PIN, LNG_RANGE, IR_LNG2_OFFSET_TEMP, degrees_to_radians(IR_LNG2_ANGLE));
   USONIC1.initialize(USONIC1_TRIG_PIN, USONIC1_ECHO_PIN, USONIC1_OFFSET_TEMP, degrees_to_radians(USONIC1_ANGLE));
   USONIC2.initialize(USONIC2_TRIG_PIN, USONIC2_ECHO_PIN, USONIC2_OFFSET_TEMP, degrees_to_radians(USONIC2_ANGLE));
+  USONIC3.initialize(USONIC3_TRIG_PIN, USONIC3_ECHO_PIN, USONIC3_OFFSET_TEMP, degrees_to_radians(USONIC3_ANGLE));
   SONAR1.initialize(SONAR1_PIN, SONAR1_OFFSET_TEMP, degrees_to_radians(SONAR1_ANGLE));
   
   IR_VAR1.initialize(IR_VAR1_PIN, LOW, INPUT);
@@ -125,16 +128,17 @@ void init_sensor_core(void) {
 }
 
 void update_sensors(void) {
-  IR_SHT1.update();
+  //IR_SHT1.update();
   IR_MED1.update();
   IR_MED2.update();
   IR_LNG1.update();
-  IR_LNG2.update();
+  //IR_LNG2.update();
   
   USONIC1.update();
   USONIC2.update();
+  USONIC3.update();
   
-  SONAR1.update();
+  //SONAR1.update();
 }
 
 
