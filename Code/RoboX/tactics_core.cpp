@@ -3,9 +3,9 @@
  * tactics_core.cpp
  *----------------------------------------------------------------------
  * 
- * Author:  Peter Nicholls
+ * Author:  Peter Nicholls, Jack Hendrikz and Ryan Taylor
  * Created: 2015-06-17
- * Edited:  2015-06-18
+ * Edited:  2015-10-10
  * 
  * Blurb
  * 
@@ -26,8 +26,8 @@
 /// GLOBALS ///
 ///////////////
 uint8_t OPERATION_MODE = IDLE_MODE;
-int IMU_time = 0;
-int car = 0;
+int16_t IMU_time = 0;
+int flag = 0;
 
 //CartVec weight_location = {-1, -1};
 int8_t NO_WEIGHT[2] = {-1, -1};
@@ -233,11 +233,13 @@ static void debug_sensors(void) {
     //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
     //PRINT(IR_LNG1.polar_read().r); PRINT("  ");
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    PRINT(USONIC1.polar_read().r); PRINT("  ");
-    PRINT(USONIC2.polar_read().r); PRINT("  ");
-    PRINT(USONIC3.polar_read().r); PRINT("  ");
+    //PRINT(USONIC1.polar_read().r); PRINT("  ");
+    //PRINT(USONIC2.polar_read().r); PRINT("  ");
+    //PRINT(USONIC3.polar_read().r); PRINT("  ");
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
+    PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
+    //PRINT(IMU.read()[1]); PRINT("  ");
     //PRINT(analogRead(A6));PRINT("   ");
     PRINT('\r');
   
@@ -449,21 +451,26 @@ static CartVec get_local_target(void) {
   	
 
   	// Backup if not actually moving
-	/*if (((IMU.read()[0] + IMU.read()[1]) < 50) && ((IMU.read()[3] + IMU.read()[4]) < 50)) {
-		if (car == 0){
+	if ((abs(IMU.read()[0]) + abs(IMU.read()[1])) < 150) {
+		if (flag == 0){
 			IMU_time = millis();
-			car = 1;
+			flag = 1;
 		}
-		if(IMU_time - millis() > 3000){
+		if((millis() - IMU_time) > 3000){
         	target.x = 0;
     		target.y = -200; // drive backwards
-    		car = 0;
-    		PRINT("   Going backwards    ");
+    		flag = 0;
+    		PRINT("              Going backwards    ");
     		PRINT("\r");
     	}
     	PRINT("   NOT MOVING    ");
     	PRINT("\r");
-	}*/
+	}
+	else {
+		flag = 0;
+		PRINT("   Reset flag     ");
+    	PRINT("\r");
+	}
     
   	return target;
 }
