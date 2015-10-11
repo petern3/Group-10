@@ -34,6 +34,7 @@ int8_t NO_WEIGHT[2] = {-1, -1};
 
 bool is_extended = true;
 bool is_lowered = false;
+bool stuck_flag = false;
 uint8_t home_base = NO_BASE;
 CircBuf_t stop_buffer_x;
 CircBuf_t stop_buffer_y;
@@ -243,6 +244,7 @@ static void debug_sensors(void) {
     //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
     //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
     PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
+    PRINT(stuck_flag); PRINT("  "); // fleg
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
@@ -373,16 +375,16 @@ static CartVec get_local_target(void) {
   	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
       	if (left_IR.x < 150 && right_IR.x < 150){
 			if (left_IR.x > right_IR.x && right_IR.y < centre_IR.y < left_IR.y){ //case 3 wall on right
-	  			target.x = -400;// set to random
-	  			target.y = 200;
+	  			target.x = random(-350,-400);
+	  			target.y = 100;
 			}
 			else if (left_IR.x < right_IR.x && right_IR.y > centre_IR.y > left_IR.y){//case 4 wall on left
-	  			target.x = 400;// set to random
-	  			target.y = 200;
+	  			target.x = random(350,400);
+	  			target.y = 100;
 			}
 			else if(centre_IR.y > left_IR.y || centre_IR.y > right_IR.y){//case 1 in corner
-	  			target.x = 400;//this turns left may need to turn right
-	  			target.y = 0;
+	  			target.x = 300;//this turns left may need to turn right
+	  			target.y = -50;
 			}
 			else{
 				target.x = 0;
@@ -415,7 +417,7 @@ static CartVec get_local_target(void) {
     	PRINT("- x x         ");
   	}
   	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
-    	target.x = -100; //set to random
+    	target.x = random(-100,-200);
     	target.y = ROBOT_RADIUS;
     	PRINT("- - x         ");
   	}
@@ -430,7 +432,7 @@ static CartVec get_local_target(void) {
     	PRINT("- x -         ");
   	}
   	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
-    	target.x = 100; //set to random
+    	target.x = random(100,200);
     	target.y = ROBOT_RADIUS;
     	PRINT("x - -         ");
   	}
@@ -516,9 +518,11 @@ void secondary_tactic(void) {
   PolarVec polar_target = {0, 0};
   bool is_stuck = false;
   uint16_t countdown = 0;
+  uint16_t stuck_millis = 0; // stuck time
   
   char serial_byte = '\0';
   bool enable_drive = true;
+  
   
   SERVO_COLOUR = LED_WHITE;
   
@@ -528,7 +532,6 @@ void secondary_tactic(void) {
     
     curr_base = colour_detect();
     IMU.update();
-    
     
     /// Check how many weights I've got ///
     if (is_full()) {
@@ -622,21 +625,37 @@ void secondary_tactic(void) {
     }
     
     
+   
+
+    
     /// Check for stuck ///
     static uint16_t last_millis = millis();
+    
     if ((millis() - last_millis) > 400) { // i dont know if this if statement will work?
       buffer_store(&stop_buffer_x, cart_target.x);
       buffer_store(&stop_buffer_y, cart_target.y);
       
       if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
-          abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50) {
+          abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50 &&
+          cart_target.x != 0 && cart_target.y != ROBOT_RADIUS &&
+          stuck_flag == false){
         PRINTLN("stuck!");
-        DC.drive(-45, 0);
-        delay(2000);
+        DC.drive(-35, 0);
+        delay(1000);
+        DC.drive(0, -20);
+        delay(100);
+        stuck_flag = true;
+        stuck_millis = millis();
+        
         // need to reset buffer as now it just drives backwards
         // This only happens when in corner ie not very often
       }
       last_millis = millis();
+      
+    }
+    
+    if ((millis() - stuck_millis) > 1000) { //flag reset after stuck
+    	stuck_flag = false;
     }
     
     /// Perform tasks ///
