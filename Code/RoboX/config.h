@@ -212,10 +212,11 @@
 #define GREEN_THRESHOLD 180
 #define BLUE_THRESHOLD 150
 
-#define WEIGHT_TIMEOUT_MAX 4000  // milliseconds
-#define WEIGHT_TIMEOUT_INC 400   // milliseconds
+#define WEIGHT_TIMEOUT_INC 200    // milliseconds
+#define WEIGHT_TIMEOUT_MAX 1000   // milliseconds
+#define WEIGHT_RAISE_TIMEOUT 1500 // milliseconds
 
-#define STOP_BUFFER_SIZE 60
+#define STOP_BUFFER_SIZE 40
 
 //////////////////
 /// MAP CONFIG ///

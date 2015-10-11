@@ -62,8 +62,8 @@ void init_tactics_core(void) {
 void extend_magnets(void) {
   if (!is_extended && DIP8_S4.is_active()) {
     uint32_t steps_left = STEPPER1_SPR; // 520; // (180 * steps_per_rev) / 360)
-    digitalWrite(STEPPER1.dir_pin, LOW);
-    digitalWrite(STEPPER2.dir_pin, HIGH);
+    digitalWrite(STEPPER1.dir_pin, HIGH);
+    digitalWrite(STEPPER2.dir_pin, LOW);
     
     for (steps_left; steps_left > 0; steps_left--) {
       digitalWrite(STEPPER1.step_pin, LOW);
@@ -71,7 +71,7 @@ void extend_magnets(void) {
       delayMicroseconds(2);
       digitalWrite(STEPPER1.step_pin, HIGH);
       digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(4);
+      delay(2);
       if (LIMIT_O.is_active()) {
         break;
       }
@@ -83,8 +83,8 @@ void extend_magnets(void) {
 void retract_magnets(void) {
   if (is_extended && DIP8_S4.is_active()) {
     uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
-    digitalWrite(STEPPER1.dir_pin, HIGH);
-    digitalWrite(STEPPER2.dir_pin, LOW);
+    digitalWrite(STEPPER1.dir_pin, LOW);
+    digitalWrite(STEPPER2.dir_pin, HIGH);
     
     for (steps_left; steps_left > 0; steps_left--) {
       digitalWrite(STEPPER1.step_pin, LOW);
@@ -92,7 +92,7 @@ void retract_magnets(void) {
       delayMicroseconds(2);
       digitalWrite(STEPPER1.step_pin, HIGH);
       digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(4);
+      delay(2);
     }
     is_extended = false;
   }
@@ -111,6 +111,7 @@ void raise_magnets(void) {
     SERVO1.rotate(MAX_TRAVEL);
     SERVO2.rotate(0);
     is_lowered = false;
+    PRINTLN("raise");
   }
 }
 
@@ -119,6 +120,7 @@ void lower_magnets(void) {
     SERVO1.rotate(0);
     SERVO2.rotate(MAX_TRAVEL);
     is_lowered = true;
+    PRINTLN("lower");
   }
 }
 
@@ -238,20 +240,20 @@ static void debug_sensors(void) {
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
-    PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
+    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
     //PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    PRINT(USONIC1.polar_read().r); PRINT("  "); //left
-    PRINT(USONIC2.polar_read().r); PRINT("  "); //right
-    PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
+    //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
+    //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
+    //PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
     //PRINT(stuck_flag); PRINT("  "); // fleg
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
     //PRINT(IMU.read()[1]); PRINT("  ");
-    PRINT(abs(IR_MED1.polar_read().r) - abs(USONIC1.polar_read().r)); PRINT("  ");
-    PRINT(abs(IR_MED2.polar_read().r) - abs(USONIC2.polar_read().r)); PRINT("  ");
+    //PRINT(abs(IR_MED1.polar_read().r) - abs(USONIC1.polar_read().r)); PRINT("  ");
+    //PRINT(abs(IR_MED2.polar_read().r) - abs(USONIC2.polar_read().r)); PRINT("  ");
     PRINT('\r');
   
 }
@@ -273,7 +275,7 @@ void idle_mode(void) {
   char serial_byte = '\0';
   //uint32_t initial_time = millis();
   lower_magnets();
-  raise_magnets();
+  raise_magnets(); //PRINTLN("idle");
   
   while (OPERATION_MODE == IDLE_MODE) {
     
@@ -434,11 +436,11 @@ static CartVec get_local_target(void) {
   	}
   	else if (centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 100) { // checks for a wall close before the next one
   		target.x = 0;
-    	target.y = -200;
+    	target.y = -300;
     	PRINT("0 x 0   just ultra      ");
   	}
   	else if (left_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 500 && right_IR.x == NOT_VALID) {  // -  x  - 
-    	target.x = ROBOT_RADIUS;
+    	target.x = 0;
     	target.y = -50;
     	PRINT("- x -         ");
   	}
@@ -471,9 +473,9 @@ void secondary_tactic(void) {
     Timer3.attachInterrupt(secondary_tactic_ISR);
     
     uint8_t operation_state = SEARCHING;
-    int16_t last_weight_time = 0;
-    int16_t target_time = 0;
-    uint16_t weight_timeout = 0;
+    int32_t last_weight_time = 0;
+    int32_t target_time = 0;
+    uint32_t weight_timeout = 0;
     
     int8_t weight_detection_count = 0;
     //int searching = 0;
@@ -517,7 +519,7 @@ void secondary_tactic(void) {
         
         /// Check if I'm in a base ///
         if (curr_base == home_base && home_base != NO_BASE) {  // In home base
-            raise_magnets();
+            raise_magnets(); //PRINTLN("in base");
             retract_magnets();
             // Something else?
             // reverse a little
@@ -540,7 +542,7 @@ void secondary_tactic(void) {
                                 weight_detection_count = 120;
                                 PRINT(weight_detection_count);
                             }
-                            if (weight_detection_count >= 3) {
+                            if (weight_detection_count >= 2) {
                                 operation_state = COLLECTING;
                                 last_weight_time = millis();
                             }
@@ -577,6 +579,13 @@ void secondary_tactic(void) {
                 				cart_target = weight_locations.right;
               				}
             			}
+                        if (IR_VAR1.is_active() && IR_VAR2.is_active()) {
+                            cart_target.x -= 50;
+                        }
+                        else if (IR_VAR1.is_active() && IR_VAR2.is_active()) {
+                            cart_target.x += 50;
+                        }
+                       
           	        }
                   	else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
                     	//raise_magnets();
@@ -601,12 +610,12 @@ void secondary_tactic(void) {
         }
         else {  // In opposition_base
             SERVO_COLOUR = LED_CYAN;
-            raise_magnets();
+            raise_magnets(); //PRINTLN("other base");
             cart_target = get_local_target();
         }
         
         /// Raise Magnets two seconds after losing weight
-        if ((millis() - last_weight_time) > (weight_timeout + 3000)) {  // If lost
+        if ((operation_state != COLLECTING) && (millis() - last_weight_time) > WEIGHT_RAISE_TIMEOUT) {  // If lost weight
             raise_magnets();
         }
     
@@ -615,36 +624,35 @@ void secondary_tactic(void) {
     		stuck_flag = false;
     	}
         
-        if ((millis() - last_millis) > 100 && enable_drive == true) { // i dont know if this if statement will work?
+        if ((millis() - last_millis) > 80 && enable_drive == true && DIP8_S7.is_active()) { // i dont know if this if statement will work?
             buffer_store(&stop_buffer_x, cart_target.x);
             buffer_store(&stop_buffer_y, cart_target.y);
       
-      	if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
-          	abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50 &&
-          	stuck_flag == false){
-          	PRINTLN("stuck!");
-          	DC.drive(-35, 0);
-          	delay(1000);
-          	DC.drive(0, -20);
-          	delay(1000);
-          	stuck_flag = true;
-          	stuck_millis = millis();
-          	for (i = 0; i <= STOP_BUFFER_SIZE; i++){
-              	buffer_store(&stop_buffer_x, 10000);
-      		  	buffer_store(&stop_buffer_y, 10000);
-          	}
-          
+          	if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
+              	abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50 &&
+              	stuck_flag == false){
+              	PRINTLN("stuck!");
+              	DC.drive(-35, 0);
+              	delay(1000);
+              	DC.drive(0, -20);
+              	delay(1000);
+              	stuck_flag = true;
+              	stuck_millis = millis();
+              	for (i = 0; i <= STOP_BUFFER_SIZE; i++){
+                  	buffer_store(&stop_buffer_x, 10000);
+          		  	buffer_store(&stop_buffer_y, 10000);
+              	}
+            
           	// need to reset buffer as now it just drives backwards
           	// This only happens when in corner ie not very often
-      	}
-      	last_millis = millis();
-        
+          	}
+          	last_millis = millis();
     	}
     
     /// Perform tasks ///
     polar_target = cart_target.polar();
-    if (operation_state == COLLECTING) {
-        polar_target.r = polar_target.r/4;
+    if (operation_state == COLLECTING && colour_detect() == NO_BASE) {
+        polar_target.r = polar_target.r/3;
     }
     point_towards_target(polar_target);
     if (enable_drive == false || !DIP8_S7.is_active()) {
@@ -655,6 +663,13 @@ void secondary_tactic(void) {
     
     //PRINT(weight_timeout);
     //PRINT("                   \r");
+    
+    if (DIP8_S1.is_active()) {
+      OPERATION_MODE = SECONDARY_MODE;
+    }
+    else {
+      OPERATION_MODE = MANUAL_MODE;
+    }
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
@@ -722,6 +737,14 @@ void manual_mode(void) {
   delay(500);*/
   
   while(OPERATION_MODE == MANUAL_MODE) {
+    
+    if (DIP8_S1.is_active()) {
+      OPERATION_MODE = PRIMARY_MODE;
+    }
+    else {
+      OPERATION_MODE = MANUAL_MODE;
+    }
+    
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
       serial_byte = Serial.read();
@@ -765,16 +788,16 @@ void manual_mode(void) {
       }
       
       else if (serial_byte == EXTEND) {
-        extend_magnets();
         PRINTLN("\tExtending magnets");
+        extend_magnets();
       }
       else if (serial_byte == RETRACT) {
-        retract_magnets();
         PRINTLN("\tRetracting magnets");
+        retract_magnets();
       }
       else if (serial_byte == TOGGLE) {
-        toggle_magnets();
         PRINTLN("\tToggling magnets");
+        toggle_magnets();
       }
 
       else if (serial_byte == RAISE) {
