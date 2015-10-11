@@ -95,11 +95,11 @@ void retract_magnets(void) {
     	for (steps_left; steps_left > 0; steps_left--) {
       		digitalWrite(STEPPER1.step_pin, LOW);
       		digitalWrite(STEPPER2.step_pin, LOW);
-      		DC.drive(0, -20);
+      		//DC.drive(0, -20);
       		delayMicroseconds(2);
       		digitalWrite(STEPPER1.step_pin, HIGH);
       		digitalWrite(STEPPER2.step_pin, HIGH);
-      		DC.drive(0, 90);
+      		//DC.drive(0, 90);
       		delay(2);
     	}
     is_extended = false;
@@ -539,10 +539,27 @@ void secondary_tactic(void) {
         if (curr_position == home_base){ // && home_base != NO_BASE) { // In home base
             raise_magnets(); //PRINTLN("in base   ");
             retract_magnets();
-            // Something else?
-            // reverse a little
-            //cart_target.x =  0;
-            cart_target = get_local_target() ;//cart_target.y = -ROBOT_RADIUS;  // get_local_target();
+            if (IR_VAR1.is_active() || IR_VAR2.is_active() || IR_VAR3.is_active()){
+            	retract_magnets();
+            	if (!LIMIT_O.is_active()){
+  					is_extended = false;
+  				}
+            	extend_magnets();
+            }
+            delay(500);
+            if (IR_VAR1.is_active() || IR_VAR2.is_active() || IR_VAR3.is_active()){
+            	retract_magnets();
+            	if (!LIMIT_O.is_active()){
+  					is_extended = false;
+  				}
+            	extend_magnets();
+            }
+            delay(300);
+            DC.drive(-35, 0);
+            delay(1000);
+            DC.drive(0, -40);
+            delay(500);
+            cart_target = get_local_target();
             operation_state = SEARCHING;
             //searching = 0;
         }
