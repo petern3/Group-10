@@ -249,7 +249,7 @@ static void debug_sensors(void) {
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
     //PRINT(IMU.read()[1]); PRINT("  ");
-    PRINT(analogRead(A5));PRINT("   ");
+    PRINT(analogRead(A7));PRINT("   ");
     PRINT(analogRead(A4));PRINT("   ");
     PRINT('\r');
   
@@ -368,7 +368,7 @@ void primary_tactic(void) {
 ////////////////////////
 static CartVec get_local_target(void) {
   	CartVec target = {0, 0};
-  	CartVec left_S_IR = IR_SHT1.cart_read();  // left one
+  	CartVec centre_S_IR = IR_SHT1.cart_read();  // left one
   	CartVec left_IR = IR_MED1.cart_read();  // left one
   	CartVec right_IR = IR_MED2.cart_read(); // right one
   	CartVec centre_IR = IR_LNG1.cart_read();
@@ -388,6 +388,11 @@ static CartVec get_local_target(void) {
 	  			target.x = 300;//this turns left may need to turn right
 	  			target.y = -50;
 			}
+			else if((left_IR.y - right_IR.y) < 50 && centre_S_IR.x < -100 && centre_S_IR.x != NOT_VALID){
+				target.x = -200;
+	  			target.y = 100;
+			}
+			else if((left_IR.y - right_IR.y) > 50 && centre_S_IR.x == NOT_VALID){
 			else{
 				target.x = 0;
 				target.y = -300;
@@ -500,168 +505,168 @@ static CartVec get_local_target(void) {
 
 
 void secondary_tactic(void) {
-  PRINTLN("Starting secondary tactic:");
-  Timer3.setPeriod(SECONDARY_TACTIC_PERIOD);
-  Timer3.attachInterrupt(secondary_tactic_ISR);
+  	PRINTLN("Starting secondary tactic:");
+  	Timer3.setPeriod(SECONDARY_TACTIC_PERIOD);
+  	Timer3.attachInterrupt(secondary_tactic_ISR);
+ 	 
+  	uint8_t operation_state = SEARCHING;
+  	int16_t last_weight_time = 0;
+  	int16_t target_time = 0;
+  	uint16_t weight_timeout = 0;
+  	int searching = 0;
+  	int i = 0;
   
-  uint8_t operation_state = SEARCHING;
-  int16_t last_weight_time = 0;
-  int16_t target_time = 0;
-  uint16_t weight_timeout = 0;
-  int searching = 0;
-  int i = 0;
+  	Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
+  	uint8_t curr_base = home_base;
   
-  Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
-  uint8_t curr_base = home_base;
+  	buffer_initialize(&stop_buffer_x, STOP_BUFFER_SIZE);
+  	buffer_initialize(&stop_buffer_y, STOP_BUFFER_SIZE);
   
-  buffer_initialize(&stop_buffer_x, STOP_BUFFER_SIZE);
-  buffer_initialize(&stop_buffer_y, STOP_BUFFER_SIZE);
+  	CartVec cart_target = {0, 0};
+  	PolarVec polar_target = {0, 0};
+  	bool is_stuck = false; //not used atm
+  	uint16_t countdown = 0; //not used atm
+  	uint32_t stuck_millis = 0; // stuck time
+  	uint32_t last_millis = millis(); 
   
-  CartVec cart_target = {0, 0};
-  PolarVec polar_target = {0, 0};
-  bool is_stuck = false; //not used atm
-  uint16_t countdown = 0; //not used atm
-  uint32_t stuck_millis = 0; // stuck time
-  uint32_t last_millis = millis(); 
-  
-  char serial_byte = '\0';
-  bool enable_drive = true;
+  	char serial_byte = '\0';
+  	bool enable_drive = true;
   
   
-  SERVO_COLOUR = LED_WHITE;
+  	SERVO_COLOUR = LED_WHITE;
   
-  while(OPERATION_MODE == SECONDARY_MODE) {
+  	while(OPERATION_MODE == SECONDARY_MODE) {
     
-    weight_locations = weight_detect();
+    	weight_locations = weight_detect();
     
-    curr_base = colour_detect();
-    IMU.update();
+    	curr_base = colour_detect();
+    	IMU.update();
     
-    /// Check how many weights I've got ///
-    if (is_full()) {
-      operation_state = RETURNING;
-    }
+    	/// Check how many weights I've got ///
+    	if (is_full()) {
+      		operation_state = RETURNING;
+    	}
     
-    /// Check if I'm in a base ///
-    if (curr_base == home_base && home_base != NO_BASE) {  // In home base
-      raise_magnets();
-      retract_magnets();
-      // Something else?
-      // reverse a little
-      cart_target.x =  0;
-      cart_target.y = -ROBOT_RADIUS;  // get_local_target();
-      operation_state = SEARCHING;
-      searching = 0;
-    }
-    else if (curr_base == NO_BASE) {  // In arena
-      extend_magnets();
-      switch (operation_state) { 
-        case SEARCHING:
-          SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
-          //target_time = millis();
-          /*target_timeout += TARGET_TIMEOUT_INC;
-		  if (target_timeout > WEIGHT_TIMEOUT_MAX) {
-              	target_timeout = WEIGHT_TIMEOUT_MAX;
-            }*/
+    	/// Check if I'm in a base ///
+    	if (curr_base == home_base && home_base != NO_BASE) {  // In home base
+      		raise_magnets();
+      		retract_magnets();
+      		// Something else?
+      		// reverse a little
+      		cart_target.x =  0;
+      		cart_target.y = -ROBOT_RADIUS;  // get_local_target();
+      		operation_state = SEARCHING;
+      		searching = 0;
+    	}
+    	else if (curr_base == NO_BASE) {  // In arena
+      		extend_magnets();
+      		switch (operation_state) { 
+        		case SEARCHING:
+          			SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
+          			//target_time = millis();
+          			/*target_timeout += TARGET_TIMEOUT_INC;
+		  			if (target_timeout > WEIGHT_TIMEOUT_MAX) {
+            		target_timeout = WEIGHT_TIMEOUT_MAX;
+            		}*/
           
-          if(millis() - target_time > 300 || searching == 0){
-          	target_time = millis();
-          	searching = 1; 
-          	cart_target = get_local_target(); // drive around
-          }
-          /*if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
-            operation_state = COLLECTING;
-            last_weight_time = millis();
-          }*/
+          			if(millis() - target_time > 300 || searching == 0){
+          				target_time = millis();
+          				searching = 1; 
+          				cart_target = get_local_target(); // drive around
+         			}
+          			/*if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
+            			operation_state = COLLECTING;
+            			last_weight_time = millis();
+          			}*/
           
-          break;
-        case COLLECTING:
-        	SERVO_COLOUR = LED_GREEN;
-          	lower_magnets();
+          			break;
+        		case COLLECTING:
+        			SERVO_COLOUR = LED_GREEN;
+          			lower_magnets();
           
-          	if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
-            	last_weight_time = millis();
-            	weight_timeout += WEIGHT_TIMEOUT_INC;
-            	if (weight_timeout > WEIGHT_TIMEOUT_MAX) {
-              		weight_timeout = WEIGHT_TIMEOUT_MAX;
-            	}
-            	if (weight_locations.right.polar() == NO_WEIGHT) {  // If I see left weight
-              		cart_target = weight_locations.left;
-            	}
-            	else if (weight_locations.left.polar() == NO_WEIGHT) {  // If I see right weight
-              		cart_target = weight_locations.right;
-            	}
-            	else {
-              		if (weight_locations.left.polar().r > weight_locations.right.polar().r) {  // If I see both, choose closest
-                		cart_target = weight_locations.left;
-              		}
-              		else {
-                		cart_target = weight_locations.right;
-              		}
-            	}
+          			if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
+            			last_weight_time = millis();
+            			weight_timeout += WEIGHT_TIMEOUT_INC;
+            			if (weight_timeout > WEIGHT_TIMEOUT_MAX) {
+              				weight_timeout = WEIGHT_TIMEOUT_MAX;
+            			}
+            			if (weight_locations.right.polar() == NO_WEIGHT) {  // If I see left weight
+              				cart_target = weight_locations.left;
+            			}
+            			else if (weight_locations.left.polar() == NO_WEIGHT) {  // If I see right weight
+              				cart_target = weight_locations.right;
+            			}
+            			else {
+              				if (weight_locations.left.polar().r > weight_locations.right.polar().r) {  // If I see both, choose closest
+                			cart_target = weight_locations.left;
+              				}
+              				else {
+                				cart_target = weight_locations.right;
+              				}
+            			}
             
-          	}
-          	else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
-            	raise_magnets();
-            	weight_timeout = 0;
-            	operation_state = SEARCHING;
-            	searching = 0;
-          	}
-          // only have the magenets down for max time
+          			}
+          			else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
+            			raise_magnets();
+            			weight_timeout = 0;
+            			operation_state = SEARCHING;
+            			searching = 0;
+          			}
+          			// only have the magenets down for max time
           
           
-          break;
-        case RETURNING:
-          SERVO_COLOUR = LED_BLUE;
-          raise_magnets();
-          cart_target = get_local_target();
-          if (!is_full()) {
-            operation_state = SEARCHING;
-            searching = 0;
-          }
-          break;
-      }
-    }
-    else {  // In opposition_base
-      SERVO_COLOUR = LED_CYAN;
-      raise_magnets();
-      cart_target = get_local_target();
-    }
+          			break;
+        		case RETURNING:
+          			SERVO_COLOUR = LED_BLUE;
+          			raise_magnets();
+          			cart_target = get_local_target();
+          			if (!is_full()) {
+            			operation_state = SEARCHING;
+            			searching = 0;
+          			}
+          			break;
+      		}
+    	}
+    	else {  // In opposition_base
+      		SERVO_COLOUR = LED_CYAN;
+      		raise_magnets();
+      		cart_target = get_local_target();
+    	}
     
     
    
 
     
-    /// Check for stuck ///
-    if ((millis() - stuck_millis) > 5000) { //flag reset after stuck
-    	stuck_flag = false;
-    }
+    	/// Check for stuck ///
+    	if ((millis() - stuck_millis) > 5000) { //flag reset after stuck
+    		stuck_flag = false;
+    	}
     
-    if ((millis() - last_millis) > 100) { // i dont know if this if statement will work?
-      buffer_store(&stop_buffer_x, cart_target.x);
-      buffer_store(&stop_buffer_y, cart_target.y);
+    	if ((millis() - last_millis) > 100) { // i dont know if this if statement will work?
+      		buffer_store(&stop_buffer_x, cart_target.x);
+      		buffer_store(&stop_buffer_y, cart_target.y);
       
-      if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
-          abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50 &&
-          stuck_flag == false){
-          PRINTLN("stuck!");
-          DC.drive(-35, 0);
-          delay(1000);
-          DC.drive(0, -20);
-          delay(1000);
-          stuck_flag = true;
-          stuck_millis = millis();
-          for (i = 0; i <= STOP_BUFFER_SIZE; i++){
-              buffer_store(&stop_buffer_x, 10000);
-      		  buffer_store(&stop_buffer_y, 10000);
-          }
+      	if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
+          	abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50 &&
+          	stuck_flag == false){
+          	PRINTLN("stuck!");
+          	DC.drive(-35, 0);
+          	delay(1000);
+          	DC.drive(0, -20);
+          	delay(1000);
+          	stuck_flag = true;
+          	stuck_millis = millis();
+          	for (i = 0; i <= STOP_BUFFER_SIZE; i++){
+              	buffer_store(&stop_buffer_x, 10000);
+      		  	buffer_store(&stop_buffer_y, 10000);
+          	}
           
-          // need to reset buffer as now it just drives backwards
-          // This only happens when in corner ie not very often
-      }
-      last_millis = millis();
+          	// need to reset buffer as now it just drives backwards
+          	// This only happens when in corner ie not very often
+      	}
+      	last_millis = millis();
       
-    }
+    	}
     
     
     
