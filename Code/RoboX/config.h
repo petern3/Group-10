@@ -59,7 +59,7 @@
 
 #define CHIP_SELECT_PIN 53
 #define SPEAKER_PIN 5
-#define SPEAKER_ENABLE_PIN 6
+#define SPEAKER_ENABLE_PIN A10
 
 #define DIP8_S1_PIN 38 // WORKS - PRIMARY/MANUAL
 #define DIP8_S2_PIN 39 // DOESNT
@@ -120,7 +120,7 @@
 //#define STEPPER4_SPR 200  // to calibrate
 
 /// SERVO CONFIG ///
-#define MAX_TRAVEL 160
+#define MAX_TRAVEL 100
 
 /*
   LED_GREEN
@@ -206,7 +206,7 @@
 
 #define BACKING_ANGLE 179 //120  // degrees, set to 181 to disable
 
-#define WEIGHT_DETECT_TOLERANCE 120 // mm
+#define WEIGHT_DETECT_TOLERANCE 150 // mm
 #define CENTRE_SENSOR_TOLERANCE 200 // mm
 
 #define GREEN_THRESHOLD 180

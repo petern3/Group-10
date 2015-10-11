@@ -181,24 +181,24 @@ Weight_Detect_t weight_detect(void) {
   
   	// Check left sensors (NOT LEFT SIDE). No need for abs as the lower one (USONIC) should always be less.
   	if (USONIC1.is_valid()) { 
-    	if (IR_MED1.polar_read().r - USONIC1.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
-        IR_MED1.polar_read().r == NOT_VALID) { //weight next to wall, WEIGHT_DETECT_TOLERANCE should be the distance the our 
+    	if ((IR_MED1.polar_read().r - USONIC1.polar_read().r) > WEIGHT_DETECT_TOLERANCE ||
+            IR_MED1.polar_read().r == NOT_VALID) { //weight next to wall, WEIGHT_DETECT_TOLERANCE should be the distance the our 
         	//robot can pick a weight up next to a way... not the mesurement of a weight...
-      		if (!USONIC3.is_valid() || USONIC3.polar_read().r > 200) { // checks to see a poll, this 200 may need ajusting
+      		if (!USONIC3.is_valid() || USONIC3.polar_read().r > CENTRE_SENSOR_TOLERANCE) { // checks to see a poll, this 200 may need ajusting
         		found.left = USONIC1.cart_read();
       		}
     	}
   	}
   	// Check right sensors
   	if (USONIC2.is_valid()) { 
-    	if (IR_MED2.polar_read().r - USONIC2.polar_read().r > WEIGHT_DETECT_TOLERANCE ||
-        IR_MED2.polar_read().r == NOT_VALID) {
-      		if (!USONIC3.is_valid() || USONIC3.polar_read().r > 200) {
+    	if ((IR_MED2.polar_read().r - USONIC2.polar_read().r) > WEIGHT_DETECT_TOLERANCE ||
+            IR_MED2.polar_read().r == NOT_VALID) {
+      		if (!USONIC3.is_valid() || USONIC3.polar_read().r > CENTRE_SENSOR_TOLERANCE) {
         		found.right = USONIC2.cart_read();
       		}
     	}
   	}
-
+    
   	return found;
 }
 
@@ -236,22 +236,22 @@ static void debug_sensors(void) {
     
     //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
-
-    PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
-    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
+    
+    //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
+    PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
     //PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
-    //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
-    //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
-    //PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
+    PRINT(USONIC1.polar_read().r); PRINT("  "); //left
+    PRINT(USONIC2.polar_read().r); PRINT("  "); //right
+    PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
     //PRINT(stuck_flag); PRINT("  "); // fleg
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
     //PRINT(IMU.read()[1]); PRINT("  ");
-    PRINT(analogRead(A7));PRINT("   ");
-    PRINT(analogRead(A4));PRINT("   ");
+    PRINT(abs(IR_MED1.polar_read().r) - abs(USONIC1.polar_read().r)); PRINT("  ");
+    PRINT(abs(IR_MED2.polar_read().r) - abs(USONIC2.polar_read().r)); PRINT("  ");
     PRINT('\r');
   
 }
@@ -417,7 +417,7 @@ static CartVec get_local_target(void) {
     	target.y = 100;
     	PRINT("x x -         ");
   	}
-  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && centre_ULTRA.y <= 200 && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall // now avoid corners brilliantly!
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && centre_ULTRA.y <= CENTRE_SENSOR_TOLERANCE && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall // now avoid corners brilliantly!
     	target.x = (left_IR.x + right_IR.x)/2;
     	target.y = ROBOT_RADIUS;
     	PRINT("x - x         ");
@@ -579,7 +579,7 @@ void secondary_tactic(void) {
             			}
           	        }
                   	else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
-                    	raise_magnets();
+                    	//raise_magnets();
                     	weight_timeout = 0;
                     	operation_state = SEARCHING;
                     	weight_detection_count = 0;
@@ -590,7 +590,7 @@ void secondary_tactic(void) {
                     break;
                 case RETURNING:
                     SERVO_COLOUR = LED_BLUE;
-                    raise_magnets();
+                    //raise_magnets();
                     cart_target = get_local_target();
                     if (!is_full()) {
                         operation_state = SEARCHING;
@@ -604,7 +604,11 @@ void secondary_tactic(void) {
             raise_magnets();
             cart_target = get_local_target();
         }
-    
+        
+        /// Raise Magnets two seconds after losing weight
+        if ((millis() - last_weight_time) > (weight_timeout + 3000)) {  // If lost
+            raise_magnets();
+        }
     
     	/// Check for stuck ///
     	if ((millis() - stuck_millis) > 5000) { //flag reset after stuck
@@ -634,11 +638,14 @@ void secondary_tactic(void) {
           	// This only happens when in corner ie not very often
       	}
       	last_millis = millis();
-      
+        
     	}
     
     /// Perform tasks ///
     polar_target = cart_target.polar();
+    if (operation_state == COLLECTING) {
+        polar_target.r = polar_target.r/4;
+    }
     point_towards_target(polar_target);
     if (enable_drive == false || !DIP8_S7.is_active()) {
         polar_target.r = 0;
@@ -848,7 +855,7 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
     
-    //debug_sensors();
+    debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
