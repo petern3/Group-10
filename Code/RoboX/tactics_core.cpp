@@ -105,7 +105,7 @@ void toggle_magnets(void) {
 }
 
 void raise_magnets(void) {
-  if (is_lowered) {
+  if (is_lowered && DIP8_S5.is_active()) {
     SERVO1.rotate(MAX_TRAVEL);
     SERVO2.rotate(0);
     is_lowered = false;
@@ -113,7 +113,7 @@ void raise_magnets(void) {
 }
 
 void lower_magnets(void) {
-  if (!is_lowered) {
+  if (!is_lowered && DIP8_S5.is_active()) {
     SERVO1.rotate(0);
     SERVO2.rotate(MAX_TRAVEL);
     is_lowered = true;
@@ -504,7 +504,8 @@ void secondary_tactic(void) {
   int16_t last_weight_time = 0;
   int16_t target_time = 0;
   uint16_t weight_timeout = 0;
-  int searching = 0;
+  // int searching = 0;
+  int8_t weight_detection_count = 0;
   
   Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
   uint8_t curr_base = home_base;
@@ -551,21 +552,30 @@ void secondary_tactic(void) {
       switch (operation_state) { 
         case SEARCHING:
           SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
-          //target_time = millis();
-          /*target_timeout += TARGET_TIMEOUT_INC;
-		  if (target_timeout > WEIGHT_TIMEOUT_MAX) {
-              	target_timeout = WEIGHT_TIMEOUT_MAX;
-            }*/
           
-          if(millis() - target_time > 300 || searching == 0){
+          /*if(millis() - target_time > 300 || searching == 0){
           	target_time = millis();
-          	searching = 1; 
+          	searching = 1;
           	cart_target = get_local_target(); // drive around
-          }
-          /*if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
-            operation_state = COLLECTING;
-            last_weight_time = millis();
           }*/
+          if (DIP8_S3.is_active()) {
+            if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
+              weight_detection_count++;
+              if (weight_detection_count > 120) {
+                weight_detection_count = 120;
+              }
+              if (weight_detection_count >= 5) {
+                operation_state = COLLECTING;
+                last_weight_time = millis();
+              }
+            }
+            else {
+                weight_detection_count--;
+                if (weight_detection_count < 0) {
+                  weight_detection_count = 0;
+                }
+            }
+          }
           
           break;
         case COLLECTING:
@@ -598,7 +608,7 @@ void secondary_tactic(void) {
             	raise_magnets();
             	weight_timeout = 0;
             	operation_state = SEARCHING;
-            	searching = 0;
+            	weight_detection_count = 0;
           	}
           // only have the magenets down for max time
           
@@ -642,7 +652,7 @@ void secondary_tactic(void) {
     /// Perform tasks ///
     polar_target = cart_target.polar();
     point_towards_target(polar_target);
-    if (enable_drive == false || !DIP8_S3.is_active()) {
+    if (enable_drive == false || !DIP8_S7.is_active()) {
       polar_target.r = 0;
       polar_target.theta = 0;
     }
