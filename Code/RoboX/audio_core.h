@@ -123,6 +123,7 @@
 /// GLOBALS ///
 ///////////////
 extern bool SOUNDS_ON;
+extern char* cena_main;
 
 /////////////////
 /// FUNCTIONS ///

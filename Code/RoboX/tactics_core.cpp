@@ -16,6 +16,7 @@
 ////////////////
 #include "tactics_core.h"
 #include "actuator_core.h"
+#include "audio_core.h"
 #include "exception_core.h"
 #include "interrupt_core.h"
 #include "map_core.h"
@@ -34,6 +35,7 @@ int8_t NO_WEIGHT[2] = {-1, -1};
 
 bool is_extended = true;
 bool is_lowered = false;
+bool stuck_flag = false;
 uint8_t home_base = NO_BASE;
 CircBuf_t stop_buffer_x;
 CircBuf_t stop_buffer_y;
@@ -234,20 +236,22 @@ static void debug_sensors(void) {
     
     //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
-    
-    //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
+
+    PRINT(IR_SHT1.polar_read().r); PRINT("  ");
     //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
     //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
-    PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
+    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
     //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
-    PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
+    //PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
+    //PRINT(stuck_flag); PRINT("  "); // fleg
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
     //PRINT(IMU.read()[1]); PRINT("  ");
-    //PRINT(analogRead(A6));PRINT("   ");
+    PRINT(analogRead(A5));PRINT("   ");
+    PRINT(analogRead(A4));PRINT("   ");
     PRINT('\r');
   
 }
@@ -365,6 +369,7 @@ void primary_tactic(void) {
 ////////////////////////
 static CartVec get_local_target(void) {
   	CartVec target = {0, 0};
+  	CartVec left_S_IR = IR_SHT1.cart_read();  // left one
   	CartVec left_IR = IR_MED1.cart_read();  // left one
   	CartVec right_IR = IR_MED2.cart_read(); // right one
   	CartVec centre_IR = IR_LNG1.cart_read();
@@ -373,16 +378,16 @@ static CartVec get_local_target(void) {
   	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
       	if (left_IR.x < 150 && right_IR.x < 150){
 			if (left_IR.x > right_IR.x && right_IR.y < centre_IR.y < left_IR.y){ //case 3 wall on right
-	  			target.x = -400;// set to random
-	  			target.y = 200;
+	  			target.x = random(-350,-400);
+	  			target.y = 100;
 			}
 			else if (left_IR.x < right_IR.x && right_IR.y > centre_IR.y > left_IR.y){//case 4 wall on left
-	  			target.x = 400;// set to random
-	  			target.y = 200;
+	  			target.x = random(350,400);
+	  			target.y = 100;
 			}
 			else if(centre_IR.y > left_IR.y || centre_IR.y > right_IR.y){//case 1 in corner
-	  			target.x = 400;//this turns left may need to turn right
-	  			target.y = 0;
+	  			target.x = 300;//this turns left may need to turn right
+	  			target.y = -50;
 			}
 			else{
 				target.x = 0;
@@ -404,7 +409,7 @@ static CartVec get_local_target(void) {
     	target.y = 100;
     	PRINT("x x -         ");
   	}
-  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && centre_ULTRA.y <= 200 && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall // now avoid corners brilliantly!
     	target.x = (left_IR.x + right_IR.x)/2;
     	target.y = ROBOT_RADIUS;
     	PRINT("x - x         ");
@@ -415,7 +420,7 @@ static CartVec get_local_target(void) {
     	PRINT("- x x         ");
   	}
   	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
-    	target.x = -100; //set to random
+    	target.x = random(-100,-200);
     	target.y = ROBOT_RADIUS;
     	PRINT("- - x         ");
   	}
@@ -430,7 +435,7 @@ static CartVec get_local_target(void) {
     	PRINT("- x -         ");
   	}
   	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
-    	target.x = 100; //set to random
+    	target.x = random(100,200);
     	target.y = ROBOT_RADIUS;
     	PRINT("x - -         ");
   	}
@@ -446,49 +451,6 @@ static CartVec get_local_target(void) {
   	}
   	PRINT("\r");
 	  
-  	/*
-  	 * initial buffer use TARGET_TIMEOUT_BUFFER_SIZE
-  	 * 
-  	 * then each time this function run chech to see if buffer is in a tollerance of the newest target
-  	 * 		set time the first time
-  	 * 		if time - millis() > 8000
-  	 * 			then back up
-  	 * 			then reset buffer 
-  	 * 			the reset time this will be simular to below with the imu
-  	 * 
-  	 * 
-  	 * at the end of this function store target angle
-  	 * 
-  	 * 
-  	 */
-    
-    
-  	
-  	/*
-  	if (target.polar().r < 50) {
-    	target.y = -ROBOT_DIAMETER;
-  	}*/
-  	// Backup if not actually moving
-	/*if ((abs(IMU.read()[0]) + abs(IMU.read()[1])) < 150) {
-		if (flag == 0){
-			IMU_time = millis();
-			flag = 1;
-		}
-		if((millis() - IMU_time) > 3000){
-        	target.x = 0;
-    		target.y = -200; // drive backwards
-    		flag = 0;
-    		PRINT("              Going backwards    ");
-    		PRINT("\r");
-    	}
-    	PRINT("   NOT MOVING    ");
-    	PRINT("\r");
-	}
-	else {
-		flag = 0;
-		PRINT("   Reset flag     ");
-    	PRINT("\r");
-	}*/
     
   	return target;
 }
@@ -504,8 +466,10 @@ void secondary_tactic(void) {
   int16_t last_weight_time = 0;
   int16_t target_time = 0;
   uint16_t weight_timeout = 0;
-  // int searching = 0;
+  
   int8_t weight_detection_count = 0;
+  //int searching = 0;
+  int i = 0;
   
   Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
   uint8_t curr_base = home_base;
@@ -515,21 +479,29 @@ void secondary_tactic(void) {
   
   CartVec cart_target = {0, 0};
   PolarVec polar_target = {0, 0};
-  bool is_stuck = false;
-  uint16_t countdown = 0;
+  bool is_stuck = false; //not used atm
+  uint16_t countdown = 0; //not used atm
+  uint32_t stuck_millis = 0; // stuck time
+  uint32_t last_millis = millis(); 
+  uint32_t program_start = millis();
   
   char serial_byte = '\0';
   bool enable_drive = true;
+  
   
   SERVO_COLOUR = LED_WHITE;
   
   while(OPERATION_MODE == SECONDARY_MODE) {
     
+    if ((millis() - program_start) > 300000) {
+        PRINTLN("That\'s time!");
+        play_sound(cena_main);
+    }
+    
     weight_locations = weight_detect();
     
     curr_base = colour_detect();
     IMU.update();
-    
     
     /// Check how many weights I've got ///
     if (is_full()) {
@@ -542,22 +514,18 @@ void secondary_tactic(void) {
       retract_magnets();
       // Something else?
       // reverse a little
-      cart_target.x =  0;
-      cart_target.y = -ROBOT_RADIUS;  // get_local_target();
+      //cart_target.x =  0;
+      cart_target = get_local_target() ;//cart_target.y = -ROBOT_RADIUS;  // get_local_target();
       operation_state = SEARCHING;
-      searching = 0;
+      //searching = 0;
     }
     else if (curr_base == NO_BASE) {  // In arena
       extend_magnets();
       switch (operation_state) { 
         case SEARCHING:
           SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
+          cart_target = get_local_target();
           
-          /*if(millis() - target_time > 300 || searching == 0){
-          	target_time = millis();
-          	searching = 1;
-          	cart_target = get_local_target(); // drive around
-          }*/
           if (DIP8_S3.is_active()) {
             if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
               weight_detection_count++;
@@ -565,7 +533,7 @@ void secondary_tactic(void) {
                 weight_detection_count = 120;
                 PRINT(weight_detection_count);
               }
-              if (weight_detection_count >= 5) {
+              if (weight_detection_count >= 3) {
                 operation_state = COLLECTING;
                 last_weight_time = millis();
               }
@@ -621,7 +589,7 @@ void secondary_tactic(void) {
           cart_target = get_local_target();
           if (!is_full()) {
             operation_state = SEARCHING;
-            searching = 0;
+            //searching = 0;
           }
           break;
       }
@@ -633,21 +601,38 @@ void secondary_tactic(void) {
     }
     
     
+   
+
+    
     /// Check for stuck ///
-    static uint16_t last_millis = millis();
-    if ((millis() - last_millis) > 400) { // i dont know if this if statement will work?
+    if ((millis() - stuck_millis) > 5000) { //flag reset after stuck
+    	stuck_flag = false;
+    }
+    
+    if ((millis() - last_millis) > 100 && enable_drive == true) { // i dont know if this if statement will work?
       buffer_store(&stop_buffer_x, cart_target.x);
       buffer_store(&stop_buffer_y, cart_target.y);
       
       if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
-          abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50) {
-        PRINTLN("stuck!");
-        DC.drive(-45, 0);
-        delay(2000);
-        // need to reset buffer as now it just drives backwards
-        // This only happens when in corner ie not very often
+          abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50 &&
+          stuck_flag == false){
+          PRINTLN("stuck!");
+          DC.drive(-35, 0);
+          delay(1000);
+          DC.drive(0, -20);
+          delay(1000);
+          stuck_flag = true;
+          stuck_millis = millis();
+          for (i = 0; i <= STOP_BUFFER_SIZE; i++){
+              buffer_store(&stop_buffer_x, 10000);
+      		  buffer_store(&stop_buffer_y, 10000);
+          }
+          
+          // need to reset buffer as now it just drives backwards
+          // This only happens when in corner ie not very often
       }
       last_millis = millis();
+      
     }
     
     /// Perform tasks ///
@@ -659,7 +644,8 @@ void secondary_tactic(void) {
     }
     move_towards_target(polar_target);
     
-    //PRINTLN(weight_timeout);
+    //PRINT(weight_timeout);
+    //PRINT("                   \r");
     
     #ifdef ENABLE_SERIAL
     if (Serial.available() > 0) {
@@ -860,7 +846,7 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
     
-    debug_sensors();
+    //debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);

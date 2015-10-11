@@ -128,7 +128,7 @@ void init_sensor_core(void) {
 }
 
 void update_sensors(void) {
-  //IR_SHT1.update();
+  IR_SHT1.update();
   IR_MED1.update();
   IR_MED2.update();
   IR_LNG1.update();
