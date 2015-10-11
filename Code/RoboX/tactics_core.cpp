@@ -454,8 +454,8 @@ static CartVec get_local_target(void) {
     	delay(1000);
   	}
   	else if (left_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 500 && right_IR.x == NOT_VALID) {  // -  x  - 
-    	target.x = 0;
-    	target.y = -50;
+    	target.x = 50;
+    	target.y = -200;
     	PRINT("- x -         ");
   	}
   	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
@@ -494,6 +494,7 @@ void secondary_tactic(void) {
     int8_t weight_detection_count = 0;
     //int searching = 0;
     int i = 0;
+    
   
   	Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
   	delay(200);
@@ -507,6 +508,7 @@ void secondary_tactic(void) {
     CartVec cart_target = {0, 0};
     PolarVec polar_target = {0, 0};
     bool is_stuck = false; //not used atm
+    bool dropping = false;
     uint16_t countdown = 0; //not used atm
     uint32_t stuck_millis = 0; // stuck time
     uint32_t last_millis = millis(); 
@@ -530,6 +532,7 @@ void secondary_tactic(void) {
         if ((millis() - program_start) > 300000) {
             PRINTLN("That\'s time!");
             play_sound(cena_main);
+            DC.drive(0, -20);
         }
         
         weight_locations = weight_detect();
@@ -545,25 +548,27 @@ void secondary_tactic(void) {
         /// Check if I'm in a base ///
         if (curr_position == home_base){ // && home_base != NO_BASE) { // In home base
             raise_magnets(); //PRINTLN("in base   ");
-            if (IR_VAR1.is_active() || IR_VAR2.is_active() || IR_VAR3.is_active()){
+            if (IR_LNG1.cart_read().y > 300 &&
+                (IR_VAR1.is_active() || IR_VAR1.is_active() || IR_VAR3.is_active()) ){
+            	DC.drive(30, 0);
+            	delay(50);
+            }
+            else if (IR_VAR1.is_active() || IR_VAR1.is_active() || IR_VAR3.is_active()) {
             	DC.drive(0, 0);
             	retract_magnets();
             	extend_magnets();
-            }
-            delay(500);
-            if (IR_VAR1.is_active() || IR_VAR2.is_active() || IR_VAR3.is_active()){
+            	delay(500);
             	retract_magnets();
             	extend_magnets();
+            	delay(300);
+            	DC.drive(-35, 0);
+            	delay(1000);
+            	curr_position = colour_detect();
+            	DC.drive(0, -40);
+            	delay(500);
             }
-            delay(300);
-            DC.drive(-35, 0);
-            delay(1000);
-            curr_position = colour_detect();
-            DC.drive(0, -40);
-            delay(500);
             cart_target = get_local_target();
             operation_state = SEARCHING;
-            //searching = 0;
         }
         else if (curr_position == NO_BASE) {  // In arena
             extend_magnets();
