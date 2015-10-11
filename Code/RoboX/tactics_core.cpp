@@ -563,6 +563,7 @@ void secondary_tactic(void) {
               weight_detection_count++;
               if (weight_detection_count > 120) {
                 weight_detection_count = 120;
+                PRINT(weight_detection_count);
               }
               if (weight_detection_count >= 5) {
                 operation_state = COLLECTING;
