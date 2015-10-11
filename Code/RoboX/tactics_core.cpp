@@ -635,10 +635,10 @@ void secondary_tactic(void) {
             }
         }
         else {  // In opposition_base
-        	if (is_full()) {
+        	/*if (is_full()) {
       			operation_state = RETURNING;
       			break;
-    		}
+    		}*/
             SERVO_COLOUR = LED_CYAN;
             raise_magnets(); //PRINTLN("other base");
             cart_target = get_local_target();
