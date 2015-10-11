@@ -37,6 +37,7 @@ bool is_extended = true;
 bool is_lowered = false;
 bool stuck_flag = false;
 uint8_t home_base = NO_BASE;
+uint8_t curr_position = NO_BASE;
 CircBuf_t stop_buffer_x;
 CircBuf_t stop_buffer_y;
 
@@ -60,42 +61,49 @@ void init_tactics_core(void) {
 /// ACTUATORS ///
 
 void extend_magnets(void) {
-  if (!is_extended && DIP8_S4.is_active()) {
-    uint32_t steps_left = STEPPER1_SPR; // 520; // (180 * steps_per_rev) / 360)
-    digitalWrite(STEPPER1.dir_pin, HIGH);
-    digitalWrite(STEPPER2.dir_pin, LOW);
+  	if (!is_extended && DIP8_S4.is_active()) {
+    	uint32_t steps_left = STEPPER1_SPR; // 520; // (180 * steps_per_rev) / 360)
+    	digitalWrite(STEPPER1.dir_pin, HIGH);
+    	digitalWrite(STEPPER2.dir_pin, LOW);
     
-    for (steps_left; steps_left > 0; steps_left--) {
-      digitalWrite(STEPPER1.step_pin, LOW);
-      digitalWrite(STEPPER2.step_pin, LOW);
-      delayMicroseconds(2);
-      digitalWrite(STEPPER1.step_pin, HIGH);
-      digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(2);
-      if (LIMIT_O.is_active()) {
-        break;
-      }
-    }
+    	for (steps_left; steps_left > 0; steps_left--) {
+      		digitalWrite(STEPPER1.step_pin, LOW);
+      		digitalWrite(STEPPER2.step_pin, LOW);
+      		delayMicroseconds(2);
+      		digitalWrite(STEPPER1.step_pin, HIGH);
+      		digitalWrite(STEPPER2.step_pin, HIGH);
+      		delay(2);
+      		if (LIMIT_O.is_active()) {
+        		break;
+      		}
+    	}
     is_extended = true;
-  }
+  	}
 }
 
 void retract_magnets(void) {
-  if (is_extended && DIP8_S4.is_active()) {
-    uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
-    digitalWrite(STEPPER1.dir_pin, LOW);
-    digitalWrite(STEPPER2.dir_pin, HIGH);
+	if (LIMIT_O.is_active()){
+  		is_extended = true;
+  	}
+  	PRINT("retract");
+  	PRINT("\r");
+  	if (is_extended && DIP8_S4.is_active()) {
+    	uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
+    	digitalWrite(STEPPER1.dir_pin, LOW);
+    	digitalWrite(STEPPER2.dir_pin, HIGH);
     
-    for (steps_left; steps_left > 0; steps_left--) {
-      digitalWrite(STEPPER1.step_pin, LOW);
-      digitalWrite(STEPPER2.step_pin, LOW);
-      delayMicroseconds(2);
-      digitalWrite(STEPPER1.step_pin, HIGH);
-      digitalWrite(STEPPER2.step_pin, HIGH);
-      delay(2);
-    }
+    	for (steps_left; steps_left > 0; steps_left--) {
+      		digitalWrite(STEPPER1.step_pin, LOW);
+      		digitalWrite(STEPPER2.step_pin, LOW);
+      		DC.drive(0, -20);
+      		delayMicroseconds(2);
+      		digitalWrite(STEPPER1.step_pin, HIGH);
+      		digitalWrite(STEPPER2.step_pin, HIGH);
+      		DC.drive(0, 90);
+      		delay(2);
+    	}
     is_extended = false;
-  }
+  	}
 }
 
 void toggle_magnets(void) {
@@ -213,15 +221,13 @@ uint8_t colour_detect(void) {
   else if (COLOUR.read()[2] > BLUE_THRESHOLD && (COLOUR.read()[2]-BLUE_THRESHOLD) > (COLOUR.read()[1]-GREEN_THRESHOLD)) {  // Blue
     return BLUE_BASE;
   }*/
-  if (COLOUR.read()[2] > BLUE_THRESHOLD) {  // Blue
+  if (COLOUR.read()[2] > BLUE_THRESHOLD) {  // Blue GREEN_THRESHOLD 180
     return BLUE_BASE;
   }
-  else if (COLOUR.read()[1] > GREEN_THRESHOLD) {  // Green
+  else if (COLOUR.read()[1] > GREEN_THRESHOLD) {  // Green BLUE_THRESHOLD 150
     return GREEN_BASE;
   }
-  else {
-    return NO_BASE;
-  }
+  return NO_BASE;
 }
 
 bool is_full(void) {
@@ -240,14 +246,15 @@ static void debug_sensors(void) {
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
     //PRINT(IR_SHT1.polar_read().r); PRINT("  "); //A5
-    PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
-    PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
-    PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
+    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
+    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
     //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
     //PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
-    PRINT(analogRead(A5)); PRINT("  "); // 
+    PRINT(COLOUR.read()[2]); PRINT("  "); // 
+    PRINT(COLOUR.read()[1]); PRINT("  "); // 
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
@@ -486,7 +493,10 @@ void secondary_tactic(void) {
     int i = 0;
   
   	Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
-  	uint8_t curr_base = home_base;
+  	delay(200);
+  	home_base = colour_detect();// this sets home base
+  	DC.drive(35, 0);
+    delay(500);
   
   	buffer_initialize(&stop_buffer_x, STOP_BUFFER_SIZE);
   	buffer_initialize(&stop_buffer_y, STOP_BUFFER_SIZE);
@@ -504,6 +514,10 @@ void secondary_tactic(void) {
   	//play_sound(cena_main);
   
   	SERVO_COLOUR = LED_WHITE;
+
+  	if (!LIMIT_O.is_active()){
+  		is_extended = false;
+  	}
   
   	while(OPERATION_MODE == SECONDARY_MODE) {
         if ((millis() - program_start) > 300000) {
@@ -513,7 +527,7 @@ void secondary_tactic(void) {
         
         weight_locations = weight_detect();
     
-    	curr_base = colour_detect();
+    	curr_position = colour_detect();
     	IMU.update();
     
     	/// Check how many weights I've got ///
@@ -522,8 +536,8 @@ void secondary_tactic(void) {
     	}
         
         /// Check if I'm in a base ///
-        if (curr_base == home_base && home_base != NO_BASE) { // In home base
-            raise_magnets(); //PRINTLN("in base");
+        if (curr_position == home_base){ // && home_base != NO_BASE) { // In home base
+            raise_magnets(); //PRINTLN("in base   ");
             retract_magnets();
             // Something else?
             // reverse a little
@@ -532,7 +546,7 @@ void secondary_tactic(void) {
             operation_state = SEARCHING;
             //searching = 0;
         }
-        else if (curr_base == NO_BASE) {  // In arena
+        else if (curr_position == NO_BASE) {  // In arena
             extend_magnets();
             switch (operation_state) { 
                 case SEARCHING:
@@ -550,10 +564,10 @@ void secondary_tactic(void) {
                                 weight_detection_count = 120;
                                 PRINT(weight_detection_count);
                             }
-                            /*if (weight_detection_count >= 2) {
+                            if (weight_detection_count >= 2) {
                                 operation_state = COLLECTING;
                                 last_weight_time = millis();
-                            }*/
+                            }
                         }
                         else {
                             weight_detection_count--;
@@ -564,7 +578,7 @@ void secondary_tactic(void) {
                     }
           			break;
                     
-        		/*case COLLECTING:
+        		case COLLECTING:
         			if (is_full()) {
       					operation_state = RETURNING;
       					break;
@@ -608,7 +622,7 @@ void secondary_tactic(void) {
                     // only have the magenets down for max time
                     
                     
-                    break;*/
+                    break;
                 case RETURNING:
                     SERVO_COLOUR = LED_BLUE;
                     //raise_magnets();
