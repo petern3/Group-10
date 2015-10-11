@@ -37,7 +37,7 @@
 #define STEPPER2_STEP_PIN 44
 #define STEPPER2_DIR_PIN 45
 
-#define IR_SHT1_PIN A8 //10
+#define IR_SHT1_PIN A5 //10
 //#define IR_SHT2_PIN A1 //11
 #define IR_MED1_PIN A2
 #define IR_MED2_PIN A3
@@ -160,10 +160,10 @@
 #define SONAR1_ANGLE 0
 
 
-#define IR_SHT_MIN_ADC 0   // To measure
-#define IR_SHT_DV1_ADC 200   // to measure
-#define IR_SHT_DV2_ADC 400   // to measure
-#define IR_SHT_MAX_ADC 1023  // To measure
+#define IR_SHT_MIN_ADC 970   // To measure
+#define IR_SHT_DV1_ADC 360   // to measure
+#define IR_SHT_DV2_ADC 220   // to measure
+#define IR_SHT_MAX_ADC 150  // To measure
 #define IR_SHT_MIN_MM 40
 #define IR_SHT_DV1_MM 120
 #define IR_SHT_DV2_MM 200

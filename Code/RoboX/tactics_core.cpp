@@ -239,15 +239,15 @@ static void debug_sensors(void) {
     //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
     
-    //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
-    //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
-    //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
-    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
+    //PRINT(IR_SHT1.polar_read().r); PRINT("  "); //A5
+    PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
+    PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
+    PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
     //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
     //PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
-    //PRINT(stuck_flag); PRINT("  "); // fleg
+    PRINT(analogRead(A5)); PRINT("  "); // 
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
@@ -391,14 +391,6 @@ static CartVec get_local_target(void) {
 	  			target.x = 300;//this turns left may need to turn right
 	  			target.y = -50;
 			}
-			else if((left_IR.y - right_IR.y) < 50 && centre_S_IR.x < -100 && centre_S_IR.x != NOT_VALID){
-				target.x = -200;
-	  			target.y = 100;
-			}
-			else if((left_IR.y - right_IR.y) > 50 && centre_S_IR.x == NOT_VALID){
-                target.x = 200;
-                target.y = 100;
-			}
 			else {
 				target.x = 0;
 				target.y = -300;
@@ -420,8 +412,20 @@ static CartVec get_local_target(void) {
     	PRINT("x x -         ");
   	}
   	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && centre_ULTRA.y <= CENTRE_SENSOR_TOLERANCE && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall // now avoid corners brilliantly!
-    	target.x = (left_IR.x + right_IR.x)/2;
-    	target.y = ROBOT_RADIUS;
+    	if((left_IR.y - right_IR.y) < 50 && 0 < centre_S_IR.x > -250 && centre_S_IR.x != NOT_VALID){//detects a side wall
+			target.x = 200;
+	  		target.y = -50;
+	  		PRINT("Turning right   ");
+		}
+		else if((left_IR.y - right_IR.y) < 50 && centre_S_IR.x == NOT_VALID){
+        	target.x = -200;
+            target.y = -50;
+            PRINT("Turning left   ");
+		}
+    	else {
+    		target.x = (left_IR.x + right_IR.x)/2;
+    		target.y = ROBOT_RADIUS;
+    	}
     	PRINT("x - x         ");
   	}
   	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  x  x
@@ -435,9 +439,9 @@ static CartVec get_local_target(void) {
     	PRINT("- - x         ");
   	}
   	else if (centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 100) { // checks for a wall close before the next one
-  		target.x = 0;
-    	target.y = -300;
+  		DC.drive(-35, 0);
     	PRINT("0 x 0   just ultra      ");
+    	delay(1000);
   	}
   	else if (left_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 500 && right_IR.x == NOT_VALID) {  // -  x  - 
     	target.x = 0;
@@ -497,7 +501,7 @@ void secondary_tactic(void) {
   
   	char serial_byte = '\0';
   	bool enable_drive = true;
-  
+  	//play_sound(cena_main);
   
   	SERVO_COLOUR = LED_WHITE;
   
@@ -518,7 +522,7 @@ void secondary_tactic(void) {
     	}
         
         /// Check if I'm in a base ///
-        if (curr_base == home_base && home_base != NO_BASE) {  // In home base
+        if (curr_base == home_base && home_base != NO_BASE) { // In home base
             raise_magnets(); //PRINTLN("in base");
             retract_magnets();
             // Something else?
@@ -532,6 +536,10 @@ void secondary_tactic(void) {
             extend_magnets();
             switch (operation_state) { 
                 case SEARCHING:
+                	if (is_full()) {
+      					operation_state = RETURNING;
+      					break;
+    				}
                     SERVO_COLOUR = LED_WHITE; //white doesnt show up :(
                     cart_target = get_local_target();
                     
@@ -542,10 +550,10 @@ void secondary_tactic(void) {
                                 weight_detection_count = 120;
                                 PRINT(weight_detection_count);
                             }
-                            if (weight_detection_count >= 2) {
+                            /*if (weight_detection_count >= 2) {
                                 operation_state = COLLECTING;
                                 last_weight_time = millis();
-                            }
+                            }*/
                         }
                         else {
                             weight_detection_count--;
@@ -556,7 +564,11 @@ void secondary_tactic(void) {
                     }
           			break;
                     
-        		case COLLECTING:
+        		/*case COLLECTING:
+        			if (is_full()) {
+      					operation_state = RETURNING;
+      					break;
+    				}
         			SERVO_COLOUR = LED_GREEN;
           			lower_magnets();
           			if (weight_locations.left != NO_WEIGHT || weight_locations.right != NO_WEIGHT) { // If I see a weight
@@ -587,7 +599,7 @@ void secondary_tactic(void) {
                         }
                        
           	        }
-                  	else if ((millis() - last_weight_time) > weight_timeout) {  // If lost
+                  	else if ((millis() - last_weight_time) > weight_timeout) {  // If lost weights
                     	//raise_magnets();
                     	weight_timeout = 0;
                     	operation_state = SEARCHING;
@@ -596,7 +608,7 @@ void secondary_tactic(void) {
                     // only have the magenets down for max time
                     
                     
-                    break;
+                    break;*/
                 case RETURNING:
                     SERVO_COLOUR = LED_BLUE;
                     //raise_magnets();
@@ -609,6 +621,10 @@ void secondary_tactic(void) {
             }
         }
         else {  // In opposition_base
+        	if (is_full()) {
+      			operation_state = RETURNING;
+      			break;
+    		}
             SERVO_COLOUR = LED_CYAN;
             raise_magnets(); //PRINTLN("other base");
             cart_target = get_local_target();
@@ -624,7 +640,7 @@ void secondary_tactic(void) {
     		stuck_flag = false;
     	}
         
-        if ((millis() - last_millis) > 80 && enable_drive == true && DIP8_S7.is_active()) { // i dont know if this if statement will work?
+        if ((millis() - last_millis) > 80 && enable_drive == true){// && DIP8_S7.is_active()) { // i dont know if this if statement will work?
             buffer_store(&stop_buffer_x, cart_target.x);
             buffer_store(&stop_buffer_y, cart_target.y);
       
