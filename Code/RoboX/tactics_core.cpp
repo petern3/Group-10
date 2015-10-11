@@ -61,6 +61,9 @@ void init_tactics_core(void) {
 /// ACTUATORS ///
 
 void extend_magnets(void) {
+	if (!LIMIT_O.is_active()){
+  		is_extended = false;
+  	}
   	if (!is_extended && DIP8_S4.is_active()) {
     	uint32_t steps_left = STEPPER1_SPR; // 520; // (180 * steps_per_rev) / 360)
     	digitalWrite(STEPPER1.dir_pin, HIGH);
@@ -496,7 +499,7 @@ void secondary_tactic(void) {
   	delay(200);
   	home_base = colour_detect();// this sets home base
   	DC.drive(35, 0);
-    delay(500);
+    delay(1000);
   
   	buffer_initialize(&stop_buffer_x, STOP_BUFFER_SIZE);
   	buffer_initialize(&stop_buffer_y, STOP_BUFFER_SIZE);
@@ -518,6 +521,10 @@ void secondary_tactic(void) {
   	if (!LIMIT_O.is_active()){
   		is_extended = false;
   	}
+  	else {
+  		is_extended = true;
+  	}
+  	extend_magnets();
   
   	while(OPERATION_MODE == SECONDARY_MODE) {
         if ((millis() - program_start) > 300000) {
@@ -538,25 +545,20 @@ void secondary_tactic(void) {
         /// Check if I'm in a base ///
         if (curr_position == home_base){ // && home_base != NO_BASE) { // In home base
             raise_magnets(); //PRINTLN("in base   ");
-            retract_magnets();
             if (IR_VAR1.is_active() || IR_VAR2.is_active() || IR_VAR3.is_active()){
+            	DC.drive(0, 0);
             	retract_magnets();
-            	if (!LIMIT_O.is_active()){
-  					is_extended = false;
-  				}
             	extend_magnets();
             }
             delay(500);
             if (IR_VAR1.is_active() || IR_VAR2.is_active() || IR_VAR3.is_active()){
             	retract_magnets();
-            	if (!LIMIT_O.is_active()){
-  					is_extended = false;
-  				}
             	extend_magnets();
             }
             delay(300);
             DC.drive(-35, 0);
             delay(1000);
+            curr_position = colour_detect();
             DC.drive(0, -40);
             delay(500);
             cart_target = get_local_target();
