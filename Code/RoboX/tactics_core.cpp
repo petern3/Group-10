@@ -235,21 +235,22 @@ static void debug_sensors(void) {
     
     //PRINT("L ("); PRINT(USONIC1.cart_read().x); PRINT(", "); PRINT(USONIC1.cart_read().y); PRINT(") ");
     //PRINT("R ("); PRINT(USONIC2.cart_read().x); PRINT(", "); PRINT(USONIC2.cart_read().y); PRINT(") ");
-    
-    //PRINT(IR_SHT1.polar_read().r); PRINT("  ");
+
+    PRINT(IR_SHT1.polar_read().r); PRINT("  ");
     //PRINT(IR_MED1.polar_read().r); PRINT("  ");// left one
     //PRINT(IR_MED2.polar_read().r); PRINT("  ");// right one
-    PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
+    //PRINT(IR_LNG1.polar_read().r); PRINT("  ");// used
     //PRINT(IR_LNG2.polar_read().r); PRINT("  ");
     //PRINT(USONIC1.polar_read().r); PRINT("  "); //left
     //PRINT(USONIC2.polar_read().r); PRINT("  "); //right
-    PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
-    PRINT(stuck_flag); PRINT("  "); // fleg
+    //PRINT(USONIC3.polar_read().r); PRINT("  "); //centre
+    //PRINT(stuck_flag); PRINT("  "); // fleg
     //PRINT(SONAR1.polar_read().r); PRINT("  ");
     //PRINT(IR_VAR1.read()); PRINT(IR_VAR2.read()); PRINT(IR_VAR3.read());
     //PRINT(abs(IMU.read()[0]) + abs(IMU.read()[1])); PRINT("  ");
     //PRINT(IMU.read()[1]); PRINT("  ");
-    //PRINT(analogRead(A6));PRINT("   ");
+    PRINT(analogRead(A5));PRINT("   ");
+    PRINT(analogRead(A4));PRINT("   ");
     PRINT('\r');
   
 }
@@ -367,6 +368,7 @@ void primary_tactic(void) {
 ////////////////////////
 static CartVec get_local_target(void) {
   	CartVec target = {0, 0};
+  	CartVec left_S_IR = IR_SHT1.cart_read();  // left one
   	CartVec left_IR = IR_MED1.cart_read();  // left one
   	CartVec right_IR = IR_MED2.cart_read(); // right one
   	CartVec centre_IR = IR_LNG1.cart_read();
@@ -507,6 +509,7 @@ void secondary_tactic(void) {
   int16_t target_time = 0;
   uint16_t weight_timeout = 0;
   int searching = 0;
+  int i = 0;
   
   Weight_Detect_t weight_locations = {{-1, -1}, {-1, -1}};
   uint8_t curr_base = home_base;
@@ -516,9 +519,10 @@ void secondary_tactic(void) {
   
   CartVec cart_target = {0, 0};
   PolarVec polar_target = {0, 0};
-  bool is_stuck = false;
-  uint16_t countdown = 0;
-  uint16_t stuck_millis = 0; // stuck time
+  bool is_stuck = false; //not used atm
+  uint16_t countdown = 0; //not used atm
+  uint32_t stuck_millis = 0; // stuck time
+  uint32_t last_millis = millis(); 
   
   char serial_byte = '\0';
   bool enable_drive = true;
@@ -629,34 +633,37 @@ void secondary_tactic(void) {
 
     
     /// Check for stuck ///
-    static uint16_t last_millis = millis();
+    if ((millis() - stuck_millis) > 5000) { //flag reset after stuck
+    	stuck_flag = false;
+    }
     
-    if ((millis() - last_millis) > 400) { // i dont know if this if statement will work?
+    if ((millis() - last_millis) > 100) { // i dont know if this if statement will work?
       buffer_store(&stop_buffer_x, cart_target.x);
       buffer_store(&stop_buffer_y, cart_target.y);
       
       if (abs(stop_buffer_x.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_x)) < 50 &&
           abs(stop_buffer_y.data[STOP_BUFFER_SIZE-1] - buffer_average(stop_buffer_y)) < 50 &&
-          cart_target.x != 0 && cart_target.y != ROBOT_RADIUS &&
           stuck_flag == false){
-        PRINTLN("stuck!");
-        DC.drive(-35, 0);
-        delay(1000);
-        DC.drive(0, -20);
-        delay(100);
-        stuck_flag = true;
-        stuck_millis = millis();
-        
-        // need to reset buffer as now it just drives backwards
-        // This only happens when in corner ie not very often
+          PRINTLN("stuck!");
+          DC.drive(-35, 0);
+          delay(1000);
+          DC.drive(0, -20);
+          delay(1000);
+          stuck_flag = true;
+          stuck_millis = millis();
+          for (i = 0; i <= STOP_BUFFER_SIZE; i++){
+              buffer_store(&stop_buffer_x, 10000);
+      		  buffer_store(&stop_buffer_y, 10000);
+          }
+          
+          // need to reset buffer as now it just drives backwards
+          // This only happens when in corner ie not very often
       }
       last_millis = millis();
       
     }
     
-    if ((millis() - stuck_millis) > 1000) { //flag reset after stuck
-    	stuck_flag = false;
-    }
+    
     
     /// Perform tasks ///
     polar_target = cart_target.polar();

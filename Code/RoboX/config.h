@@ -37,12 +37,12 @@
 #define STEPPER2_STEP_PIN 44
 #define STEPPER2_DIR_PIN 45
 
-#define IR_SHT1_PIN A0 //10
+#define IR_SHT1_PIN A8 //10
 //#define IR_SHT2_PIN A1 //11
 #define IR_MED1_PIN A2
 #define IR_MED2_PIN A3
 #define IR_LNG1_PIN A4
-#define IR_LNG2_PIN A5
+#define IR_LNG2_PIN A0
 #define USONIC3_TRIG_PIN 7
 #define USONIC3_ECHO_PIN 6
 #define USONIC2_TRIG_PIN 11
@@ -134,8 +134,13 @@
 /////////////////////
 /// SENSOR CONFIG ///
 /////////////////////
-#define IR_SHT1_OFFSET {0, 0}
-#define IR_SHT1_ANGLE 0
+// USONIC 1 is left
+// USONIC 2 is right
+// USONIC 3 is upper centre
+// IR_MED1 left one
+// IR_MED2 right one
+#define IR_SHT1_OFFSET {-80, -80}
+#define IR_SHT1_ANGLE -90
 #define IR_MED1_OFFSET {-100, 100}
 #define IR_MED1_ANGLE 35
 #define IR_MED2_OFFSET {100, 100}
@@ -154,7 +159,7 @@
 #define SONAR1_ANGLE 0
 
 
-#define IR_SHT_MIN_ADC 157   // To measure
+#define IR_SHT_MIN_ADC 0   // To measure
 #define IR_SHT_DV1_ADC 200   // to measure
 #define IR_SHT_DV2_ADC 400   // to measure
 #define IR_SHT_MAX_ADC 1023  // To measure
@@ -209,7 +214,7 @@
 #define WEIGHT_TIMEOUT_MAX 4000  // milliseconds
 #define WEIGHT_TIMEOUT_INC 400   // milliseconds
 
-#define STOP_BUFFER_SIZE 10
+#define STOP_BUFFER_SIZE 60
 
 //////////////////
 /// MAP CONFIG ///
