@@ -209,8 +209,8 @@
 #define WEIGHT_DETECT_TOLERANCE 150 // mm
 #define CENTRE_SENSOR_TOLERANCE 200 // mm
 
-#define GREEN_THRESHOLD 180
-#define BLUE_THRESHOLD 150
+#define GREEN_THRESHOLD 200
+#define BLUE_THRESHOLD 250
 
 #define WEIGHT_TIMEOUT_INC 200    // milliseconds
 #define WEIGHT_TIMEOUT_MAX 1000   // milliseconds

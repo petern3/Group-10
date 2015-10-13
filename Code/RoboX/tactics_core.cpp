@@ -64,6 +64,7 @@ void extend_magnets(void) {
 	if (!LIMIT_O.is_active()){
   		is_extended = false;
   	}
+  	PRINTLN("extend");
   	if (!is_extended && DIP8_S4.is_active()) {
     	uint32_t steps_left = STEPPER1_SPR; // 520; // (180 * steps_per_rev) / 360)
     	digitalWrite(STEPPER1.dir_pin, HIGH);
@@ -88,8 +89,7 @@ void retract_magnets(void) {
 	if (LIMIT_O.is_active()){
   		is_extended = true;
   	}
-  	PRINT("retract");
-  	PRINT("\r");
+  	PRINTLN("retract");
   	if (is_extended && DIP8_S4.is_active()) {
     	uint32_t steps_left = 520; // (180 * steps_per_rev) / 360)
     	digitalWrite(STEPPER1.dir_pin, LOW);
@@ -480,6 +480,110 @@ static CartVec get_local_target(void) {
 }
 
 
+static CartVec wall_follow_target(void) {
+	// Follows left-hand wall
+	
+  	CartVec target = {0, 0};
+  	CartVec centre_S_IR = IR_SHT1.cart_read();  // left one
+  	CartVec left_IR = IR_MED1.cart_read();  // left one
+  	CartVec right_IR = IR_MED2.cart_read(); // right one
+  	CartVec centre_IR = IR_LNG1.cart_read();
+  	CartVec centre_ULTRA = USONIC3.cart_read(); // middle ultrasonic sensor
+  
+  	if (left_IR.x != NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  x
+      	/*if (left_IR.x < 150 && right_IR.x < 150){
+			if (left_IR.x > right_IR.x && right_IR.y < centre_IR.y < left_IR.y){ //case 3 wall on right
+	  			target.x = random(-350,-400);
+	  			target.y = 100;
+			}
+			else if (left_IR.x < right_IR.x && right_IR.y > centre_IR.y > left_IR.y){//case 4 wall on left
+	  			target.x = random(350,400);
+	  			target.y = 100;
+			}
+			else if(centre_IR.y > left_IR.y || centre_IR.y > right_IR.y){//case 1 in corner
+	  			target.x = 300;//this turns left may need to turn right
+	  			target.y = -50;
+			}
+			else {
+				target.x = 0;
+				target.y = -300;
+			}
+      	}
+		else {
+    		target.x = 0;
+			target.y = 130;
+    	}
+		/*else if (centre_SONAR.y < left_IR.y && centre_ULTRA.y < right_IR.y){// case 5 detects a poll near the wall
+	  		target.x = 300;
+	  		target.y = -50;
+		}*/
+		target.x = 200;
+		target.y = 0;
+    	PRINT("x x x         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y != NOT_VALID && right_IR.x != NOT_VALID) {  // x  x  - these are objects on left and centre
+    	target.x = 100;
+    	target.y = 100;
+    	PRINT("x x -         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && centre_ULTRA.y <= CENTRE_SENSOR_TOLERANCE && right_IR.x != NOT_VALID) {  // x  -  x //needs work at wall // now avoid corners brilliantly!
+    	if((left_IR.y - right_IR.y) < 50 && 0 < centre_S_IR.x > -250 && centre_S_IR.x != NOT_VALID){//detects a side wall
+			target.x = 200;
+	  		target.y = -50;
+	  		PRINT("Turning right   ");
+		}
+		else if((left_IR.y - right_IR.y) < 50 && centre_S_IR.x == NOT_VALID){
+        	target.x = -200;
+            target.y = -50;
+            PRINT("Turning left   ");
+		}
+    	else {
+    		target.x = (left_IR.x + right_IR.x)/2;
+    		target.y = ROBOT_RADIUS;
+    	}
+    	PRINT("x - x         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  x  x
+    	target.x = 200;
+    	target.y = -200;
+    	PRINT("- x x         ");
+  	}
+  	else if (left_IR.x != NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID) {  // -  -  x
+    	target.x = 200;
+    	target.y = 0;
+    	PRINT("- - x         ");
+  	}
+  	else if (centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 100) { // checks for a wall close before the next one
+  		DC.drive(-35, 0);
+    	PRINT("0 x 0   just ultra      ");
+    	delay(1000);
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_ULTRA.y != NOT_VALID && centre_ULTRA.y < 500 && right_IR.x == NOT_VALID) {  // -  x  - 
+    	target.x = 50;
+    	target.y = -200;
+    	PRINT("- x -         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x != NOT_VALID) {  // x  -  -
+    	target.x = -200;
+    	target.y = ROBOT_RADIUS;
+    	PRINT("x - -         ");
+  	}
+  	else if (left_IR.x == NOT_VALID && centre_IR.y == NOT_VALID && right_IR.x == NOT_VALID ) {  // -  -  -
+    	target.x = -ROBOT_RADIUS;
+    	target.y = ROBOT_RADIUS;
+    	PRINT("- - -         ");
+  	}
+  	else {
+  		target.x = -50;
+  		target.y = -300;
+  		PRINT("NO STATE      ");
+  	}
+  	PRINT("\r");
+	  
+    
+  	return target;
+}
+
 
 void secondary_tactic(void) {
     PRINTLN("Starting secondary tactic:");
@@ -547,26 +651,31 @@ void secondary_tactic(void) {
         
         /// Check if I'm in a base ///
         if (curr_position == home_base){ // && home_base != NO_BASE) { // In home base
-            raise_magnets(); //PRINTLN("in base   ");
-            if (IR_LNG1.cart_read().y > 300 &&
+            raise_magnets(); PRINTLN("in base   ");
+            if (IR_LNG1.cart_read().y > 300 && IR_MED1.polar_read().r > 300 && IR_MED2.polar_read().r > 300 &&
                 (IR_VAR1.is_active() || IR_VAR1.is_active() || IR_VAR3.is_active()) ){
             	DC.drive(30, 0);
             	delay(50);
+            	DC.drive(0, 40);
+            	delay(100);
             }
             else if (IR_VAR1.is_active() || IR_VAR1.is_active() || IR_VAR3.is_active()) {
             	DC.drive(0, 0);
             	retract_magnets();
             	extend_magnets();
             	delay(500);
-            	retract_magnets();
-            	extend_magnets();
-            	delay(300);
+            	if (IR_VAR1.is_active() || IR_VAR1.is_active() || IR_VAR3.is_active()) {
+            		retract_magnets();
+            		extend_magnets();
+            		delay(300);
+            	}
             	DC.drive(-35, 0);
             	delay(1000);
-            	curr_position = colour_detect();
             	DC.drive(0, -40);
             	delay(500);
             }
+            SERVO_COLOUR = LED_CYAN;
+            curr_position = colour_detect();
             cart_target = get_local_target();
             operation_state = SEARCHING;
         }
@@ -650,7 +759,7 @@ void secondary_tactic(void) {
                 case RETURNING:
                     SERVO_COLOUR = LED_BLUE;
                     //raise_magnets();
-                    cart_target = get_local_target();
+                    cart_target = get_local_target(); //wall_follow_target();
                     if (!is_full()) {
                         operation_state = SEARCHING;
                         //searching = 0;
@@ -663,7 +772,7 @@ void secondary_tactic(void) {
       			operation_state = RETURNING;
       			break;
     		}*/
-            SERVO_COLOUR = LED_CYAN;
+            SERVO_COLOUR = LED_WHITE;
             raise_magnets(); //PRINTLN("other base");
             cart_target = get_local_target();
         }
@@ -932,7 +1041,7 @@ void manual_mode(void) {
       Herkulex.moveOneAngle(SMART_SERVO1_ADDRESS, 0, 200, SERVO_COLOUR);
     }
     
-    debug_sensors();
+    //debug_sensors();
     
     //PRINTLN(LEFT_ROTATION*0.104719755);
     //PRINTLN(RIGHT_ROTATION*0.104719755);
@@ -950,7 +1059,7 @@ void manual_mode(void) {
     PRINT(DIP8_S8.is_active());
     PRINT('\r');*/
     //print_buffer(IMU.read(), IMU_BUFFER_SIZE); PRINT('\r');
-    //COLOUR.read();
+    COLOUR.read();
     //delay(200);
     
   }
