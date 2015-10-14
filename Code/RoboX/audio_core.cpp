@@ -255,7 +255,6 @@ void init_audio_core(void) {
   digitalWrite(SPEAKER_ENABLE_PIN, LOW);
   #ifdef ENABLE_SOUNDS
     SOUNDS_ON = true;
-    //play_sound(cena_main);
   #else
     SOUNDS_ON = false;
   #endif
